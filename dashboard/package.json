@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
@@ -16,6 +16,7 @@
     "@tanstack/react-query": "^5.100.10",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.9.1",
+    "@vercel/analytics": "^2.0.1",
     "@walletconnect/ethereum-provider": "^2.23.9",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
