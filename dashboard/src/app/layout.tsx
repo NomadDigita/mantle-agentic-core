@@ -7,6 +7,7 @@ import ContextProvider from "../context";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import React, { useEffect, useState, useMemo } from "react";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -100,6 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="relative z-50">{children}</div>
           </ContextProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
