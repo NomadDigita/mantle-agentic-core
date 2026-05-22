@@ -1,0 +1,22 @@
+{
+  "name": "my-ai-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bs58": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.16.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@byreal-io/byreal-cli": "^0.3.4"
+  }
+}
