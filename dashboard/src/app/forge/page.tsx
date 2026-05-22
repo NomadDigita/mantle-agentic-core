@@ -91,7 +91,7 @@ export default function NeuralForge() {
         setOutput(`// FORGE SCAN ERROR:\n${data.message}`);
       }
     } catch (err) {
-      setOutput("// COMPILER ERROR: Failed to establish context stream with Neural Forge.\n// Please verify FastAPI is running at http://localhost:8000.");
+      setOutput("// COMPILER ERROR: Failed to establish context stream with Neural Forge.\n// Please verify FastAPI is running at https://mantle-agentic-core.onrender.com.");
     } finally {
       setIsForging(false);
       if (!isOverclocked) setSystemState('IDLE');
@@ -198,7 +198,9 @@ export default function NeuralForge() {
           <div className="flex flex-col gap-6">
             <FloatingGlassCard delay={0.4} className={`bg-white/5 backdrop-blur-3xl border ${border} rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col h-[350px] transition-colors duration-500`}>
               <div className="bg-black/20 px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Forge Output Log</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-3 border-b border-white/10 pb-2">
+                  Forge Output Log
+                </span>
                 <div className="w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse" />
               </div>
               <div className="p-6 font-mono text-xs text-amber-500/90 whitespace-pre-wrap overflow-y-auto flex-1 leading-relaxed scrollbar-hide">

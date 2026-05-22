@@ -17,10 +17,12 @@ private_key = os.getenv("PRIVATE_KEY")
 client = Groq(api_key=api_key)
 app = FastAPI(title="Mantle Agent Engine")
 
+# --- UPGRADE: PRODUCTION CORS MIDDLEWARE CONFIGURATION ---
+# Permitting any origin to resolve client-backend queries securely without cookie blocks
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"], 
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,7 +31,6 @@ class CommandPayload(BaseModel):
     command: str
     wallet_address: str | None = None
 
-# Refuel request schema
 class RefuelPayload(BaseModel):
     wallet_address: str
 
@@ -101,7 +102,6 @@ def execute_mac_transfer(to_address: str, amount_ether: float):
     except Exception as e:
         return f"Transaction failed: {str(e)}"
 
-# --- UPGRADE: SOVEREIGN TREASURY NATIVE MNT REFUELING MODULE ---
 def execute_mnt_refuel(to_address: str):
     try:
         rpc_url = os.getenv("MANTLE_RPC_URL")
@@ -114,11 +114,10 @@ def execute_mnt_refuel(to_address: str):
         
         nonce = web3.eth.get_transaction_count(account.address)
         
-        # Build Standard Native MNT Transfer payload
         tx = {
             'nonce': nonce,
             'to': checksum_address,
-            'value': web3.to_wei(2.0, 'ether'), # Refuels exactly 2.00 MNT
+            'value': web3.to_wei(2.0, 'ether'),
             'gas': 21000,
             'gasPrice': web3.eth.gas_price,
             'chainId': 5003
@@ -245,7 +244,7 @@ async def execute_command(payload: CommandPayload):
             f"Always sign off your message with: '— Verified by Mantle Agentic Core'"
         )
         
-        thinking_steps.append("Invoking inference execution (model: Llama-3.1-8b-instant)...")
+        thinking_steps.append("Inference execution (model: Llama-3.1-8b-instant)...")
         chat_completion = client.chat.completions.create(
             messages=[{"role": "system", "content": system_prompt}],
             model="llama-3.1-8b-instant",
@@ -268,7 +267,6 @@ async def execute_command(payload: CommandPayload):
             "latency": "0ms"
         }
 
-# --- UPGRADE: SOVEREIGN NATIVE REFUEL ENDPOINT ---
 @app.post("/api/refuel")
 async def execute_refuel(payload: RefuelPayload):
     try:
