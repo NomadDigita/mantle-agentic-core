@@ -72,7 +72,7 @@ export default function NeuralForge() {
     setOutput("// Compiling dependencies and initiating SecOps audit...\n// Querying Mantle core neural models...");
     
     try {
-      const response = await fetch("http://localhost:8000/api/forge", {
+      const response = await fetch("https://mantle-agentic-core.onrender.com/api/forge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: blueprint }),

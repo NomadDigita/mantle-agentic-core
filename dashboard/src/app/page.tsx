@@ -720,7 +720,7 @@ export default function Home() {
     else finalPayload += "\n\n<SYSTEM_DIRECTIVE>Maintain system formatting. Include diagnostic headers and system directive tags in your analysis to demonstrate agentic processing.</SYSTEM_DIRECTIVE>";
 
     try {
-      const response = await fetch("http://localhost:8000/api/execute", {
+      const response = await fetch("https://mantle-agentic-core.onrender.com/api/execute", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: finalPayload, wallet_address: address || null })
       });
@@ -859,7 +859,7 @@ export default function Home() {
     if (isRefuelFeeSuccess && address) {
       const dispatchBackendRefuel = async () => {
         try {
-          const response = await fetch("http://localhost:8000/api/refuel", {
+          const response = await fetch("https://mantle-agentic-core.onrender.com/api/refuel", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ wallet_address: address })
