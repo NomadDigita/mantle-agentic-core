@@ -266,7 +266,7 @@ export default function Home() {
     address: address as `0x${string}`,
     chainId: 5003
   });
-  const mntGasBalance = balanceData ? parseFloat(balanceData.formatted) : 5.0; 
+  const mntGasBalance = balanceData ? parseFloat((balanceData as any).formatted) : 5.0; 
   const [isRefueling, setIsRefueling] = useState(false);
   const [refuelResultHash, setRefuelResultHash] = useState<string | null>(null);
 
