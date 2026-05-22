@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme } from "./ThemeContext";
 import ContextProvider from "../context";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import React, { useEffect, useState, useMemo } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -100,6 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="relative z-50">{children}</div>
           </ContextProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
