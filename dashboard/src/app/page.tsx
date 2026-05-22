@@ -113,9 +113,10 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
         <div className={`absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 animate-[spin_5s_linear_infinite] opacity-60 pointer-events-none -z-10 transition-all duration-700 ${borderGradients[systemState]}`} />
       )}
       
+      {/* Responsive Inner Padding */}
       <div 
         style={{ transform: "translateZ(40px)" }} 
-        className={`h-full w-full rounded-[22px] transition-all duration-700 p-6 flex flex-col relative z-10 ${
+        className={`h-full w-full rounded-[22px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 ${
           isAuraActive 
             ? "bg-[rgba(10,15,30,0.25)] backdrop-blur-[45px] shadow-[0_50px_100px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] border-t border-l border-white/20 border-b border-r border-white/5"
             : "bg-[rgba(15,22,42,0.15)] backdrop-blur-[50px] shadow-[0_30px_60px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 hover:border-white/25"
@@ -261,7 +262,7 @@ export default function Home() {
     { agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
   ]);
 
-  // --- NATIVE MNT GAS MONITORING ---
+  // NATIVE MNT GAS MONITORING
   const { data: balanceData, refetch: refetchBalance } = useBalance({
     address: address as `0x${string}`,
     chainId: 5003
@@ -270,7 +271,6 @@ export default function Home() {
   const [isRefueling, setIsRefueling] = useState(false);
   const [refuelResultHash, setRefuelResultHash] = useState<string | null>(null);
 
-  // Wagmi signature for the refuel MAC feepayment (5 MAC collateral)
   const { writeContract: refuelFeeWrite, data: refuelFeeHash } = useWriteContract();
   const { isLoading: isRefuelFeePending, isSuccess: isRefuelFeeSuccess } = useWaitForTransactionReceipt({ hash: refuelFeeHash });
 
@@ -888,7 +888,8 @@ export default function Home() {
   const currentMarket = marketCoins[activeCoinIndex];
 
   return (
-    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-0 overflow-x-hidden bg-transparent font-sans">
+    // --- UPGRADE: MOBILE-OPTIMIZED LIQUID CONTAINER ---
+    <main className="min-h-screen relative p-2 sm:p-6 lg:p-12 z-0 overflow-x-hidden bg-transparent font-sans">
       <AnimatePresence>
         {showIntro && <IntroSequence isAuraActive={isAuraActive} onComplete={handleIntroComplete} />}
       </AnimatePresence>
@@ -920,23 +921,24 @@ export default function Home() {
         initial={{ opacity: 0, filter: "blur(20px)" }} animate={{ opacity: showIntro ? 0 : 1, filter: showIntro ? "blur(20px)" : "blur(0px)" }} transition={{ duration: 1 }}
         className="max-w-7xl mx-auto space-y-8 mt-4 relative z-10"
       >
-        <div className={`flex justify-between items-center mb-8 bg-white/5 backdrop-blur-xl border ${border} p-6 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
+        {/* --- UPGRADE: RESPONSIVE HEADER DECK --- */}
+        <div className={`flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 backdrop-blur-xl border ${border} p-4 sm:p-6 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-black/40 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]`}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-black/40 border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]">
               <div className={`w-4 h-4 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]' : dotBg}`} />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-widest text-white uppercase drop-shadow-md">
+              <h1 className="text-xl sm:text-2xl font-black tracking-widest text-white uppercase drop-shadow-md">
                 MANTLE <span className={primary}>CORE</span>
               </h1>
             </div>
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
              {/* AURA MODE SELECTOR BUTTON */}
              <button 
               onClick={() => setIsAuraActive(!isAuraActive)}
-              className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
+              className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
                 isAuraActive 
                   ? 'bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30' 
                   : 'bg-black/20 text-white/50 border-white/10 hover:border-white/35 hover:text-white'
@@ -946,7 +948,7 @@ export default function Home() {
             </button>
              <button 
               onClick={toggleOverclock}
-              className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
+              className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
                 isOverclocked 
                   ? 'bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30' 
                   : 'bg-black/20 text-white/50 border-white/10 hover:border-emerald-500/50 hover:text-emerald-400'
@@ -954,33 +956,34 @@ export default function Home() {
             >
               {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
             </button>
-            <Link href="/citadel"><button className="px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-white/70 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg">Citadel</button></Link>
-            <Link href="/forge"><button className="px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-white/70 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg">Forge</button></Link>
+            <Link href="/citadel"><button className="px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/70 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg">Citadel</button></Link>
+            <Link href="/forge"><button className="px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/70 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg">Forge</button></Link>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
+          {/* --- UPGRADE: MOBILE HEIGHT-SCALED MAIN CHAT TERMINAL --- */}
           <FloatingGlassCard isAuraActive={isAuraActive} className={`lg:col-span-2 bg-white/5 backdrop-blur-3xl border transition-all duration-1000 shadow-[0_30px_60px_rgba(0,0,0,0.5)] ${border}`}>
-            <div className="flex flex-col h-[650px] overflow-hidden rounded-3xl bg-gradient-to-b from-white/[0.05] to-transparent">
-              <div className="bg-black/20 px-8 py-5 border-b border-white/5 flex justify-between items-center">
+            <div className="flex flex-col h-[500px] sm:h-[650px] overflow-hidden rounded-3xl bg-gradient-to-b from-white/[0.05] to-transparent">
+              <div className="bg-black/20 px-4 sm:px-8 py-4 sm:py-5 border-b border-white/5 flex justify-between items-center">
                 <AnimatePresence mode="wait">
                   <motion.span 
                     key={headerText}
                     initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                    className={`text-xs font-mono font-bold uppercase tracking-widest ${secondary}`}
+                    className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest ${secondary}`}
                   >
                     {headerText}
                   </motion.span>
                 </AnimatePresence>
               </div>
               
-              <div ref={scrollRef} className="p-8 font-mono text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
+              <div ref={scrollRef} className="p-4 sm:p-8 font-mono text-xs sm:text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
                 
                 <AnimatePresence>
                   {activePositions.length > 0 && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-3 flex items-center gap-2">
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-3 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active Deployments
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -989,21 +992,21 @@ export default function Home() {
                             <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,1)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)]'}`} />
                             <div className="flex justify-between items-start mb-2 pl-2">
                               <div>
-                                <span className="text-white font-black text-lg">{pos.asset}</span>
-                                <span className={`ml-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                                <span className="text-white font-black text-base sm:text-lg">{pos.asset}</span>
+                                <span className={`ml-2 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
                                   {pos.type} {pos.leverage}x
                                 </span>
                               </div>
                               <div className="text-right">
-                                <div className={`font-mono text-lg font-black tracking-tighter ${pos.pnl >= 0 ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>
+                                <div className={`font-mono text-base sm:text-lg font-black tracking-tighter ${pos.pnl >= 0 ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>
                                   {pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}
                                 </div>
-                                <div className={`text-[10px] font-bold ${pos.pnl >= 0 ? 'text-emerald-500/70' : 'text-red-500/70'}`}>
+                                <div className={`text-[8px] sm:text-[10px] font-bold ${pos.pnl >= 0 ? 'text-emerald-500/70' : 'text-red-500/70'}`}>
                                   {pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%
                                 </div>
                               </div>
                             </div>
-                            <div className="flex justify-between text-[10px] font-mono text-white/40 pl-2 border-t border-white/5 pt-2 mt-2">
+                            <div className="flex justify-between text-[8px] sm:text-[10px] font-mono text-white/40 pl-2 border-t border-white/5 pt-2 mt-2">
                               <span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                               <span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
@@ -1020,14 +1023,14 @@ export default function Home() {
                     return (
                       <motion.div 
                         key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                        className={`flex flex-col gap-3 p-5 rounded-2xl backdrop-blur-xl border shadow-lg ${
-                          msg.role === 'user' ? 'bg-black/40 border-white/5 ml-16' : 
-                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-16` : 
-                          msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-16 animate-pulse' : 'bg-transparent border-transparent text-center opacity-50'
+                        className={`flex flex-col gap-3 p-4 sm:p-5 rounded-2xl backdrop-blur-xl border shadow-lg ${
+                          msg.role === 'user' ? 'bg-black/40 border-white/5 ml-8 sm:ml-16' : 
+                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-8 sm:mr-16` : 
+                          msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-8 sm:mr-16 animate-pulse' : 'bg-transparent border-transparent text-center opacity-50'
                         }`}
                       >
                         {msg.role !== 'system' && (
-                          <span className={`text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/40' : secondary}`}>
+                          <span className={`text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/40' : secondary}`}>
                             {msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}
                           </span>
                         )}
@@ -1040,7 +1043,7 @@ export default function Home() {
                         <p className={`leading-relaxed whitespace-pre-wrap ${msg.role === 'user' ? 'text-white' : msg.role === 'ai' ? 'text-white/90' : 'text-red-400 font-mono'}`}>{msg.text}</p>
                         
                         {msg.actionPayload && (
-                          <div className={`mt-4 p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-black/40 border-white/10'}`}>
+                          <div className={`mt-4 p-4 sm:p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-black/40 border-white/10'}`}>
                             
                             <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                               <span className="text-xs font-bold uppercase tracking-widest text-white/50 flex items-center gap-2">
@@ -1065,33 +1068,33 @@ export default function Home() {
 
                             {/* Option C Reasoning Hash inside the Action Card */}
                             {msg.decisionHash && (
-                              <div className="mb-5 bg-black/50 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center">
+                              <div className="mb-5 bg-black/50 p-3 sm:p-4 rounded-lg border border-white/5 font-mono text-[8px] sm:text-[9px] text-purple-400 flex gap-4 items-center">
                                  <span>PROVED_DECISION HASH:</span>
                                  <span className="break-all text-white/60">{msg.decisionHash}</span>
                               </div>
                             )}
                             
-                            <div className="grid grid-cols-4 gap-4 mb-6">
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/40 block mb-1">ASSET</span>
-                                <span className="text-sm font-bold text-white">{msg.actionPayload.asset}</span>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">ASSET</span>
+                                <span className="text-xs sm:text-sm font-bold text-white">{msg.actionPayload.asset}</span>
                               </div>
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/40 block mb-1">ACTION</span>
-                                <span className={`text-sm font-bold ${msg.actionPayload.type === 'LONG' ? 'text-emerald-400' : msg.actionPayload.type === 'SHORT' ? 'text-red-400' : 'text-blue-400'}`}>{msg.actionPayload.type}</span>
+                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">ACTION</span>
+                                <span className={`text-xs sm:text-sm font-bold ${msg.actionPayload.type === 'LONG' ? 'text-emerald-400' : msg.actionPayload.type === 'SHORT' ? 'text-red-400' : 'text-blue-400'}`}>{msg.actionPayload.type}</span>
                               </div>
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/40 block mb-1">LEVERAGE</span>
-                                <span className="text-sm font-bold text-white">{msg.actionPayload.leverage}x</span>
+                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">LEVERAGE</span>
+                                <span className="text-xs sm:text-sm font-bold text-white">{msg.actionPayload.leverage}x</span>
                               </div>
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/40 block mb-1">COLLATERAL</span>
+                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">COLLATERAL</span>
                                 <span className="text-xs font-black uppercase text-purple-400">5.00 MAC</span>
                               </div>
                             </div>
 
                             {msg.actionPayload.status !== 'SUCCESS' ? (
-                              <div className="flex gap-3">
+                              <div className="flex flex-col sm:flex-row gap-3">
                                 <button 
                                   onClick={() => handleSignExecution(msg.id, msg.actionPayload!)}
                                   disabled={isTradeConfirming}
@@ -1120,25 +1123,26 @@ export default function Home() {
                   })}
                 </AnimatePresence>
                 {isExecuting && (
-                  <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className={`text-xs font-mono tracking-widest uppercase ${secondary} mr-16 p-5`}>
+                  <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className={`text-xs font-mono tracking-widest uppercase ${secondary} mr-8 sm:mr-16 p-4 sm:p-5`}>
                     &gt; Processing neural matrix...
                   </motion.div>
                 )}
               </div>
 
-              <div className="p-6 bg-black/30 border-t border-white/5">
+              {/* Dynamic input bar padding */}
+              <div className="p-4 sm:p-6 bg-black/30 border-t border-white/5">
                 <div className="flex gap-4 bg-black/40 p-2 rounded-2xl border border-white/5 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
                   <input 
                     type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
                     onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                     onBlur={() => !isOverclocked && setSystemState('IDLE')}
                     placeholder="Enter executive command (e.g. 'Long ETH')..." 
-                    className="flex-1 bg-transparent px-6 py-4 text-sm focus:outline-none text-white placeholder:text-white/20 font-mono"
+                    className="flex-1 bg-transparent px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm focus:outline-none text-white placeholder:text-white/20 font-mono"
                     disabled={isExecuting}
                   />
                   <button 
                     onClick={handleExecute} disabled={isExecuting || !command.trim()}
-                    className={`px-10 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all text-black ${
+                    className={`px-6 sm:px-10 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all text-black ${
                       isOverclocked ? 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'bg-white hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]'
                     } disabled:opacity-30 disabled:cursor-not-allowed`}
                   >
@@ -1280,7 +1284,7 @@ export default function Home() {
                        {refuelResultHash && (
                          <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col mt-2">
                            <span className="font-bold">🚀 REFUELED SUCCESSFUL</span>
-                           <span className="break-all">TX: {refuelResultHash}</span>
+                           <span className="break-all text-[8px] sm:text-[9px]">TX: {refuelResultHash}</span>
                          </div>
                        )}
                      </div>
