@@ -78,8 +78,7 @@ type RelayPingLog = {
   text: string;
 };
 
-// --- DUAL-MODE LIQUID GLASS FLOATING DECK COMPONENT ---
-function FloatingGlassCard({ children, className, delay = 0, designMode = "AURA" }: { children: React.ReactNode, className: string, delay?: number, designMode?: "AURA" | "SILENT" | "CHROME" }) {
+function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "AURA" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" }) {
   const { systemState } = useTheme();
   
   const x = useMotionValue(0);
@@ -110,13 +109,13 @@ function FloatingGlassCard({ children, className, delay = 0, designMode = "AURA"
       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay }}
       className={`relative rounded-3xl p-[2px] overflow-hidden transition-all duration-700 ${className}`}
     >
-      {designMode === "AURA" && (
+      {isAuraActive && (
         <div className={`absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 animate-[spin_5s_linear_infinite] opacity-60 pointer-events-none -z-10 transition-all duration-700 ${borderGradients[systemState]}`} />
       )}
       
       <div 
         style={{ transform: "translateZ(40px)" }} 
-        className={`h-full w-full rounded-[22px] transition-all duration-700 p-6 flex flex-col relative z-10 ${
+        className={`h-full w-full rounded-[22px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 ${
           designMode === "AURA"
             ? "bg-[rgba(10,15,30,0.25)] backdrop-blur-[45px] shadow-[0_50px_100px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] border-t border-l border-white/20 border-b border-r border-white/5"
             : designMode === "CHROME"
@@ -1091,13 +1090,13 @@ export default function Home() {
                       <motion.div 
                         key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                         className={`flex flex-col gap-3 p-4 sm:p-5 rounded-2xl backdrop-blur-xl border shadow-lg ${
-                          msg.role === 'user' ? 'bg-black/40 border-white/5 ml-16' : 
-                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-16` : 
-                          msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-16 animate-pulse' : 'bg-transparent border-transparent text-center opacity-50'
+                          msg.role === 'user' ? 'bg-black/40 border-white/5 ml-8 sm:ml-16' : 
+                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-8 sm:mr-16` : 
+                          msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-8 sm:mr-16 animate-pulse' : 'bg-transparent border-transparent text-center opacity-50'
                         }`}
                       >
                         {msg.role !== 'system' && (
-                          <span className={`text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/40' : secondary}`}>
+                          <span className={`text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/40' : secondary}`}>
                             {msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}
                           </span>
                         )}
@@ -1219,9 +1218,12 @@ export default function Home() {
             </div>
           </FloatingGlassCard>
 
-          <div className="space-y-8">
-            {/* DYNAMIC ON-CHAIN GOVERNANCE HUD */}
-            <FloatingGlassCard designMode={designMode} delay={0.2} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
+          {/* --- UPGRADE: MOBILE GRID LAYOUT COMPONENT DECK --- */}
+          {/* Converts to 2-columns on mobile/tablet widths, keeping desktop vertical */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 lg:gap-8 items-start">
+            
+            {/* ERC-8004 GOVERNANCE REGISTRY */}
+            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 backdrop-blur-3xl p-8 border border-white/10 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500">
               <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-6 border-b border-white/10 pb-4">
                 ERC-8004 Governance Registry
               </h4>
@@ -1262,6 +1264,56 @@ export default function Home() {
                     </button>
                   </Link>
                 </div>
+              )}
+            </FloatingGlassCard>
+
+            {/* SECOPS Sentinel MEMPOOL INTRUSION DETECTOR */}
+            <FloatingGlassCard designMode={designMode} delay={0.1} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 flex items-center gap-2">
+                   <div className={`w-2 h-2 rounded-full ${secOpsActive ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_currentColor]' : 'bg-white/20'}`} />
+                   Mantle SecOps Sentinel
+                </span>
+                <button 
+                  onClick={() => setSecOpsActive(!secOpsActive)}
+                  className={`text-[9px] font-mono uppercase tracking-widest px-3 py-1 rounded-md border ${
+                    secOpsActive ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
+                  }`}
+                >
+                  {secOpsActive ? "ACTIVE" : "OFFLINE"}
+                </button>
+              </div>
+
+              {secOpsActive ? (
+                <div className="space-y-4">
+                  <div className="font-mono text-[9px] text-white/50 leading-relaxed bg-black/40 p-3 rounded-xl border border-white/5 space-y-1">
+                     <div>MEMPOOL MONITORING: <span className="text-emerald-400">SECURE</span></div>
+                     <div>REGISTRY BOUND: <span className="text-white">0x1E5B...5942</span></div>
+                     {exploitAlert && <div className="text-red-500 font-bold uppercase animate-pulse mt-2">⚠️ FLASH LOAN ATTACK SIGNATURE FLAG</div>}
+                  </div>
+
+                  <AnimatePresence>
+                    {exploitAlert && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                        className="bg-red-950/20 border border-red-500/30 p-4 rounded-xl mt-2"
+                      >
+                         <span className="text-[9px] text-red-400 font-mono uppercase block mb-1">DEFENSIVE INTERVENTION REQUIRED</span>
+                         <p className="text-[10px] text-white/70 font-mono leading-relaxed mb-4">Autonomous agent detects exploit vectors inside the pending mempool stream.</p>
+                         
+                         <button
+                           onClick={handleRescueSecOps}
+                           disabled={isSecuringRescue}
+                           className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95"
+                         >
+                           {isSecuringRescue ? "BROADCASTING FRONT-RUN..." : "CONFIRM SECURE RESCUE"}
+                         </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <p className="text-xs text-white/30 text-center py-2 font-mono">SecOps threat detection stream is standing by.</p>
               )}
             </FloatingGlassCard>
 
@@ -1319,105 +1371,6 @@ export default function Home() {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* DYNAMIC SOVEREIGN REFUEL Sentinel HUDBLOCK */}
-            <AnimatePresence>
-               {isConnected && address && mntGasBalance < 1.0 && (
-                 <motion.div
-                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                   exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                   transition={{ duration: 0.4 }}
-                 >
-                   <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-black/40 border border-amber-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.25)] animate-pulse">
-                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                       <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase flex items-center gap-2">
-                         <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Gas Sentinel Alert
-                       </span>
-                       <span className="text-[9px] font-mono text-white/40">TREASURY ACTIVE</span>
-                     </div>
-
-                     <div className="space-y-3 mb-6 font-mono text-xs">
-                       <div className="text-red-400 font-bold uppercase">🚨 GAS EXHAUST DETECTED</div>
-                       <div className="flex justify-between text-white/60">
-                         <span>Your Wallet Balance:</span>
-                         <span className="text-red-400 font-bold">{mntGasBalance.toFixed(4)} MNT</span>
-                       </div>
-                       <p className="text-[10px] text-white/40 leading-relaxed pt-2 border-t border-white/5">
-                         Your gas balance is insufficient to authorize on-chain executions. Swap 5.00 MAC for an immediate native 2.00 MNT autonomous refuel.
-                       </p>
-                       
-                       {refuelResultHash && (
-                         <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col mt-2">
-                           <span className="font-bold">🚀 REFUELED SUCCESSFUL</span>
-                           <span className="break-all text-[8px] sm:text-[9px]">TX: {refuelResultHash}</span>
-                         </div>
-                       )}
-                     </div>
-
-                     {!refuelResultHash && (
-                       <button
-                         onClick={handleRequestRefuel}
-                         disabled={isRefueling || isRefuelFeePending}
-                         className="w-full py-3 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all active:scale-95"
-                       >
-                         {isRefueling ? "TRANSFERRING GAS..." : isRefuelFeePending ? "CONFIRMING FEE SWAP..." : "REQUEST GAS REFUEL"}
-                       </button>
-                     )}
-                   </FloatingGlassCard>
-                 </motion.div>
-               )}
-            </AnimatePresence>
-
-            {/* SECOPS Sentinel MEMPOOL INTRUSION DETECTOR */}
-            <FloatingGlassCard designMode={designMode} delay={0.1} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
-              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 flex items-center gap-2">
-                   <div className={`w-2 h-2 rounded-full ${secOpsActive ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_currentColor]' : 'bg-white/20'}`} />
-                   Mantle SecOps Sentinel
-                </span>
-                <button 
-                  onClick={() => setSecOpsActive(!secOpsActive)}
-                  className={`text-[9px] font-mono uppercase tracking-widest px-3 py-1 rounded-md border ${
-                    secOpsActive ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'
-                  }`}
-                >
-                  {secOpsActive ? "ACTIVE" : "OFFLINE"}
-                </button>
-              </div>
-
-              {secOpsActive ? (
-                <div className="space-y-4">
-                  <div className="font-mono text-[9px] text-white/50 leading-relaxed bg-black/40 p-3 rounded-xl border border-white/5 space-y-1">
-                     <div>MEMPOOL MONITORING: <span className="text-emerald-400">SECURE</span></div>
-                     <div>REGISTRY BOUND: <span className="text-white">0x1E5B...5942</span></div>
-                     {exploitAlert && <div className="text-red-500 font-bold uppercase animate-pulse mt-2">⚠️ FLASH LOAN ATTACK SIGNATURE FLAG</div>}
-                  </div>
-
-                  <AnimatePresence>
-                    {exploitAlert && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-red-950/20 border border-red-500/30 p-4 rounded-xl mt-2"
-                      >
-                         <span className="text-[9px] text-red-400 font-mono uppercase block mb-1">DEFENSIVE INTERVENTION REQUIRED</span>
-                         <p className="text-[10px] text-white/70 font-mono leading-relaxed mb-4">Autonomous agent detects exploit vectors inside the pending mempool stream.</p>
-                         
-                         <button
-                           onClick={handleRescueSecOps}
-                           disabled={isSecuringRescue}
-                           className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95"
-                         >
-                           {isSecuringRescue ? "BROADCASTING FRONT-RUN..." : "CONFIRM SECURE RESCUE"}
-                         </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <p className="text-xs text-white/30 text-center py-2 font-mono">SecOps threat detection stream is standing by.</p>
-              )}
-            </FloatingGlassCard>
 
             {/* --- COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) --- */}
             <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/10 rounded-3xl p-6 h-[220px]">
@@ -1498,7 +1451,55 @@ export default function Home() {
               </div>
             </FloatingGlassCard>
 
-            {/* --- UPGRADE: PASSED THE COMPLETE DESIGNMODE PARAMETER INSTEAD OF ISAURAACTIVE PROP --- */}
+            {/* DYNAMIC SOVEREIGN REFUEL Sentinel HUDBLOCK */}
+            <AnimatePresence>
+               {isConnected && address && mntGasBalance < 1.0 && (
+                 <motion.div
+                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                   animate={{ opacity: 1, scale: 1, y: 0 }}
+                   exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                   transition={{ duration: 0.4 }}
+                 >
+                   <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-black/40 border border-amber-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.25)] animate-pulse">
+                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                       <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase flex items-center gap-2">
+                         <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Gas Sentinel Alert
+                       </span>
+                       <span className="text-[9px] font-mono text-white/40">TREASURY ACTIVE</span>
+                     </div>
+
+                     <div className="space-y-3 mb-6 font-mono text-xs">
+                       <div className="text-red-400 font-bold uppercase">🚨 GAS EXHAUST DETECTED</div>
+                       <div className="flex justify-between text-white/60">
+                         <span>Your Wallet Balance:</span>
+                         <span className="text-red-400 font-bold">{mntGasBalance.toFixed(4)} MNT</span>
+                       </div>
+                       <p className="text-[10px] text-white/40 leading-relaxed pt-2 border-t border-white/5">
+                         Your gas balance is insufficient to authorize on-chain executions. Swap 5.00 MAC for an immediate native 2.00 MNT autonomous refuel.
+                       </p>
+                       
+                       {refuelResultHash && (
+                         <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col mt-2">
+                           <span className="font-bold">🚀 REFUELED SUCCESSFUL</span>
+                           <span className="break-all text-[8px] sm:text-[9px]">TX: {refuelResultHash}</span>
+                         </div>
+                       )}
+                     </div>
+
+                     {!refuelResultHash && (
+                       <button
+                         onClick={handleRequestRefuel}
+                         disabled={isRefueling || isRefuelFeePending}
+                         className="w-full py-3 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all active:scale-95"
+                       >
+                         {isRefueling ? "TRANSFERRING GAS..." : isRefuelFeePending ? "CONFIRMING FEE SWAP..." : "REQUEST GAS REFUEL"}
+                       </button>
+                     )}
+                   </FloatingGlassCard>
+                 </motion.div>
+               )}
+            </AnimatePresence>
+
             <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[80px]">
               <button 
                 onClick={() => open()} 

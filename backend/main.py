@@ -17,8 +17,6 @@ private_key = os.getenv("PRIVATE_KEY")
 client = Groq(api_key=api_key)
 app = FastAPI(title="Mantle Agent Engine")
 
-# --- UPGRADE: PRODUCTION CORS MIDDLEWARE CONFIGURATION ---
-# Permitting any origin to resolve client-backend queries securely without cookie blocks
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -95,8 +93,9 @@ def execute_mac_transfer(to_address: str, amount_ether: float):
             'nonce': nonce,
         })
 
+        # --- UPGRADE: USE WEB3.PY V6 CAMELCASE SIGNATURE ATTRIBUTE ---
         signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
-        tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         
         return f"Transaction broadcasted successfully. TxHash: {web3.to_hex(tx_hash)}"
     except Exception as e:
@@ -123,8 +122,9 @@ def execute_mnt_refuel(to_address: str):
             'chainId': 5003
         }
         
+        # --- UPGRADE: USE WEB3.PY V6 CAMELCASE SIGNATURE ATTRIBUTE ---
         signed_tx = web3.eth.account.sign_transaction(tx, private_key=private_key)
-        tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         return f"Refuel transaction broadcasted successfully. TxHash: {web3.to_hex(tx_hash)}"
     except Exception as e:
         return f"Refuel failed: {str(e)}"
