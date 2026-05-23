@@ -78,7 +78,8 @@ type RelayPingLog = {
   text: string;
 };
 
-function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean }) {
+// --- DUAL-MODE LIQUID GLASS FLOATING DECK COMPONENT ---
+function FloatingGlassCard({ children, className, delay = 0, designMode = "AURA" }: { children: React.ReactNode, className: string, delay?: number, designMode?: "AURA" | "SILENT" | "CHROME" }) {
   const { systemState } = useTheme();
   
   const x = useMotionValue(0);
@@ -109,16 +110,17 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay }}
       className={`relative rounded-3xl p-[2px] overflow-hidden transition-all duration-700 ${className}`}
     >
-      {isAuraActive && (
+      {designMode === "AURA" && (
         <div className={`absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 animate-[spin_5s_linear_infinite] opacity-60 pointer-events-none -z-10 transition-all duration-700 ${borderGradients[systemState]}`} />
       )}
       
-      {/* Responsive Inner Padding */}
       <div 
         style={{ transform: "translateZ(40px)" }} 
-        className={`h-full w-full rounded-[22px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 ${
-          isAuraActive 
+        className={`h-full w-full rounded-[22px] transition-all duration-700 p-6 flex flex-col relative z-10 ${
+          designMode === "AURA"
             ? "bg-[rgba(10,15,30,0.25)] backdrop-blur-[45px] shadow-[0_50px_100px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] border-t border-l border-white/20 border-b border-r border-white/5"
+            : designMode === "CHROME"
+            ? "bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 backdrop-blur-[50px] shadow-[0_40px_80px_rgba(168,85,247,0.25),inset_0_1px_3px_rgba(255,255,255,0.2)] border border-purple-500/30 animate-[pulse_6s_ease-in-out_infinite]"
             : "bg-[rgba(15,22,42,0.15)] backdrop-blur-[50px] shadow-[0_30px_60px_rgba(0,0,0,0.65),inset_0_1px_2px_rgba(255,255,255,0.1)] border border-white/10 hover:border-white/25"
         }`}
       >
@@ -128,34 +130,34 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   );
 }
 
-function IntroSequence({ onComplete, isAuraActive = true }: { onComplete: () => void, isAuraActive?: boolean }) {
+function IntroSequence({ onComplete, designMode = "AURA" }: { onComplete: () => void, designMode?: "AURA" | "SILENT" | "CHROME" }) {
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
       transition={{ duration: 0.8 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
     >
-      <FloatingGlassCard isAuraActive={isAuraActive} className="max-w-2xl w-full text-center">
+      <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full text-center">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
           <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-emerald-400 to-blue-500 blur-[2px] shadow-[0_0_40px_rgba(16,185,129,0.5)] flex items-center justify-center border-2 border-white/20">
             <div className="w-12 h-12 bg-black rounded-xl animate-pulse" />
           </div>
           <h1 className="text-4xl font-black text-white uppercase tracking-widest mb-2">Mantle <span className="text-emerald-400">Agentic</span> Core</h1>
-          <p className="text-white/50 font-mono text-sm mb-10">Autonomous Web3 Operations Ecosystem</p>
+          <p className="text-white/60 font-mono text-sm mb-10">Autonomous Web3 Operations Ecosystem</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 text-left">
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="bg-black/40 p-5 rounded-2xl border border-white/5">
             <h3 className="text-emerald-400 font-bold text-xs uppercase mb-2 tracking-widest">01. Live Terminal</h3>
-            <p className="text-white/40 text-[10px] font-mono leading-relaxed">Real-time market analysis and agentic execution.</p>
+            <p className="text-white/60 text-[10px] font-mono leading-relaxed">Real-time market analysis and agentic execution.</p>
           </motion.div>
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="bg-black/40 p-5 rounded-2xl border border-white/5">
             <h3 className="text-amber-400 font-bold text-xs uppercase mb-2 tracking-widest">02. Neural Forge</h3>
-            <p className="text-white/40 text-[10px] font-mono leading-relaxed">Autonomous smart contract compilation and auditing.</p>
+            <p className="text-white/60 text-[10px] font-mono leading-relaxed">Autonomous smart contract compilation and auditing.</p>
           </motion.div>
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="bg-black/40 p-5 rounded-2xl border border-white/5">
             <h3 className="text-blue-400 font-bold text-xs uppercase mb-2 tracking-widest">03. Citadel Vault</h3>
-            <p className="text-white/40 text-[10px] font-mono leading-relaxed">ERC-8004 Agent Identity minting and risk management.</p>
+            <p className="text-white/60 text-[10px] font-mono leading-relaxed">ERC-8004 Agent Identity minting and risk management.</p>
           </motion.div>
         </div>
 
@@ -193,7 +195,7 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
             initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}
             className="overflow-hidden bg-black/20"
           >
-            <div className="p-4 space-y-2 font-mono text-[9px] text-white/50 leading-relaxed border-t border-white/5">
+            <div className="p-4 space-y-2 font-mono text-[9px] text-white/60 leading-relaxed border-t border-white/5">
               {steps.map((step, idx) => (
                 <div key={idx} className="flex gap-2 items-start">
                   <span className="text-purple-500/80">[{idx + 1}]</span>
@@ -205,6 +207,49 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// --- UPGRADE: MOBILE-COMPATIBLE ECOSYSTEM SOCIALS CAROUSEL ---
+function SocialMatrixCarousel() {
+  const socials = [
+    { name: "𝕏", url: "https://x.com/MantleCore_", text: "@MantleCore_", color: "text-white" },
+    { name: "✈️", url: "https://t.me/MantleAgentic", text: "t.me/MantleAgentic", color: "text-blue-400" },
+    { name: "💬", url: "https://discord.gg/RZDdfKvWYC", text: "discord.gg/MantleCore", color: "text-indigo-400" },
+    { name: "✉️", url: "mailto:mantlecore.agent@gmail.com", text: "mantlecore.agent@gmail.com", color: "text-red-400" },
+    { name: "🐙", url: "https://github.com/NomadDigita/mantle-agentic-core", text: "github/MantleAgentic", color: "text-white/80" }
+  ];
+
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % socials.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [socials.length]);
+
+  const active = socials[index];
+
+  return (
+    <a 
+      href={active.url} target="_blank" rel="noopener noreferrer"
+      className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full hover:bg-white/10 hover:border-purple-500/50 transition-all shadow-md overflow-hidden relative max-w-[150px] sm:max-w-[200px]"
+    >
+      <span className="text-xs flex-shrink-0">{active.name}</span>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={active.text}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className={`text-[8px] sm:text-[9px] font-mono font-bold truncate ${active.color}`}
+        >
+          {active.text}
+        </motion.span>
+      </AnimatePresence>
+    </a>
   );
 }
 
@@ -252,8 +297,22 @@ export default function Home() {
   const { writeContract: rescueWrite, data: rescueHash } = useWriteContract();
   const { isLoading: isSecuringRescue, isSuccess: isRescueSuccess } = useWaitForTransactionReceipt({ hash: rescueHash });
 
-  // AURA MATRIX CHIP SELECTOR STATE
+  // --- UPGRADE: 3-WAY MATRIX CHIP SELECTOR STATE ---
+  const [designMode, setDesignMode] = useState<"AURA" | "SILENT" | "CHROME">("AURA");
   const [isAuraActive, setIsAuraActive] = useState(true);
+
+  // Sync state helpers with dynamic toggle selectors
+  useEffect(() => {
+    setIsAuraActive(designMode === "AURA");
+  }, [designMode]);
+
+  const handleToggleDesignMode = () => {
+    setDesignMode(prev => {
+      if (prev === "AURA") return "CHROME";
+      if (prev === "CHROME") return "SILENT";
+      return "AURA";
+    });
+  };
 
   // ORGANIC MULTI-AGENT COLLABORATIVEseq Sequencer
   const [relayLogs, setRelayLogs] = useState<RelayPingLog[]>([
@@ -262,7 +321,7 @@ export default function Home() {
     { agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
   ]);
 
-  // NATIVE MNT GAS MONITORING
+  // --- NATIVE MNT GAS MONITORING ---
   const { data: balanceData, refetch: refetchBalance } = useBalance({
     address: address as `0x${string}`,
     chainId: 5003
@@ -271,6 +330,7 @@ export default function Home() {
   const [isRefueling, setIsRefueling] = useState(false);
   const [refuelResultHash, setRefuelResultHash] = useState<string | null>(null);
 
+  // Wagmi signature for the refuel MAC feepayment (5 MAC collateral)
   const { writeContract: refuelFeeWrite, data: refuelFeeHash } = useWriteContract();
   const { isLoading: isRefuelFeePending, isSuccess: isRefuelFeeSuccess } = useWaitForTransactionReceipt({ hash: refuelFeeHash });
 
@@ -891,7 +951,7 @@ export default function Home() {
     // --- UPGRADE: MOBILE-OPTIMIZED LIQUID CONTAINER ---
     <main className="min-h-screen relative p-2 sm:p-6 lg:p-12 z-0 overflow-x-hidden bg-transparent font-sans">
       <AnimatePresence>
-        {showIntro && <IntroSequence isAuraActive={isAuraActive} onComplete={handleIntroComplete} />}
+        {showIntro && <IntroSequence designMode={designMode} onComplete={handleIntroComplete} />}
       </AnimatePresence>
 
       {/* DEEP LIQUID NODE PARTICLE BACKGROUND */}
@@ -937,18 +997,20 @@ export default function Home() {
           <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
              {/* AURA MODE SELECTOR BUTTON */}
              <button 
-              onClick={() => setIsAuraActive(!isAuraActive)}
-              className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
-                isAuraActive 
+              onClick={handleToggleDesignMode}
+              className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
+                designMode === "AURA" 
                   ? 'bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30' 
+                  : designMode === "CHROME"
+                  ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50 hover:bg-indigo-500/30'
                   : 'bg-black/20 text-white/50 border-white/10 hover:border-white/35 hover:text-white'
               }`}
             >
-              {isAuraActive ? 'AURA MATRIX: ON' : 'AURA MATRIX: OFF'}
+              {designMode === "AURA" ? 'AURA MATRIX: ON' : designMode === "CHROME" ? 'CHROME 4D: ON' : 'SILENT GLASS: ON'}
             </button>
              <button 
               onClick={toggleOverclock}
-              className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
+              className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg ${
                 isOverclocked 
                   ? 'bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30' 
                   : 'bg-black/20 text-white/50 border-white/10 hover:border-emerald-500/50 hover:text-emerald-400'
@@ -964,18 +1026,23 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* --- UPGRADE: MOBILE HEIGHT-SCALED MAIN CHAT TERMINAL --- */}
-          <FloatingGlassCard isAuraActive={isAuraActive} className={`lg:col-span-2 bg-white/5 backdrop-blur-3xl border transition-all duration-1000 shadow-[0_30px_60px_rgba(0,0,0,0.5)] ${border}`}>
+          <FloatingGlassCard designMode={designMode} className={`lg:col-span-2 bg-white/5 backdrop-blur-3xl border transition-all duration-1000 shadow-[0_30px_60px_rgba(0,0,0,0.5)] ${border}`}>
             <div className="flex flex-col h-[500px] sm:h-[650px] overflow-hidden rounded-3xl bg-gradient-to-b from-white/[0.05] to-transparent">
-              <div className="bg-black/20 px-4 sm:px-8 py-4 sm:py-5 border-b border-white/5 flex justify-between items-center">
+              <div className="bg-black/20 px-4 sm:px-8 py-4 sm:py-5 border-b border-white/5 flex justify-between items-center gap-2">
                 <AnimatePresence mode="wait">
                   <motion.span 
                     key={headerText}
                     initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                    className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest ${secondary}`}
+                    className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest truncate max-w-[120px] sm:max-w-none ${secondary}`}
                   >
                     {headerText}
                   </motion.span>
                 </AnimatePresence>
+
+                {/* --- UPGRADE: INJECTED SOCIAL PORTAL CAROUSEL HUDBAR --- */}
+                <div className="flex-shrink-0">
+                  <SocialMatrixCarousel />
+                </div>
               </div>
               
               <div ref={scrollRef} className="p-4 sm:p-8 font-mono text-xs sm:text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
@@ -1024,13 +1091,13 @@ export default function Home() {
                       <motion.div 
                         key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                         className={`flex flex-col gap-3 p-4 sm:p-5 rounded-2xl backdrop-blur-xl border shadow-lg ${
-                          msg.role === 'user' ? 'bg-black/40 border-white/5 ml-8 sm:ml-16' : 
-                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-8 sm:mr-16` : 
-                          msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-8 sm:mr-16 animate-pulse' : 'bg-transparent border-transparent text-center opacity-50'
+                          msg.role === 'user' ? 'bg-black/40 border-white/5 ml-16' : 
+                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-16` : 
+                          msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-16 animate-pulse' : 'bg-transparent border-transparent text-center opacity-50'
                         }`}
                       >
                         {msg.role !== 'system' && (
-                          <span className={`text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/40' : secondary}`}>
+                          <span className={`text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/40' : secondary}`}>
                             {msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}
                           </span>
                         )}
@@ -1043,7 +1110,7 @@ export default function Home() {
                         <p className={`leading-relaxed whitespace-pre-wrap ${msg.role === 'user' ? 'text-white' : msg.role === 'ai' ? 'text-white/90' : 'text-red-400 font-mono'}`}>{msg.text}</p>
                         
                         {msg.actionPayload && (
-                          <div className={`mt-4 p-4 sm:p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-black/40 border-white/10'}`}>
+                          <div className={`mt-4 p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-black/40 border-white/10'}`}>
                             
                             <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                               <span className="text-xs font-bold uppercase tracking-widest text-white/50 flex items-center gap-2">
@@ -1068,33 +1135,33 @@ export default function Home() {
 
                             {/* Option C Reasoning Hash inside the Action Card */}
                             {msg.decisionHash && (
-                              <div className="mb-5 bg-black/50 p-3 sm:p-4 rounded-lg border border-white/5 font-mono text-[8px] sm:text-[9px] text-purple-400 flex gap-4 items-center">
+                              <div className="mb-5 bg-black/50 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center">
                                  <span>PROVED_DECISION HASH:</span>
                                  <span className="break-all text-white/60">{msg.decisionHash}</span>
                               </div>
                             )}
                             
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
-                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">ASSET</span>
-                                <span className="text-xs sm:text-sm font-bold text-white">{msg.actionPayload.asset}</span>
+                            <div className="grid grid-cols-4 gap-4 mb-6">
+                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[9px] text-white/40 block mb-1">ASSET</span>
+                                <span className="text-sm font-bold text-white">{msg.actionPayload.asset}</span>
                               </div>
-                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">ACTION</span>
-                                <span className={`text-xs sm:text-sm font-bold ${msg.actionPayload.type === 'LONG' ? 'text-emerald-400' : msg.actionPayload.type === 'SHORT' ? 'text-red-400' : 'text-blue-400'}`}>{msg.actionPayload.type}</span>
+                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[9px] text-white/40 block mb-1">ACTION</span>
+                                <span className={`text-sm font-bold ${msg.actionPayload.type === 'LONG' ? 'text-emerald-400' : msg.actionPayload.type === 'SHORT' ? 'text-red-400' : 'text-blue-400'}`}>{msg.actionPayload.type}</span>
                               </div>
-                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">LEVERAGE</span>
-                                <span className="text-xs sm:text-sm font-bold text-white">{msg.actionPayload.leverage}x</span>
+                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[9px] text-white/40 block mb-1">LEVERAGE</span>
+                                <span className="text-sm font-bold text-white">{msg.actionPayload.leverage}x</span>
                               </div>
-                              <div className="bg-white/5 p-2 sm:p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[8px] sm:text-[9px] text-white/40 block mb-1">COLLATERAL</span>
+                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                <span className="text-[9px] text-white/40 block mb-1">COLLATERAL</span>
                                 <span className="text-xs font-black uppercase text-purple-400">5.00 MAC</span>
                               </div>
                             </div>
 
                             {msg.actionPayload.status !== 'SUCCESS' ? (
-                              <div className="flex flex-col sm:flex-row gap-3">
+                              <div className="flex gap-3">
                                 <button 
                                   onClick={() => handleSignExecution(msg.id, msg.actionPayload!)}
                                   disabled={isTradeConfirming}
@@ -1123,26 +1190,25 @@ export default function Home() {
                   })}
                 </AnimatePresence>
                 {isExecuting && (
-                  <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className={`text-xs font-mono tracking-widest uppercase ${secondary} mr-8 sm:mr-16 p-4 sm:p-5`}>
+                  <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className={`text-xs font-mono tracking-widest uppercase ${secondary} mr-16 p-5`}>
                     &gt; Processing neural matrix...
                   </motion.div>
                 )}
               </div>
 
-              {/* Dynamic input bar padding */}
-              <div className="p-4 sm:p-6 bg-black/30 border-t border-white/5">
+              <div className="p-6 bg-black/30 border-t border-white/5">
                 <div className="flex gap-4 bg-black/40 p-2 rounded-2xl border border-white/5 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
                   <input 
                     type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
                     onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                     onBlur={() => !isOverclocked && setSystemState('IDLE')}
                     placeholder="Enter executive command (e.g. 'Long ETH')..." 
-                    className="flex-1 bg-transparent px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm focus:outline-none text-white placeholder:text-white/20 font-mono"
+                    className="flex-1 bg-transparent px-6 py-4 text-sm focus:outline-none text-white placeholder:text-white/20 font-mono"
                     disabled={isExecuting}
                   />
                   <button 
                     onClick={handleExecute} disabled={isExecuting || !command.trim()}
-                    className={`px-6 sm:px-10 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all text-black ${
+                    className={`px-10 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all text-black ${
                       isOverclocked ? 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'bg-white hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]'
                     } disabled:opacity-30 disabled:cursor-not-allowed`}
                   >
@@ -1155,7 +1221,7 @@ export default function Home() {
 
           <div className="space-y-8">
             {/* DYNAMIC ON-CHAIN GOVERNANCE HUD */}
-            <FloatingGlassCard isAuraActive={isAuraActive} delay={0.2} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
+            <FloatingGlassCard designMode={designMode} delay={0.2} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
               <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-6 border-b border-white/10 pb-4">
                 ERC-8004 Governance Registry
               </h4>
@@ -1208,7 +1274,7 @@ export default function Home() {
                   exit={{ opacity: 0, scale: 0.9, y: -20 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <FloatingGlassCard isAuraActive={isAuraActive} delay={0.3} className="bg-black/40 border border-purple-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                  <FloatingGlassCard designMode={designMode} delay={0.3} className="bg-black/40 border border-purple-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.25)]">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                       <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver
@@ -1263,7 +1329,7 @@ export default function Home() {
                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
                    transition={{ duration: 0.4 }}
                  >
-                   <FloatingGlassCard isAuraActive={isAuraActive} delay={0.2} className="bg-black/40 border border-amber-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.25)] animate-pulse">
+                   <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-black/40 border border-amber-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.25)] animate-pulse">
                      <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                        <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase flex items-center gap-2">
                          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Gas Sentinel Alert
@@ -1304,7 +1370,7 @@ export default function Home() {
             </AnimatePresence>
 
             {/* SECOPS Sentinel MEMPOOL INTRUSION DETECTOR */}
-            <FloatingGlassCard isAuraActive={isAuraActive} delay={0.1} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
+            <FloatingGlassCard designMode={designMode} delay={0.1} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 flex items-center gap-2">
                    <div className={`w-2 h-2 rounded-full ${secOpsActive ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_currentColor]' : 'bg-white/20'}`} />
@@ -1354,7 +1420,7 @@ export default function Home() {
             </FloatingGlassCard>
 
             {/* --- COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) --- */}
-            <FloatingGlassCard isAuraActive={isAuraActive} delay={0.2} className="bg-white/5 border border-white/10 rounded-3xl p-6 h-[220px]">
+            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/10 rounded-3xl p-6 h-[220px]">
                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0">
                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />
                  Mantle Agent Matrix Relay
@@ -1377,7 +1443,7 @@ export default function Home() {
                </div>
             </FloatingGlassCard>
 
-            <FloatingGlassCard isAuraActive={isAuraActive} delay={0.4} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
+            <FloatingGlassCard designMode={designMode} delay={0.4} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
               <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-8 border-b border-white/10 pb-4">
                 Node Topology
               </h4>
@@ -1401,7 +1467,7 @@ export default function Home() {
             </FloatingGlassCard>
 
             {/* RESTORED MARKET SENTINEL COMPONENT */}
-            <FloatingGlassCard isAuraActive={isAuraActive} delay={0.6} className={`bg-transparent rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)]`}>
+            <FloatingGlassCard designMode={designMode} delay={0.6} className={`bg-transparent rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)]`}>
               <div className="relative overflow-hidden rounded-3xl h-full w-full">
                 <div className="relative h-full w-full">
                   <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
@@ -1432,7 +1498,8 @@ export default function Home() {
               </div>
             </FloatingGlassCard>
 
-            <FloatingGlassCard isAuraActive={isAuraActive} delay={0.4} className="bg-transparent h-[80px]">
+            {/* --- UPGRADE: PASSED THE COMPLETE DESIGNMODE PARAMETER INSTEAD OF ISAURAACTIVE PROP --- */}
+            <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[80px]">
               <button 
                 onClick={() => open()} 
                 className="w-full h-full rounded-2xl bg-white text-black hover:bg-emerald-400 transition-colors font-black text-xs uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.3)] active:scale-95"
