@@ -339,17 +339,12 @@ export default function Home() {
     { id: "init-3", agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
   ]);
 
-  // --- NATIVE MNT GAS MONITORING (SAFE BIGINT MATH WITH COMPLETE UNDEFINED COERCION) ---
+  // --- NATIVE MNT GAS MONITORING ---
   const { data: balanceData, refetch: refetchBalance } = useBalance({
     address: address as `0x${string}`,
-    chainId: 5003,
-    query: { enabled: !!address } // Gate hook to prevent undefined query key crashes
+    chainId: 5003
   });
-  
-  const mntGasBalance = (balanceData && typeof balanceData.value !== "undefined" && typeof balanceData.decimals !== "undefined")
-    ? Number(balanceData.value) / (10 ** balanceData.decimals) 
-    : 5.0; 
-
+  const mntGasBalance = balanceData ? parseFloat((balanceData as any).formatted) : 5.0; 
   const [isRefueling, setIsRefueling] = useState(false);
   const [refuelResultHash, setRefuelResultHash] = useState<string | null>(null);
 
@@ -486,45 +481,18 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // --- STATE-LOCKED CACHE RESTORATION WITH CORRUPT-CACHE PROTECTION ---
+  // --- STATE-LOCKED CACHE RESTORATION ---
   useEffect(() => {
     if (isConnected && address) {
       setIsRestored(false); 
-      const safeAddress = address.toLowerCase(); // Safe local reference to avoid properties of undefined crashes
-      const cachedMessages = localStorage.getItem(`mac_messages_${safeAddress}`);
-      const cachedPositions = localStorage.getItem(`mac_positions_${safeAddress}`);
+      const cachedMessages = localStorage.getItem(`mac_messages_${address.toLowerCase()}`);
+      const cachedPositions = localStorage.getItem(`mac_positions_${address.toLowerCase()}`);
       
-      // Safe Messages Parser
-      if (cachedMessages) {
-        try {
-          const parsed = JSON.parse(cachedMessages);
-          if (Array.isArray(parsed) && parsed.every(m => m && typeof m === 'object' && 'id' in m)) {
-            setMessages(parsed);
-          } else {
-            setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
-          }
-        } catch (e) {
-          setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
-        }
-      } else {
-        setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
-      }
+      if (cachedMessages) setMessages(JSON.parse(cachedMessages));
+      else setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
       
-      // Safe Positions Parser
-      if (cachedPositions) {
-        try {
-          const parsed = JSON.parse(cachedPositions);
-          if (Array.isArray(parsed) && parsed.every(p => p && typeof p === 'object' && 'id' in p)) {
-            setActivePositions(parsed);
-          } else {
-            setActivePositions([]);
-          }
-        } catch (e) {
-          setActivePositions([]);
-        }
-      } else {
-        setActivePositions([]);
-      }
+      if (cachedPositions) setActivePositions(JSON.parse(cachedPositions));
+      else setActivePositions([]);
       
       setIsRestored(true); 
     }
@@ -533,15 +501,13 @@ export default function Home() {
   // --- WRITE MONITORS CACHED ---
   useEffect(() => {
     if (isConnected && address && isRestored && messages.length > 1) {
-      const safeAddress = address.toLowerCase();
-      localStorage.setItem(`mac_messages_${safeAddress}`, JSON.stringify(messages));
+      localStorage.setItem(`mac_messages_${address.toLowerCase()}`, JSON.stringify(messages));
     }
   }, [messages, isConnected, address, isRestored]);
 
   useEffect(() => {
     if (isConnected && address && isRestored) {
-      const safeAddress = address.toLowerCase();
-      localStorage.setItem(`mac_positions_${safeAddress}`, JSON.stringify(activePositions));
+      localStorage.setItem(`mac_positions_${address.toLowerCase()}`, JSON.stringify(activePositions));
     }
   }, [activePositions, isConnected, address, isRestored]);
 
@@ -556,7 +522,6 @@ export default function Home() {
     const scanOnChainAgent = async () => {
       setIsCheckingAgent(true);
       try {
-        const safeAddress = address.toLowerCase();
         const client = createPublicClient({
           chain: {
             id: 5003,
@@ -579,11 +544,11 @@ export default function Home() {
             }
           ],
           functionName: "balanceOf",
-          args: [safeAddress as `0x${string}`]
+          args: [address as `0x${string}`]
         }) as bigint;
 
         if (balance > BigInt(0)) {
-          const cachedProfile = localStorage.getItem(`mac_agent_${safeAddress}`);
+          const cachedProfile = localStorage.getItem(`mac_agent_${address.toLowerCase()}`);
           if (cachedProfile) {
             setAgentProfile(JSON.parse(cachedProfile));
             setIsCheckingAgent(false);
@@ -594,7 +559,7 @@ export default function Home() {
             const logs = await client.getLogs({
               address: "0x1E5B64264089aacC547A1506402B94f909215942",
               event: parseAbiItem("event AgentAwakened(address indexed creator, uint256 indexed agentId, string riskStrategy)"),
-              args: { creator: safeAddress as `0x${string}` },
+              args: { creator: address as `0x${string}` },
               fromBlock: "earliest",
               toBlock: "latest"
             });
@@ -619,7 +584,7 @@ export default function Home() {
                 };
 
                 setAgentProfile(fetchedProfile);
-                localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
+                localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(fetchedProfile));
                 return;
               }
             }
@@ -643,7 +608,7 @@ export default function Home() {
                   args: [BigInt(i)]
                 }) as `0x${string}`;
 
-                if (owner.toLowerCase() === safeAddress) {
+                if (owner.toLowerCase() === address.toLowerCase()) {
                   const rawProfile = await (client as any).readContract({
                     address: "0x1E5B64264089aacC547A1506402B94f909215942",
                     abi: ERC8004_IDENTITY_ABI, 
@@ -659,7 +624,7 @@ export default function Home() {
                   };
 
                   setAgentProfile(fetchedProfile);
-                  localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
+                  localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(fetchedProfile));
                   break;
                 }
               } catch (ownerErr) {
@@ -1006,10 +971,6 @@ export default function Home() {
     }
   }, [isRefuelFeeSuccess, address, refetchBalance]);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   if (!mounted) return null;
   const currentMarket = marketCoins[activeCoinIndex];
 
@@ -1113,14 +1074,14 @@ export default function Home() {
                 title="Enter Discord Sanctuary"
               >
                 <svg className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.27 4.73a16.13 16.13 0 0 0-3.97-1.23.1.1 0 0 0-.1.05c-.35.62-.74 1.44-1.01 2.1a15 15 0 0 0-4.38 0c-.27-.66-.67-1.48-1.02-2.1a.1.1 0 0 0-.1-.05 16.13 16.13 0 0 0-3.97 1.23.1.1 0 0 0-.05.04C1.9 9.36 1.02 13.84 1.48 18.25a.1.1 0 0 0 .04-.07 16.27 16.27 0 0 0 4.9 2.48.1.1 0 0 0 .11-.04c.38-.51.72-1.07 1-1.66a.1.1 0 0 0-.06-.13 10.74 10.74 0 0 1-1.51-.72.1.1 0 0 1-.01-.16c.1-.08.2-.15.3-.23a.1.1 0 0 1 .11-.01c3.15 1.44 6.57 1.44 9.66 0a.1.1 0 0 1 .11.01c.1.08.2.15.3.23a.1.1 0 0 1-.01.16 10.5 10.5 0 0 1-1.51.72.1.1 0 0 0-.06.13c.29.59.63 1.15 1 1.66a.1.1 0 0 0 .11.04 16.27 16.27 0 0 0 4.9-2.48.1.1 0 0 0 .04-.07c.56-5.1-.9-9.54-3.57-13.48a.1.1 0 0 0-.05-.04zM8.52 14.85c-.95 0-1.72-.87-1.72-1.94s.75-1.94 1.72-1.94c.98 0 1.73.88 1.72 1.94 0 1.07-.75 1.94-1.72 1.94zm6.96 0c-.95 0-1.72-.87-1.72-1.94s.75-1.94 1.72-1.94c.98 0 1.73.88 1.72 1.94 0 1.07-.75 1.94-1.72 1.94z"/>
+                  <path d="M19.27 4.73a16.13 16.13 0 0 0-3.97-1.23.1.1 0 0 0-.1.05c-.35.62-.74 1.44-1.01 2.1a15 15 0 0 0-4.38 0c-.27-.66-.67-1.48-1.02-2.1a.1.1 0 0 0-.1-.05 16.13 16.13 0 0 0-3.97 1.23.1.1 0 0 0-.05.04C1.9 9.36 1.02 13.84 1.48 18.25a.1.1 0 0 0 .04.07 16.27 16.27 0 0 0 4.9 2.48.1.1 0 0 0 .11-.04c.38-.51.72-1.07 1-1.66a.1.1 0 0 0-.06-.13 10.74 10.74 0 0 1-1.51-.72.1.1 0 0 1-.01-.16c.1-.08.2-.15.3-.23a.1.1 0 0 1 .11-.01c3.15 1.44 6.57 1.44 9.66 0a.1.1 0 0 1 .11.01c.1.08.2.15.3.23a.1.1 0 0 1-.01.16 10.5 10.5 0 0 1-1.51.72.1.1 0 0 0-.06.13c.29.59.63 1.15 1 1.66a.1.1 0 0 0 .11.04 16.27 16.27 0 0 0 4.9-2.48.1.1 0 0 0 .04-.07c.56-5.1-.9-9.54-3.57-13.48a.1.1 0 0 0-.05-.04zM8.52 14.85c-.95 0-1.72-.87-1.72-1.94s.75-1.94 1.72-1.94c.98 0 1.73.88 1.72 1.94 0 1.07-.75 1.94-1.72 1.94zm6.96 0c-.95 0-1.72-.87-1.72-1.94s.75-1.94 1.72-1.94c.98 0 1.73.88 1.72 1.94 0 1.07-.75 1.94-1.72 1.94z"/>
                 </svg>
               </a>
 
               {/* Gmail Envelope */}
               <a 
                 href="mailto:mantlecore.agent@gmail.com"
-                className="p-3 rounded-xl bg-black/40 border border-white/15 hover:border-red-400/40 hover:bg-red-950/20 transition-all flex items-center justify-center group mobile-touch-target"
+                className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-red-400/40 hover:bg-red-950/20 transition-all flex items-center justify-center group mobile-touch-target"
                 title="Direct Operator Line"
               >
                 <svg className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
