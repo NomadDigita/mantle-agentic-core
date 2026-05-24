@@ -1,7 +1,11 @@
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
+  --background: #020204;
 }
 
 body {
@@ -10,50 +14,98 @@ body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, sans-serif;
   overflow-x: hidden;
+  touch-action: manipulation;
 }
 
 /* THE LIQUID GLASS UI */
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(10, 15, 30, 0.25);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 24px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.85);
 }
 
-/* STAT CARDS */
-.stat-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 24px;
-  border-radius: 16px;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  border-color: rgba(16, 185, 129, 0.4);
-  background: rgba(16, 185, 129, 0.03);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
-}
-
-/* ASIWAJU EMERALD BUTTON */
-.btn-primary {
-  background: #10b981;
-  color: #000;
-  font-weight: 800;
-  padding: 12px 28px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* TOUCH OPTIMIZED INTERACTION CLASS */
+.mobile-touch-target {
+  touch-action: manipulation;
+  pointer-events: auto !important;
   cursor: pointer;
+  user-select: none;
 }
 
-.btn-primary:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+/* TWINKLING MINISTARS KEYFRAMES */
+@keyframes twinkle-yellow {
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0)); }
+  50% { transform: scale(1.1) rotate(180deg); opacity: 1; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)); }
+}
+@keyframes twinkle-white {
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0)); }
+  50% { transform: scale(1.2) rotate(90deg); opacity: 1; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)); }
+}
+@keyframes twinkle-blue {
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0)); }
+  50% { transform: scale(1.0) rotate(-120deg); opacity: 0.9; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)); }
+}
+@keyframes twinkle-purple {
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(168, 85, 247, 0)); }
+  50% { transform: scale(1.1) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.8)); }
+}
+@keyframes twinkle-green {
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0)); }
+  50% { transform: scale(1.0) rotate(-45deg); opacity: 0.9; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.8)); }
+}
+
+.star-yellow { animation: twinkle-yellow 4s infinite ease-in-out; }
+.star-white { animation: twinkle-white 3.5s infinite ease-in-out; }
+.star-blue { animation: twinkle-blue 5s infinite ease-in-out; }
+.star-purple { animation: twinkle-purple 4.5s infinite ease-in-out; }
+.star-green { animation: twinkle-green 6s infinite ease-in-out; }
+
+/* GEMINI FLOWING GRADIENT BORDER SYSTEM */
+@keyframes laser-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.gemini-border-sweeper {
+  animation: laser-sweep 8s linear infinite;
+  background: conic-gradient(
+    from 0deg,
+    transparent 20%,
+    rgba(16, 185, 129, 0.6) 35%,
+    rgba(59, 130, 246, 0.6) 50%,
+    transparent 65%,
+    rgba(168, 85, 247, 0.6) 80%,
+    transparent 100%
+  );
+}
+
+.gemini-border-sweeper-chrome {
+  animation: laser-sweep 6s linear infinite;
+  background: conic-gradient(
+    from 0deg,
+    transparent 10%,
+    rgba(168, 85, 247, 0.8) 30%,
+    rgba(236, 72, 153, 0.8) 50%,
+    transparent 70%,
+    rgba(99, 102, 241, 0.8) 90%,
+    transparent 100%
+  );
+}
+
+.gemini-border-sweeper-overclock {
+  animation: laser-sweep 4s linear infinite;
+  background: conic-gradient(
+    from 0deg,
+    transparent 20%,
+    rgba(239, 68, 68, 0.8) 40%,
+    rgba(127, 29, 29, 0.9) 60%,
+    transparent 80%,
+    rgba(239, 68, 68, 0.8) 95%,
+    transparent 100%
+  );
 }
 
 /* TERMINAL TEXT */
@@ -71,9 +123,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.4);
 }
