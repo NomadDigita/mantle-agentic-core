@@ -339,13 +339,14 @@ export default function Home() {
     { id: "init-3", agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
   ]);
 
-  // --- NATIVE MNT GAS MONITORING (SAFE BIGINT MATH TO PREVENT DEPRECATED FORMATTED CRASHES) ---
+  // --- NATIVE MNT GAS MONITORING (SAFE BIGINT MATH WITH COMPLETE UNDEFINED COERCION) ---
   const { data: balanceData, refetch: refetchBalance } = useBalance({
     address: address as `0x${string}`,
-    chainId: 5003
+    chainId: 5003,
+    query: { enabled: !!address } // Gate hook to prevent undefined query key crashes
   });
   
-  const mntGasBalance = balanceData 
+  const mntGasBalance = (balanceData && typeof balanceData.value !== "undefined" && typeof balanceData.decimals !== "undefined")
     ? Number(balanceData.value) / (10 ** balanceData.decimals) 
     : 5.0; 
 
@@ -489,8 +490,9 @@ export default function Home() {
   useEffect(() => {
     if (isConnected && address) {
       setIsRestored(false); 
-      const cachedMessages = localStorage.getItem(`mac_messages_${address.toLowerCase()}`);
-      const cachedPositions = localStorage.getItem(`mac_positions_${address.toLowerCase()}`);
+      const safeAddress = address.toLowerCase(); // Safe local reference to avoid properties of undefined crashes
+      const cachedMessages = localStorage.getItem(`mac_messages_${safeAddress}`);
+      const cachedPositions = localStorage.getItem(`mac_positions_${safeAddress}`);
       
       // Safe Messages Parser
       if (cachedMessages) {
@@ -531,13 +533,15 @@ export default function Home() {
   // --- WRITE MONITORS CACHED ---
   useEffect(() => {
     if (isConnected && address && isRestored && messages.length > 1) {
-      localStorage.setItem(`mac_messages_${address.toLowerCase()}`, JSON.stringify(messages));
+      const safeAddress = address.toLowerCase();
+      localStorage.setItem(`mac_messages_${safeAddress}`, JSON.stringify(messages));
     }
   }, [messages, isConnected, address, isRestored]);
 
   useEffect(() => {
     if (isConnected && address && isRestored) {
-      localStorage.setItem(`mac_positions_${address.toLowerCase()}`, JSON.stringify(activePositions));
+      const safeAddress = address.toLowerCase();
+      localStorage.setItem(`mac_positions_${safeAddress}`, JSON.stringify(activePositions));
     }
   }, [activePositions, isConnected, address, isRestored]);
 
@@ -552,6 +556,7 @@ export default function Home() {
     const scanOnChainAgent = async () => {
       setIsCheckingAgent(true);
       try {
+        const safeAddress = address.toLowerCase();
         const client = createPublicClient({
           chain: {
             id: 5003,
@@ -574,11 +579,11 @@ export default function Home() {
             }
           ],
           functionName: "balanceOf",
-          args: [address as `0x${string}`]
+          args: [safeAddress as `0x${string}`]
         }) as bigint;
 
         if (balance > BigInt(0)) {
-          const cachedProfile = localStorage.getItem(`mac_agent_${address.toLowerCase()}`);
+          const cachedProfile = localStorage.getItem(`mac_agent_${safeAddress}`);
           if (cachedProfile) {
             setAgentProfile(JSON.parse(cachedProfile));
             setIsCheckingAgent(false);
@@ -589,7 +594,7 @@ export default function Home() {
             const logs = await client.getLogs({
               address: "0x1E5B64264089aacC547A1506402B94f909215942",
               event: parseAbiItem("event AgentAwakened(address indexed creator, uint256 indexed agentId, string riskStrategy)"),
-              args: { creator: address as `0x${string}` },
+              args: { creator: safeAddress as `0x${string}` },
               fromBlock: "earliest",
               toBlock: "latest"
             });
@@ -614,7 +619,7 @@ export default function Home() {
                 };
 
                 setAgentProfile(fetchedProfile);
-                localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(fetchedProfile));
+                localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
                 return;
               }
             }
@@ -638,7 +643,7 @@ export default function Home() {
                   args: [BigInt(i)]
                 }) as `0x${string}`;
 
-                if (owner.toLowerCase() === address.toLowerCase()) {
+                if (owner.toLowerCase() === safeAddress) {
                   const rawProfile = await (client as any).readContract({
                     address: "0x1E5B64264089aacC547A1506402B94f909215942",
                     abi: ERC8004_IDENTITY_ABI, 
@@ -654,7 +659,7 @@ export default function Home() {
                   };
 
                   setAgentProfile(fetchedProfile);
-                  localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(fetchedProfile));
+                  localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
                   break;
                 }
               } catch (ownerErr) {
