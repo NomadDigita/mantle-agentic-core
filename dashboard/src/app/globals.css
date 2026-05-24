@@ -17,6 +17,20 @@ body {
   touch-action: manipulation;
 }
 
+/* HIGH LEGIBILITY CONTRAST ENHANCEMENTS */
+.text-sharp-primary {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.text-sharp-secondary {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.text-sharp-muted {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
 /* THE LIQUID GLASS UI */
 .liquid-glass {
   background: rgba(10, 15, 30, 0.25);
@@ -37,23 +51,23 @@ body {
 
 /* TWINKLING MINISTARS KEYFRAMES */
 @keyframes twinkle-yellow {
-  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0)); }
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0)); }
   50% { transform: scale(1.1) rotate(180deg); opacity: 1; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)); }
 }
 @keyframes twinkle-white {
-  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0)); }
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.25; filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0)); }
   50% { transform: scale(1.2) rotate(90deg); opacity: 1; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)); }
 }
 @keyframes twinkle-blue {
-  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0)); }
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0)); }
   50% { transform: scale(1.0) rotate(-120deg); opacity: 0.9; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)); }
 }
 @keyframes twinkle-purple {
-  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(168, 85, 247, 0)); }
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(168, 85, 247, 0)); }
   50% { transform: scale(1.1) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.8)); }
 }
 @keyframes twinkle-green {
-  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.1; filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0)); }
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0)); }
   50% { transform: scale(1.0) rotate(-45deg); opacity: 0.9; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.8)); }
 }
 
@@ -123,7 +137,7 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {

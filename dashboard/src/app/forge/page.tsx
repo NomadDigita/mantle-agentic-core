@@ -1,3 +1,7 @@
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,11 +11,13 @@ import { useTheme } from "../ThemeContext";
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useSwitchChain, useDeployContract, useWaitForTransactionReceipt } from 'wagmi';
 
-function FloatingGlassCard({ children, className, delay = 0 }: { children: React.ReactNode, className: string, delay?: number }) {
+function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean }) {
+  const { systemState } = useTheme();
+  
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-300, 300], [6, -6]);
-  const rotateY = useTransform(x, [-300, 300], [-6, 6]);
+  const rotateX = useTransform(y, [-300, 300], [4, -4]); // Keep tilt moderate on smaller viewports
+  const rotateY = useTransform(x, [-300, 300], [-4, 4]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -24,12 +30,22 @@ function FloatingGlassCard({ children, className, delay = 0 }: { children: React
       onMouseMove={handleMouse}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay }}
-      className={`relative group ${className}`}
+      animate={{ y: [0, -6, 0] }}
+      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
+      className={`relative rounded-3xl p-[1px] overflow-hidden transition-all duration-700 ${className}`}
     >
-      <div className="absolute inset-0 rounded-3xl border-t border-l border-white/20 pointer-events-none mix-blend-overlay z-20" />
-      <div style={{ transform: "translateZ(30px)" }} className="h-full w-full flex flex-col relative z-10">
+      {isAuraActive && (
+        <div className="absolute top-1/2 left-1/2 w-[220%] h-[220%] -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 transition-all duration-700 overflow-hidden">
+          <div className={`w-full h-full rounded-full opacity-35 blur-sm scale-95 ${
+            systemState === 'OVERCLOCK' ? 'gemini-border-sweeper-overclock' : 'gemini-border-sweeper'
+          }`} />
+        </div>
+      )}
+      
+      <div 
+        style={{ transform: "translateZ(25px)" }} 
+        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.35)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
+      >
         {children}
       </div>
     </motion.div>
@@ -102,7 +118,6 @@ export default function NeuralForge() {
     if (!deployableABI || !deployableBytecode) return;
     setSystemState('MINTING');
     try {
-      // UPGRADE: Fixed native BigInt literal with standard constructor
       deployContract({
         abi: deployableABI,
         bytecode: deployableBytecode as `0x${string}`,
@@ -124,7 +139,7 @@ export default function NeuralForge() {
   }, [isDeployed, isOverclocked, setSystemState]);
 
   return (
-    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-0 overflow-x-hidden flex flex-col items-center bg-transparent font-sans">
+    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center bg-transparent font-sans">
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-35">
@@ -156,7 +171,7 @@ export default function NeuralForge() {
           </div>
           
           <Link href="/">
-            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/50 transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/50 transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mobile-touch-target">
               &lt; Return to Main
             </button>
           </Link>
@@ -184,7 +199,7 @@ export default function NeuralForge() {
               <button 
                 onClick={handleForge}
                 disabled={isForging || !blueprint.trim()}
-                className={`w-full h-full rounded-3xl font-black text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.3)] ${
+                className={`w-full h-full rounded-3xl font-black text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.3)] mobile-touch-target ${
                   isForging || !blueprint.trim()
                     ? 'bg-white/10 text-white/30 cursor-not-allowed'
                     : 'bg-amber-500 text-black hover:bg-amber-400 shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.5)] active:scale-95'
@@ -241,7 +256,7 @@ export default function NeuralForge() {
                           <a 
                             href={`https://explorer.sepolia.mantle.xyz/address/${receipt.contractAddress}`}
                             target="_blank" rel="noopener noreferrer"
-                            className="text-[10px] text-purple-400 underline hover:text-purple-300 block mt-1"
+                            className="text-[10px] text-purple-400 underline hover:text-purple-300 block mt-1 mobile-touch-target"
                           >
                             View on Mantle Sepolia Explorer &gt;
                           </a>
@@ -258,7 +273,7 @@ export default function NeuralForge() {
                         ) : chainId !== 5003 ? (
                           <button
                             onClick={() => switchChain({ chainId: 5003 })}
-                            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all"
+                            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all mobile-touch-target"
                           >
                             SWITCH TO MANTLE SEPOLIA
                           </button>
@@ -266,7 +281,7 @@ export default function NeuralForge() {
                           <button
                             onClick={handleDeployContract}
                             disabled={isDeploying || isTxConfirming}
-                            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest text-white transition-all duration-300 ${
+                            className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest text-white transition-all duration-300 mobile-touch-target ${
                               isDeploying || isTxConfirming
                                 ? 'bg-purple-600/50 text-white/50 cursor-not-allowed'
                                 : 'bg-purple-600 hover:bg-purple-500 shadow-[0_0_20px_rgba(147,51,234,0.4)]'
@@ -293,7 +308,7 @@ export default function NeuralForge() {
               
               <button 
                 onClick={() => open()}
-                className="w-full py-4 rounded-2xl bg-white text-black hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all font-black text-xs uppercase tracking-widest"
+                className="w-full py-4 rounded-2xl bg-white text-black hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all font-black text-xs uppercase tracking-widest mobile-touch-target"
               >
                 {isConnected ? "Wallet Synchronized" : "Connect Wallet"}
               </button>

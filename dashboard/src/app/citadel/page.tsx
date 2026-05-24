@@ -1,3 +1,7 @@
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,11 +11,13 @@ import { useTheme } from "../ThemeContext";
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 
-function FloatingGlassCard({ children, className, delay = 0 }: { children: React.ReactNode, className: string, delay?: number }) {
+function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean }) {
+  const { systemState } = useTheme();
+  
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-300, 300], [6, -6]);
-  const rotateY = useTransform(x, [-300, 300], [-6, 6]);
+  const rotateX = useTransform(y, [-300, 300], [4, -4]);
+  const rotateY = useTransform(x, [-300, 300], [-4, 4]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -24,12 +30,22 @@ function FloatingGlassCard({ children, className, delay = 0 }: { children: React
       onMouseMove={handleMouse}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay }}
-      className={`relative group ${className}`}
+      animate={{ y: [0, -6, 0] }}
+      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
+      className={`relative rounded-3xl p-[1px] overflow-hidden transition-all duration-700 ${className}`}
     >
-      <div className="absolute inset-0 rounded-3xl border-t border-l border-white/20 pointer-events-none mix-blend-overlay z-20" />
-      <div style={{ transform: "translateZ(30px)" }} className="h-full w-full flex flex-col relative z-10">
+      {isAuraActive && (
+        <div className="absolute top-1/2 left-1/2 w-[220%] h-[220%] -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 transition-all duration-700 overflow-hidden">
+          <div className={`w-full h-full rounded-full opacity-35 blur-sm scale-95 ${
+            systemState === 'OVERCLOCK' ? 'gemini-border-sweeper-overclock' : 'gemini-border-sweeper'
+          }`} />
+        </div>
+      )}
+      
+      <div 
+        style={{ transform: "translateZ(25px)" }} 
+        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.35)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
+      >
         {children}
       </div>
     </motion.div>
@@ -57,6 +73,24 @@ export default function CitadelVault() {
     if (!isOverclocked) setSystemState('IDLE'); 
   }, [setSystemState, isOverclocked]);
 
+  useEffect(() => {
+    if (isConfirmed && address) {
+      const mintedProfile = {
+        riskStrategy: riskLevel,
+        maxDrawdown: Number(maxDrawdown),
+        birthTimestamp: Date.now(),
+        isAutonomous: true
+      };
+      
+      localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(mintedProfile));
+      
+      setMintSuccess(true);
+      setTimeout(() => {
+        if (!isOverclocked) setSystemState('IDLE');
+      }, 5000); 
+    }
+  }, [isConfirmed, address, riskLevel, maxDrawdown, setSystemState, isOverclocked]);
+
   const handleMintAgent = async () => {
     setSystemState('MINTING');
     try {
@@ -78,32 +112,14 @@ export default function CitadelVault() {
     }
   };
 
-  useEffect(() => {
-    if (isConfirmed && address) {
-      const mintedProfile = {
-        riskStrategy: riskLevel,
-        maxDrawdown: Number(maxDrawdown),
-        birthTimestamp: Date.now(),
-        isAutonomous: true
-      };
-      
-      localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(mintedProfile));
-      
-      setMintSuccess(true);
-      setTimeout(() => {
-        if (!isOverclocked) setSystemState('IDLE');
-      }, 5000); 
-    }
-  }, [isConfirmed, address, riskLevel, maxDrawdown, setSystemState, isOverclocked]);
-
   return (
-    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-0 overflow-x-hidden flex flex-col items-center justify-center bg-transparent">
+    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center justify-center bg-transparent">
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-35">
         <div className="absolute top-[20%] left-[15%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping [animation-duration:3s]" />
         <div className="absolute top-[60%] left-[80%] w-2 h-2 rounded-full bg-purple-500 animate-ping [animation-duration:4s]" />
-        <div className="absolute top-[40%] left-[45%] w-1 h-1 rounded-full bg-blue-400 animate-ping [animation-duration:5s]" />
+        <div className="absolute top-[40%] left-[45%] w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping [animation-duration:5s]" />
         <div className="absolute top-[80%] left-[25%] w-2 h-2 rounded-full bg-emerald-400 animate-ping [animation-duration:3.5s]" />
         
         <svg className="absolute inset-0 w-full h-full stroke-white/5 stroke-[0.5]" xmlns="http://www.w3.org/2000/svg">
@@ -129,7 +145,7 @@ export default function CitadelVault() {
           </div>
           
           <Link href="/">
-            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/50 transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/50 transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mobile-touch-target">
               &lt; Return to Terminal
             </button>
           </Link>
@@ -159,7 +175,7 @@ export default function CitadelVault() {
                             onChange={(e) => setRiskLevel(e.target.value)}
                             onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                             onBlur={() => !isOverclocked && setSystemState('IDLE')}
-                            className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all"
+                            className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all mobile-touch-target"
                           >
                             <option value="Conservative">Conservative (RWA Aggregator)</option>
                             <option value="Balanced">Balanced (DeFi LP Sweeper)</option>
@@ -205,7 +221,7 @@ export default function CitadelVault() {
                           ) : chainId !== 5003 ? (
                             <button
                               onClick={() => switchChain({ chainId: 5003 })}
-                              className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all"
+                              className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all mobile-touch-target"
                             >
                               SWITCH TO MANTLE SEPOLIA
                             </button>
@@ -213,7 +229,7 @@ export default function CitadelVault() {
                             <button
                               onClick={handleMintAgent}
                               disabled={isPending || isConfirming}
-                              className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest text-white transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.3)] hover:-translate-y-1 active:scale-95 ${
+                              className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest text-white transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.3)] hover:-translate-y-1 active:scale-95 mobile-touch-target ${
                                 isPending || isConfirming 
                                   ? 'bg-purple-600/50 text-white/50 cursor-not-allowed transform-none' 
                                   : 'bg-purple-600 hover:bg-purple-500 shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]'
@@ -289,7 +305,7 @@ export default function CitadelVault() {
               
               <button 
                 onClick={() => open()}
-                className="w-full py-4 rounded-2xl bg-white text-black hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all font-black text-xs uppercase tracking-widest"
+                className="w-full py-4 rounded-2xl bg-white text-black hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all font-black text-xs uppercase tracking-widest mobile-touch-target"
               >
                 {isConnected ? "Wallet Synchronized" : "Connect Wallet"}
               </button>
