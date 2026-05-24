@@ -16,7 +16,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-300, 300], [4, -4]); // Redux tilt angles for mobile optimization
+  const rotateX = useTransform(y, [-300, 300], [4, -4]);
   const rotateY = useTransform(x, [-300, 300], [-4, 4]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
@@ -44,7 +44,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       
       <div 
         style={{ transform: "translateZ(25px)" }} 
-        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.45)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
+        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.35)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
       >
         {children}
       </div>
@@ -53,6 +53,8 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
 }
 
 export default function NeuralForge() {
+  const [mounted, setMounted] = useState(false);
+  
   const { safeColors, setSystemState, isOverclocked } = useTheme();
   const { border, glow } = safeColors;
   
@@ -74,9 +76,14 @@ export default function NeuralForge() {
   const { deployContract, data: deployHash, isPending: isDeploying } = useDeployContract();
   const { isLoading: isTxConfirming, isSuccess: isDeployed, data: receipt } = useWaitForTransactionReceipt({ hash: deployHash });
 
+  // Prevent hydration mismatch by waiting for mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => { 
-    if (!isOverclocked) setSystemState('IDLE'); 
-  }, [setSystemState, isOverclocked]);
+    if (mounted && !isOverclocked) setSystemState('IDLE'); 
+  }, [setSystemState, isOverclocked, mounted]);
 
   const handleForge = async () => {
     if (!blueprint.trim()) return;
@@ -131,12 +138,14 @@ export default function NeuralForge() {
   };
 
   useEffect(() => {
-    if (isDeployed) {
+    if (isDeployed && mounted) {
       setTimeout(() => {
         if (!isOverclocked) setSystemState('IDLE');
       }, 4000);
     }
-  }, [isDeployed, isOverclocked, setSystemState]);
+  }, [isDeployed, isOverclocked, setSystemState, mounted]);
+
+  if (!mounted) return null;
 
   return (
     <main className={`min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center bg-transparent font-sans transition-all duration-1000 ${

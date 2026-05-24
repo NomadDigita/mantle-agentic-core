@@ -16,7 +16,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-300, 300], [4, -4]); // Redux tilt angles for mobile optimization
+  const rotateX = useTransform(y, [-300, 300], [4, -4]);
   const rotateY = useTransform(x, [-300, 300], [-4, 4]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
@@ -44,7 +44,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       
       <div 
         style={{ transform: "translateZ(25px)" }} 
-        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.45)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
+        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.35)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
       >
         {children}
       </div>
@@ -53,6 +53,8 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
 }
 
 export default function CitadelVault() {
+  const [mounted, setMounted] = useState(false);
+  
   const { safeColors, setSystemState, isOverclocked } = useTheme();
   const { primary, border, glow } = safeColors;
   
@@ -69,12 +71,17 @@ export default function CitadelVault() {
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
+  // Prevent hydration mismatch by waiting for mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => { 
-    if (!isOverclocked) setSystemState('IDLE'); 
-  }, [setSystemState, isOverclocked]);
+    if (mounted && !isOverclocked) setSystemState('IDLE'); 
+  }, [setSystemState, isOverclocked, mounted]);
 
   useEffect(() => {
-    if (isConfirmed && address) {
+    if (isConfirmed && address && mounted) {
       const mintedProfile = {
         riskStrategy: riskLevel,
         maxDrawdown: Number(maxDrawdown),
@@ -89,7 +96,7 @@ export default function CitadelVault() {
         if (!isOverclocked) setSystemState('IDLE');
       }, 5000); 
     }
-  }, [isConfirmed, address, riskLevel, maxDrawdown, setSystemState, isOverclocked]);
+  }, [isConfirmed, address, riskLevel, maxDrawdown, setSystemState, isOverclocked, mounted]);
 
   const handleMintAgent = async () => {
     setSystemState('MINTING');
@@ -111,6 +118,8 @@ export default function CitadelVault() {
       console.error("Transaction initiation failed", err);
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <main className={`min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center justify-center bg-transparent transition-all duration-1000 ${
