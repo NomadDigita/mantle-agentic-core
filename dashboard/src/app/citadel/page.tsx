@@ -16,7 +16,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-300, 300], [4, -4]);
+  const rotateX = useTransform(y, [-300, 300], [4, -4]); // Redux tilt angles for mobile optimization
   const rotateY = useTransform(x, [-300, 300], [-4, 4]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
@@ -44,7 +44,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       
       <div 
         style={{ transform: "translateZ(25px)" }} 
-        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.35)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
+        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.45)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
       >
         {children}
       </div>
@@ -113,7 +113,11 @@ export default function CitadelVault() {
   };
 
   return (
-    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center justify-center bg-transparent">
+    <main className={`min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center justify-center bg-transparent transition-all duration-1000 ${
+      isOverclocked 
+        ? 'shadow-[inset_0_0_120px_rgba(239,68,68,0.18)] bg-red-950/5' 
+        : ''
+    }`}>
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-35">
@@ -129,6 +133,11 @@ export default function CitadelVault() {
         </svg>
       </div>
 
+      {/* --- UPGRADE: IMMERSIVE FULL SCREEN OVERCLOCK Glow --- */}
+      {isOverclocked && (
+        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0.85)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
+      )}
+
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none transition-colors duration-1000">
         <div className={`absolute top-[-20%] left-[-10%] w-[60%] h-[60%] ${glow} blur-[150px] rounded-full transition-all duration-1000 opacity-60`} />
       </div>
@@ -139,13 +148,13 @@ export default function CitadelVault() {
             <h1 className="text-4xl font-black tracking-tighter text-white uppercase mb-1 drop-shadow-md">
               BUIDL <span className={primary}>CITADEL</span>
             </h1>
-            <p className="text-white/40 uppercase tracking-[0.2em] text-[10px] font-mono">
+            <p className="text-white/60 uppercase tracking-[0.2em] text-[10px] font-mono">
               // ERC-8004 Identity Minting & Control Terminal //
             </p>
           </div>
           
-          <Link href="/">
-            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/50 transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mobile-touch-target">
+          <Link href="/" className="pointer-events-auto z-50">
+            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/80 transition-all duration-300 border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mobile-touch-target">
               &lt; Return to Terminal
             </button>
           </Link>
@@ -169,13 +178,13 @@ export default function CitadelVault() {
                         </h3>
                         
                         <div className="space-y-2">
-                          <label className="text-xs font-mono text-white/60 block">RISK MANAGEMENT STRATEGY</label>
+                          <label className="text-[10px] font-bold font-mono text-white/70 block uppercase">RISK MANAGEMENT STRATEGY</label>
                           <select 
                             value={riskLevel} 
                             onChange={(e) => setRiskLevel(e.target.value)}
                             onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                             onBlur={() => !isOverclocked && setSystemState('IDLE')}
-                            className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all mobile-touch-target"
+                            className="w-full bg-black/60 border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all mobile-touch-target relative z-50 pointer-events-auto"
                           >
                             <option value="Conservative">Conservative (RWA Aggregator)</option>
                             <option value="Balanced">Balanced (DeFi LP Sweeper)</option>
@@ -184,14 +193,14 @@ export default function CitadelVault() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-xs font-mono text-white/60 block">MAX TRADING DRAWDOWN (%)</label>
+                          <label className="text-[10px] font-bold font-mono text-white/70 block uppercase">MAX TRADING DRAWDOWN (%)</label>
                           <input 
                             type="number" 
                             value={maxDrawdown}
                             onChange={(e) => setMaxDrawdown(e.target.value)}
                             onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                             onBlur={() => !isOverclocked && setSystemState('IDLE')}
-                            className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all"
+                            className="w-full bg-black/60 border border-white/15 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-all pointer-events-auto"
                             min="1" max="100"
                           />
                         </div>
@@ -202,14 +211,14 @@ export default function CitadelVault() {
                           <h3 className="text-white font-bold uppercase tracking-widest text-sm border-b border-white/10 pb-2 mb-4">
                             On-Chain Identity Status
                           </h3>
-                          <p className="text-xs font-mono text-white/50 leading-relaxed mb-4">
+                          <p className="text-xs font-mono text-white/80 leading-relaxed mb-4 font-medium">
                             Deploying your agent configurations registry to Mantle updates the ERC-8004 standard registry via your active wallet.
                           </p>
                           
-                          <div className="font-mono text-xs space-y-1 bg-black/40 p-3 rounded-xl border border-white/5">
-                            <div className="text-white/40">TARGET NETWORK: <span className="text-white">Mantle Sepolia</span></div>
-                            <div className="text-white/40">REGISTRY: <span className="text-purple-400">0x1E5B...5942</span></div>
-                            <div className="text-white/40 mt-2">AUTH STATUS: <span className={isConnected ? "text-emerald-400 drop-shadow-[0_0_5px_currentColor]" : "text-red-400"}>{isConnected ? "CONNECTED" : "DISCONNECTED"}</span></div>
+                          <div className="font-mono text-xs space-y-1.5 bg-black/40 p-4 rounded-xl border border-white/5">
+                            <div className="text-white/60 font-bold">TARGET NETWORK: <span className="text-white font-black">Mantle Sepolia</span></div>
+                            <div className="text-white/60 font-bold">REGISTRY: <span className="text-purple-400 font-black">0x1E5B...5942</span></div>
+                            <div className="text-white/60 mt-2 font-bold">AUTH STATUS: <span className={isConnected ? "text-emerald-400 drop-shadow-[0_0_5px_currentColor] font-black" : "text-red-400 font-black"}>{isConnected ? "CONNECTED" : "DISCONNECTED"}</span></div>
                           </div>
                         </div>
 
@@ -270,18 +279,18 @@ export default function CitadelVault() {
                             Agent ID Created
                           </h2>
                           
-                          <p className="text-white/50 font-mono text-xs mb-8 break-all px-4 bg-black/50 py-2 rounded-lg border border-white/5">
+                          <p className="text-white/80 font-mono text-xs mb-8 break-all px-4 bg-black/50 py-2.5 rounded-lg border border-white/5 font-bold">
                             Tx: {hash}
                           </p>
 
                           <div className="grid grid-cols-2 gap-4">
                             <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                              <span className="block text-[9px] uppercase tracking-widest text-white/40 mb-1">Encoded Strategy</span>
-                              <span className="text-sm font-bold text-white">{riskLevel}</span>
+                              <span className="block text-[9px] uppercase tracking-widest text-white/50 mb-1 font-bold">Encoded Strategy</span>
+                              <span className="text-sm font-black text-white">{riskLevel}</span>
                             </div>
                             <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                              <span className="block text-[9px] uppercase tracking-widest text-white/40 mb-1">Hard Stop Parameter</span>
-                              <span className="text-sm font-bold text-red-400">{maxDrawdown}% Drawdown</span>
+                              <span className="block text-[9px] uppercase tracking-widest text-white/50 mb-1 font-bold">Hard Stop Parameter</span>
+                              <span className="text-sm font-black text-red-400">{maxDrawdown}% Drawdown</span>
                             </div>
                           </div>
                         </div>
@@ -299,7 +308,7 @@ export default function CitadelVault() {
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-6 border-b border-white/10 pb-4">
                 Bridge Wallet Link
               </h3>
-              <p className="text-xs text-white/50 font-mono leading-relaxed mb-6">
+              <p className="text-xs text-white/80 font-mono leading-relaxed mb-6 font-medium">
                 Establish secure cryptographical signatures to synchronize risk modules with the Mantle Sepolia Ledger.
               </p>
               

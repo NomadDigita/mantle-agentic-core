@@ -16,7 +16,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-300, 300], [4, -4]); // Keep tilt moderate on smaller viewports
+  const rotateX = useTransform(y, [-300, 300], [4, -4]); // Redux tilt angles for mobile optimization
   const rotateY = useTransform(x, [-300, 300], [-4, 4]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
@@ -44,7 +44,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       
       <div 
         style={{ transform: "translateZ(25px)" }} 
-        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.35)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
+        className="h-full w-full rounded-[23px] transition-all duration-700 p-4 sm:p-6 flex flex-col relative z-10 bg-[rgba(5,7,18,0.45)] backdrop-blur-[50px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-l border-white/15 border-b border-r border-white/5"
       >
         {children}
       </div>
@@ -139,7 +139,11 @@ export default function NeuralForge() {
   }, [isDeployed, isOverclocked, setSystemState]);
 
   return (
-    <main className="min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center bg-transparent font-sans">
+    <main className={`min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center bg-transparent font-sans transition-all duration-1000 ${
+      isOverclocked 
+        ? 'shadow-[inset_0_0_120px_rgba(239,68,68,0.18)] bg-red-950/5' 
+        : ''
+    }`}>
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-35">
@@ -155,6 +159,11 @@ export default function NeuralForge() {
         </svg>
       </div>
 
+      {/* --- UPGRADE: IMMERSIVE FULL SCREEN OVERCLOCK Glow --- */}
+      {isOverclocked && (
+        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0.85)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
+      )}
+
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none transition-colors duration-1000">
         <div className={`absolute top-[-20%] left-[-10%] w-[60%] h-[60%] ${glow} blur-[150px] rounded-full transition-all duration-1000 opacity-60`} />
       </div>
@@ -165,13 +174,13 @@ export default function NeuralForge() {
             <h1 className="text-4xl font-black tracking-tighter text-white uppercase mb-1 drop-shadow-md">
               NEURAL <span className="text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]">FORGE</span>
             </h1>
-            <p className="text-white/40 uppercase tracking-[0.2em] text-[10px] font-mono">
+            <p className="text-white/60 uppercase tracking-[0.2em] text-[10px] font-mono">
               Autonomous Smart Contract Auditor & Compiler
             </p>
           </div>
           
-          <Link href="/">
-            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/50 transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mobile-touch-target">
+          <Link href="/" className="pointer-events-auto z-50">
+            <button className="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest text-white/80 transition-all duration-300 border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mobile-touch-target">
               &lt; Return to Main
             </button>
           </Link>
@@ -191,7 +200,7 @@ export default function NeuralForge() {
                 onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                 onBlur={() => !isOverclocked && setSystemState('IDLE')}
                 placeholder="Paste raw Solidity code to audit vulnerabilities, OR type a prompt to generate a new smart contract..."
-                className="w-full bg-transparent text-white font-mono text-sm p-6 focus:outline-none resize-none flex-1 min-h-[300px]"
+                className="w-full bg-transparent text-white font-mono text-sm p-6 focus:outline-none resize-none flex-1 min-h-[300px] font-medium"
               />
             </FloatingGlassCard>
             
@@ -213,12 +222,12 @@ export default function NeuralForge() {
           <div className="flex flex-col gap-6">
             <FloatingGlassCard delay={0.4} className={`bg-white/5 backdrop-blur-3xl border ${border} rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col h-[350px] transition-colors duration-500`}>
               <div className="bg-black/20 px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-3 border-b border-white/10 pb-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3 border-b border-white/10 pb-2">
                   Forge Output Log
                 </span>
                 <div className="w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse" />
               </div>
-              <div className="p-6 font-mono text-xs text-amber-500/90 whitespace-pre-wrap overflow-y-auto flex-1 leading-relaxed scrollbar-hide">
+              <div className="p-6 font-mono text-xs text-amber-400 font-semibold whitespace-pre-wrap overflow-y-auto flex-1 leading-relaxed scrollbar-hide">
                 {output}
               </div>
             </FloatingGlassCard>
@@ -231,28 +240,29 @@ export default function NeuralForge() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20, scale: 0.95 }}
                   transition={{ duration: 0.4 }}
+                  className="w-full"
                 >
                   <FloatingGlassCard delay={0.5} className="bg-black/40 border border-purple-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                       <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> Mantle Deployer Active
                       </span>
-                      <span className="text-[9px] font-mono text-white/40">Target: Mantle Sepolia (5003)</span>
+                      <span className="text-[9px] font-mono text-white/50">Target: Mantle Sepolia (5003)</span>
                     </div>
 
-                    <div className="space-y-2 mb-6">
+                    <div className="space-y-2 mb-6 text-sharp-secondary">
                       <div className="flex justify-between text-xs font-mono">
-                        <span className="text-white/40">CONTRACT NAME:</span>
+                        <span className="text-white/60">CONTRACT NAME:</span>
                         <span className="text-white font-bold">{contractName}</span>
                       </div>
                       <div className="flex justify-between text-xs font-mono">
-                        <span className="text-white/40">COMPILER STATUS:</span>
-                        <span className="text-emerald-400">SecOps Mapped & Compiled</span>
+                        <span className="text-white/60">COMPILER STATUS:</span>
+                        <span className="text-emerald-400 font-bold">SecOps Mapped & Compiled</span>
                       </div>
                       {isDeployed && receipt && (
                         <div className="flex flex-col text-xs font-mono bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg gap-1">
                           <span className="text-emerald-400 font-bold block">🚀 DEPLOYMENT SUCCESSFUL</span>
-                          <span className="text-[10px] text-white/50 block break-all">ADDRESS: {receipt.contractAddress}</span>
+                          <span className="text-[10px] text-white/60 block break-all">ADDRESS: {receipt.contractAddress}</span>
                           <a 
                             href={`https://explorer.sepolia.mantle.xyz/address/${receipt.contractAddress}`}
                             target="_blank" rel="noopener noreferrer"
@@ -267,7 +277,7 @@ export default function NeuralForge() {
                     {!isDeployed && (
                       <div>
                         {!isConnected ? (
-                          <div className="text-center p-3 bg-white/5 border border-white/5 rounded-xl text-[10px] text-white/40 font-mono">
+                          <div className="text-center p-3 bg-white/5 border border-white/5 rounded-xl text-[10px] text-white/50 font-mono">
                             Please connect your wallet to enable Mantle deployment.
                           </div>
                         ) : chainId !== 5003 ? (
@@ -302,7 +312,7 @@ export default function NeuralForge() {
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-6 border-b border-white/10 pb-4">
                 Bridge Wallet Link
               </h3>
-              <p className="text-xs text-white/50 font-mono leading-relaxed mb-6">
+              <p className="text-xs text-white/80 font-mono leading-relaxed mb-6 font-medium">
                 Connect your active signature wallet to authorize deployment payloads directly inside the Neural Forge.
               </p>
               
