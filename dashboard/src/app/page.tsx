@@ -77,6 +77,7 @@ type Message = {
 };
 
 type RelayPingLog = {
+  id: string;
   agent: "Yield Scribe" | "Sentinel Hub" | "Alpha Trace";
   color: string;
   text: string;
@@ -279,8 +280,14 @@ export default function Home() {
 
   // ON-CHAIN MAC TRADE ESCROW SYSTEM
   const [pendingTradePayload, setPendingTradePayload] = useState<{ msgId: string, payload: ActionPayload } | null>(null);
+  
   const { writeContract, data: txHash } = useWriteContract();
-  const { isLoading: isTradeConfirming, isSuccess: isTradeSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  
+  // --- UPGRADE: GATED TRANSACTION MONITORS ---
+  const { isLoading: isTradeConfirming, isSuccess: isTradeSuccess } = useWaitForTransactionReceipt({ 
+    hash: txHash,
+    query: { enabled: !!txHash }
+  });
 
   // STATE-LOCKED RENDER STABILITY ENGINE
   const [isRestored, setIsRestored] = useState(false);
@@ -288,13 +295,19 @@ export default function Home() {
   // AI YIELD WEAVER HUD MODULE STATE
   const [yieldWeaverMode, setYieldWeaverMode] = useState<"IDLE" | "WEAVING" | "mETH_PREMIUM">("IDLE");
   const { writeContract: weaveWrite, data: weaveHash } = useWriteContract();
-  const { isLoading: isWeavingTx, isSuccess: isWeaveConfirmed } = useWaitForTransactionReceipt({ hash: weaveHash });
+  const { isLoading: isWeavingTx, isSuccess: isWeaveConfirmed } = useWaitForTransactionReceipt({ 
+    hash: weaveHash,
+    query: { enabled: !!weaveHash }
+  });
 
   // SECOPS SENTINEL SHIELD STATES
   const [secOpsActive, setSecOpsActive] = useState(false);
   const [exploitAlert, setExploitAlert] = useState(false);
   const { writeContract: rescueWrite, data: rescueHash } = useWriteContract();
-  const { isLoading: isSecuringRescue, isSuccess: isRescueSuccess } = useWaitForTransactionReceipt({ hash: rescueHash });
+  const { isLoading: isSecuringRescue, isSuccess: isRescueSuccess } = useWaitForTransactionReceipt({ 
+    hash: rescueHash,
+    query: { enabled: !!rescueHash }
+  });
 
   // --- UPGRADE: 3-WAY MATRIX CHIP SELECTOR STATE ---
   const [designMode, setDesignMode] = useState<"AURA" | "SILENT" | "CHROME">("AURA");
@@ -321,9 +334,9 @@ export default function Home() {
 
   // ORGANIC MULTI-AGENT COLLABORATIVEseq Sequencer
   const [relayLogs, setRelayLogs] = useState<RelayPingLog[]>([
-    { agent: "Yield Scribe", color: "text-emerald-400", text: "Matrix initialised. Scanning Ondo APY metrics..." },
-    { agent: "Sentinel Hub", color: "text-purple-400", text: "Mempool scanner listening at block 543210..." },
-    { agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
+    { id: "init-1", agent: "Yield Scribe", color: "text-emerald-400", text: "Matrix initialised. Scanning Ondo APY metrics..." },
+    { id: "init-2", agent: "Sentinel Hub", color: "text-purple-400", text: "Mempool scanner listening at block 543210..." },
+    { id: "init-3", agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
   ]);
 
   // --- NATIVE MNT GAS MONITORING ---
@@ -337,7 +350,10 @@ export default function Home() {
 
   // Wagmi signature for the refuel MAC feepayment (5 MAC collateral)
   const { writeContract: refuelFeeWrite, data: refuelFeeHash } = useWriteContract();
-  const { isLoading: isRefuelFeePending, isSuccess: isRefuelFeeSuccess } = useWaitForTransactionReceipt({ hash: refuelFeeHash });
+  const { isLoading: isRefuelFeePending, isSuccess: isRefuelFeeSuccess } = useWaitForTransactionReceipt({ 
+    hash: refuelFeeHash,
+    query: { enabled: !!refuelFeeHash }
+  });
 
   useEffect(() => { 
     setMounted(true); 
@@ -453,9 +469,10 @@ export default function Home() {
     const generateRelayPing = () => {
       const selectedTemplate = relayTemplates[Math.floor(Math.random() * relayTemplates.length)];
       const text = selectedTemplate.text[Math.floor(Math.random() * selectedTemplate.text.length)];
+      const uniqueId = `${selectedTemplate.agent}-${Date.now()}-${Math.random()}`; // Fix duplicate key exception
       
       setRelayLogs(prev => {
-        const nextLogs = [{ agent: selectedTemplate.agent, color: selectedTemplate.color, text }, ...prev];
+        const nextLogs = [{ id: uniqueId, agent: selectedTemplate.agent, color: selectedTemplate.color, text }, ...prev];
         return nextLogs.slice(0, 8); 
       });
     };
@@ -1075,7 +1092,7 @@ export default function Home() {
               {/* GitHub Octocat */}
               <a 
                 href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer"
-                className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all flex items-center justify-center group mobile-touch-target"
+                className="p-3 rounded-xl bg-black/40 border border-white/30 hover:border-white/5 transition-all flex items-center justify-center group mobile-touch-target"
                 title="Examine Public Sources"
               >
                 <svg className="w-4 h-4 text-white/80 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
@@ -1487,7 +1504,7 @@ export default function Home() {
                  <AnimatePresence>
                    {relayLogs.map((log) => (
                      <motion.div 
-                       key={log.text}
+                       key={log.id} // Fix Framer Motion exiting key animation crash
                        initial={{ opacity: 0, x: -10 }} 
                        animate={{ opacity: 1, x: 0 }} 
                        exit={{ opacity: 0, scale: 0.95 }}
@@ -1574,7 +1591,7 @@ export default function Home() {
                        <span className="text-[9px] font-mono text-white/50">TREASURY ACTIVE</span>
                      </div>
 
-                     <div className="space-y-3 mb-6 font-mono text-xs">
+                     <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary">
                        <div className="text-red-400 font-bold uppercase">🚨 GAS EXHAUST DETECTED</div>
                        <div className="flex justify-between text-white/70">
                          <span>Your Wallet Balance:</span>
