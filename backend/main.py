@@ -77,6 +77,15 @@ def init_db():
             PRIMARY KEY(platform, platform_user_id)
         )
     """)
+    # Virtual bot-minted identities to bridge to web
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS virtual_identities (
+            wallet_address TEXT PRIMARY KEY,
+            risk_strategy TEXT,
+            max_drawdown INTEGER,
+            timestamp REAL
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -357,9 +366,6 @@ def fetch_live_market_data():
 
 # --- ON-CHAIN AGENT PROFILE RESOLVER (WEB3.PY MANTLE COLD-SCANNER) ---
 def fetch_onchain_agent_profile_raw(wallet_address: str) -> dict:
-    """
-    Directly queries the Mantle Sepolia network to read the user's active risk strategy parameters.
-    """
     try:
         rpc_url = os.getenv("MANTLE_RPC_URL")
         registry_address = "0x1E5B64264089aacC547A1506402B94f909215942"
@@ -369,7 +375,6 @@ def fetch_onchain_agent_profile_raw(wallet_address: str) -> dict:
         web3 = Web3(Web3.HTTPProvider(rpc_url))
         checksum_user = web3.to_checksum_address(wallet_address)
         
-        # Check balanceOf
         balance_abi = [{"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]
         contract = web3.eth.contract(address=registry_address, abi=balance_abi)
         balance = contract.functions.balanceOf(checksum_user).call()
@@ -381,7 +386,6 @@ def fetch_onchain_agent_profile_raw(wallet_address: str) -> dict:
             ]
             registry_contract = web3.eth.contract(address=registry_address, abi=profile_abi)
             
-            # Scan tokens 1 to 50 for ownership (Fallback sequential indexer)
             for token_id in range(1, 51):
                 try:
                     owner = registry_contract.functions.ownerOf(token_id).call()
@@ -402,7 +406,7 @@ def fetch_onchain_agent_profile_raw(wallet_address: str) -> dict:
         return {"status": "error", "error": str(e)}
 
 # ---------------------------------------------------------
-# BOT CORE TEXT DEFINITION
+# BOT HELPDESK CATALOG DEFINITIONS
 # ---------------------------------------------------------
 BOT_WELCOME_TEXT = (
     "🧬 **MANTLE AGENTIC CORE (MAC)** 🧬\n\n"
@@ -410,8 +414,22 @@ BOT_WELCOME_TEXT = (
     "⚡ **01. Live Terminal:** Real-time on-chain analysis and intent execution.\n"
     "🔥 **02. Neural Forge:** Solidity AST compiler & smart contract auditor.\n"
     "🔒 **03. Citadel Vault:** ERC-8004 decentralized risk strategy identity registry.\n\n"
-    "Type any command (e.g., 'What is mETH APY?' or 'Long BTC') to query the decision matrix.\n\n"
+    "Type `/help` to see the full operational catalog of commands!\n\n"
     "🔗 **LINK WALLET:** Type `/link <wallet_address>` to sync your web dashboard data!"
+)
+
+BOT_HELP_TEXT = (
+    "📖 **MANTLE CORE: AGENT OPERATING MANUAL**\n\n"
+    "Use these commands to interact directly with the Llama-3.1 Decision Matrix:\n\n"
+    "🔗 `/link <0x_address>` - Bind your Web3 wallet address to sync chat history and active positions across Web, Discord, and Telegram.\n"
+    "🔒 `/citadel` - Query your active on-chain ERC-8004 risk strategy profile.\n"
+    "🧬 `/citadel mint <Strategy> <Drawdown>` - Configure a virtual agent identity in database memory. Visit the dApp to secure it on-chain with one click!\n"
+    "🛠️ `/forge <concept>` - Generate, compile, and audit complete, secure Solidity contracts instantly.\n"
+    "📊 `/portfolio` - Fetch your active leveraged trading positions directly in the chat.\n\n"
+    "**Example prompts:**\n"
+    "• `What is mETH APY?`\n"
+    "• `Show me Nansen flows`\n"
+    "• `/forge write a custom staking contract`"
 )
 
 # ---------------------------------------------------------
@@ -646,6 +664,14 @@ async def handle_bot_webhook(payload: BotCommandPayload):
     try:
         command_lower = payload.command.lower()
         
+        # Unified Help Desk catalog triggers
+        if command_lower in ["/help", "help", "!mac help", "man"]:
+            return {
+                "status": "success",
+                "response": BOT_HELP_TEXT,
+                "latency": "0ms"
+            }
+
         # Command-line link trigger execution
         if command_lower.startswith("/link") or command_lower.startswith("link") or command_lower.startswith("!mac link"):
             parts = command_lower.replace("!mac link", "").replace("/link", "").replace("link", "").strip().split()
@@ -731,8 +757,8 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "latency": "0ms"
             }
 
-        # --- UPGRADE: LIVE ON-CHAIN CITADEL SCANNER FOR BOTS ---
-        if command_lower in ["/citadel", "citadel", "!mac citadel"]:
+        # --- UPGRADE: LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
+        if command_lower.startswith("/citadel") or command_lower.startswith("!mac citadel") or command_lower.startswith("citadel"):
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
             cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
@@ -744,14 +770,77 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "status": "success",
                     "response": (
                         "❌ **No Web3 Wallet Linked**\n\n"
-                        "You must bind your account to view your on-chain agent profile.\n"
+                        "You must bind your account to view or mint your agent profile.\n"
                         f"Please type `/link <wallet_address>` (on Telegram) or `!mac link <wallet_address>` (on Discord) to bind your wallet."
                     ),
                     "latency": "0ms"
                 }
 
             bound_address = row[0]
-            # Query Mantle Sepolia network directly via Web3
+            clean_sub = command_lower.replace("!mac citadel", "").replace("/citadel", "").replace("citadel", "").strip()
+
+            # --- SUB COMMAND: VIRTUAL AGENT MINTING ---
+            if clean_sub.startswith("mint"):
+                mint_parts = clean_sub.replace("mint", "").strip().split()
+                if len(mint_parts) < 2:
+                    return {
+                        "status": "success",
+                        "response": (
+                            "❌ **Citadel Minter Usage Error**\n\n"
+                            "Format: `/citadel mint <Strategy> <Drawdown>`\n"
+                            "• *Strategies:* `Conservative`, `Balanced`, `Aggressive`\n"
+                            "• *Drawdown:* `1` to `100` percent\n"
+                            "*(e.g., `/citadel mint Conservative 15`)*"
+                        ),
+                        "latency": "0ms"
+                    }
+                
+                strategy_input = mint_parts[0].capitalize()
+                drawdown_input = mint_parts[1]
+                
+                if strategy_input not in ["Conservative", "Balanced", "Aggressive"]:
+                    return {
+                        "status": "success",
+                        "response": "❌ Invalid Strategy. Select either `Conservative`, `Balanced`, or `Aggressive`.",
+                        "latency": "0ms"
+                    }
+                
+                try:
+                    drawdown_val = int(drawdown_input)
+                    if drawdown_val < 1 or drawdown_val > 100:
+                        raise ValueError()
+                except ValueError:
+                    return {
+                        "status": "success",
+                        "response": "❌ Invalid Drawdown value. Must be a whole number between 1 and 100.",
+                        "latency": "0ms"
+                    }
+
+                # Save Virtual bot profile directly to SQLite
+                conn = sqlite3.connect(DB_FILE)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT OR REPLACE INTO virtual_identities (wallet_address, risk_strategy, max_drawdown, timestamp)
+                    VALUES (?, ?, ?, ?)
+                """, (bound_address, strategy_input, drawdown_val, time.time()))
+                conn.commit()
+                conn.close()
+
+                return {
+                    "status": "success",
+                    "response": (
+                        f"🧬 **Virtual Agent Profile Configured!**\n\n"
+                        f"Owner Wallet: `{bound_address[:10]}...` [2.1.5, 2.2.4]\n"
+                        f"Draft Strategy: **{strategy_input}**\n"
+                        f"Draft Drawdown Limit: **{drawdown_val}%**\n\n"
+                        "🚀 This profile has been successfully saved in memory. When you open the BUIDL Citadel dApp using your linked wallet, "
+                        "it will automatically detect this setup and guide you to secure your Agent Identity NFT on the Mantle blockchain with a single click!\n"
+                        "Visit: https://mantle-agentic-core.vercel.app/citadel"
+                    ),
+                    "latency": "0ms"
+                }
+
+            # Standard Citadel Query
             profile_data = fetch_onchain_agent_profile_raw(bound_address)
             
             if profile_data.get("status") == "active":
@@ -768,14 +857,36 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "latency": "0ms"
                 }
             elif profile_data.get("status") == "none":
+                # Check for a pending virtual identity in our SQLite database
+                conn = sqlite3.connect(DB_FILE)
+                cursor = conn.cursor()
+                cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (bound_address,))
+                v_row = cursor.fetchone()
+                conn.close()
+
+                if v_row:
+                    return {
+                        "status": "success",
+                        "response": (
+                            f"🔒 **PENDING BOT VIRTUAL PROFILE**\n\n"
+                            f"Linked Wallet: `{bound_address[:8]}...{bound_address[-4:]}`\n"
+                            f"Saved Strategy: **{v_row[0]}**\n"
+                            f"Saved Drawdown Limit: **{v_row[1]}%**\n\n"
+                            "🚀 This identity is drafted in database memory. To mint it permanently on-chain as a sovereign NFT, visit: "
+                            "https://mantle-agentic-core.vercel.app/citadel"
+                        ),
+                        "latency": "0ms"
+                    }
+
                 return {
                     "status": "success",
                     "response": (
                         f"🔒 **ERC-8004 CITADEL VAULT**\n\n"
                         f"Linked Wallet: `{bound_address[:8]}...{bound_address[-4:]}`\n"
-                        f"Status: **No On-Chain Agent NFT Found**\n\n"
-                        "To awaken your autonomous on-chain identity, you must sign the minting transaction via the web dApp interface [2.1.5].\n"
-                        "Visit: https://mantle-agentic-core.vercel.app/citadel"
+                        f"Status: **No Identity Mapped**\n\n"
+                        "To draft a virtual profile directly via chat, type:\n"
+                        "`/citadel mint <Strategy> <Drawdown>`\n"
+                        "*(Strategies: Conservative, Balanced, Aggressive. Drawdown: 1-100)*"
                     ),
                     "latency": "0ms"
                 }
@@ -786,22 +897,23 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "latency": "0ms"
                 }
 
-        # --- UPGRADE: LIVE NEURAL FORGE COMPILER FOR BOTS ---
+        # --- UPGRADE: LIVE NEURAL FORGE SOLIDITY WRITER FOR BOTS ---
         if command_lower.startswith("/forge") or command_lower.startswith("!mac forge") or command_lower.startswith("forge "):
             blueprint_prompt = command_lower.replace("!mac forge", "").replace("/forge", "").replace("forge", "").strip()
             if not blueprint_prompt:
                 return {
                     "status": "success",
-                    "response": "❌ Please specify a smart contract concept or blueprint (e.g. `/forge write a custom staking contract`).",
+                    "response": "❌ Please specify a smart contract concept (e.g. `/forge write a custom staking contract`).",
                     "latency": "0ms"
                 }
             
-            # Formulate system prompt matrix
+            # Ultra-coercive system prompt to force absolute raw compilable Solidity output
             system_prompt = (
-                "You are the Neural Forge, an elite Web3 smart contract auditor and Solidity developer operating within the Mantle Terminal. "
-                "Write the secure Solidity code matching the user's requested concept. Use standard markdown code blocks for the code. "
-                "STRICT FORMATTING RULE: Start directly with the compiled Solidity code block and minor audit notes. "
-                "Sign off with '— Forge SecOps Verified'"
+                "You are the Neural Forge. The user wants a smart contract. "
+                "You MUST write the complete, compilable, and secure Solidity code block. "
+                "DO NOT write conversational explanations, DO NOT write markdown intros, DO NOT write partial code. "
+                "Start directly with the code block using standard markdown triple backticks with solidity specified: '```solidity'."
+                "End immediately after finishing the contract. Sign off with: '// Forge SecOps Verified' at the bottom of the code."
             )
             chat_completion = client.chat.completions.create(
                 messages=[
@@ -845,6 +957,27 @@ async def handle_bot_webhook(payload: BotCommandPayload):
 @app.post("/api/execute")
 async def execute_command(payload: CommandPayload):
     return await process_intent_core(payload.command, payload.wallet_address)
+
+# --- WEB EXPOSURE ENDPOINT FOR BOT MINTING DEEP LINKS ---
+@app.get("/api/bot/virtual-identity")
+async def get_bot_virtual_identity(wallet_address: str):
+    """
+    Exposes pending bot-created profile drafts so the Next.js frontend can detect them on connect.
+    """
+    safe_address = wallet_address.lower()
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (safe_address,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return {
+            "status": "pending",
+            "riskStrategy": row[0],
+            "maxDrawdown": row[1]
+        }
+    return {"status": "none"}
 
 # ---------------------------------------------------------
 # BACKEND TREASURY REFUEL
