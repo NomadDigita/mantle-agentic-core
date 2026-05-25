@@ -17,7 +17,6 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 const ParticleBackground: React.FC = () => {
-  // Pulling the global nervous system states
   const { isOverclocked, systemState } = useTheme();
   const [init, setInit] = useState(false);
 
@@ -27,37 +26,37 @@ const ParticleBackground: React.FC = () => {
     }).then(() => setInit(true));
   }, []);
 
-  // Map the semantic aura states to soft, low-brightness colors for particles
   const getParticleColor = (state: string) => {
     switch (state) {
       case 'OVERCLOCK': 
-        return "#ef4444"; // Soft Crimson Red
+        return "#ef4444"; 
       case 'ANALYZING': 
-        return "#f59e0b"; // Soft Amber
+        return "#f59e0b"; 
       case 'MINTING': 
-        return "#a855f7";   // Soft Violet
+        return "#a855f7";   
       case 'LISTENING': 
-        return "#10b981"; // Soft Emerald
+        return "#10b981"; 
       case 'IDLE':
       default: 
-        return "#10b981";          // Soft Emerald
+        return "#10b981";          
     }
   };
 
   const particleColor = getParticleColor(systemState);
-  const isListening = systemState === 'LISTENING'; // Triggers the "Silence" mode
+  const isListening = systemState === 'LISTENING'; 
 
+  // Option config prioritizing thick, highly visible particles and connection webs
   const options = useMemo<any>(() => ({
     background: { color: { value: "#020204" } },
-    fpsLimit: 60, // Optimized for smooth rendering on mobile chipsets
+    fpsLimit: 60, 
     interactivity: {
       events: {
-        onClick: { enable: false, mode: "push" }, // Disabled on mobile to prevent canvas stealing tap coordinates
+        onClick: { enable: false, mode: "push" }, 
         onHover: { enable: true, mode: "grab" }, 
         resize: { enable: true },
       },
       modes: {
-        grab: { distance: 130, links: { opacity: 0.3, color: particleColor } },
+        grab: { distance: 150, links: { opacity: 0.5, color: particleColor } },
         push: { quantity: 1 },
       },
     },
@@ -65,25 +64,24 @@ const ParticleBackground: React.FC = () => {
       color: { value: particleColor },
       links: {
         color: particleColor,
-        distance: 120,
+        distance: 130,
         enable: true,
-        // Particles dim significantly when listening for input
-        opacity: isOverclocked ? 0.3 : (isListening ? 0.03 : 0.15),
-        width: 1,
+        // Highly visible linking paths
+        opacity: isOverclocked ? 0.45 : (isListening ? 0.08 : 0.28),
+        width: 2.2, // Significantly thickened link lines
       },
       move: {
         enable: true,
-        // Particles physically slow down to a crawl when listening to free up render cycles
-        speed: isOverclocked ? 1.5 : (isListening ? 0.15 : 0.6), 
+        speed: isOverclocked ? 1.6 : (isListening ? 0.18 : 0.8), 
       },
       number: {
-        value: isOverclocked ? 45 : 30, // Optimized particle count to maintain 60FPS on low-end mobile devices
+        value: isOverclocked ? 50 : 35, 
       },
       opacity: {
-        value: { min: 0.05, max: isOverclocked ? 0.6 : (isListening ? 0.08 : 0.3) },
+        value: { min: 0.18, max: isOverclocked ? 0.7 : (isListening ? 0.12 : 0.45) },
       },
       size: {
-        value: { min: 1, max: 2 },
+        value: { min: 2.5, max: 4.8 }, // Thicker, clearly defined particle nodes
       },
     },
     detectRetina: true,
@@ -107,10 +105,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ContextProvider cookies={null}>
             <ParticleBackground />
             
-            {/* The cinematic CRT overlay (adds depth and glass texture, clicks pass through smoothly) */}
-            <div className="pointer-events-none fixed inset-0 z-40 h-full w-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.15)_50%),linear-gradient(90deg,rgba(255,0,0,0.04),rgba(0,255,0,0.01),rgba(0,0,255,0.04))] bg-[length:100%_4px,3px_100%] opacity-15 mix-blend-overlay"></div>
+            <div className="pointer-events-none fixed inset-0 z-40 h-full w-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.18)_50%),linear-gradient(90deg,rgba(255,0,0,0.04),rgba(0,255,0,0.01),rgba(0,0,255,0.04))] bg-[length:100%_4px,3px_100%] opacity-15 mix-blend-overlay"></div>
             
-            {/* Main Interactive Child Container */}
             <div className="relative z-10 pointer-events-auto">
               {children}
             </div>

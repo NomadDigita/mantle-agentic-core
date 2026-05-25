@@ -7,6 +7,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type SystemState = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'MINTING' | 'OVERCLOCK';
+export type DesignMode = 'SILENT' | 'AURA' | 'CHROME';
 
 type SafeColors = {
   primary: string;
@@ -24,6 +25,8 @@ interface ThemeContextType {
   setSystemState: (state: SystemState) => void;
   isOverclocked: boolean;
   toggleOverclock: () => void;
+  designMode: DesignMode;
+  setDesignMode: (mode: DesignMode) => void;
   safeColors: SafeColors;
 }
 
@@ -32,80 +35,90 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [systemState, setSystemState] = useState<SystemState>('IDLE');
   const [isOverclocked, setIsOverclocked] = useState(false);
+  // Defaulting designMode to SILENT as requested
+  const [designMode, setDesignMode] = useState<DesignMode>('SILENT');
 
-  // The Overclock Override: If Beast Mode is on, it locks the system into Crimson
   useEffect(() => {
-    if (isOverclocked) setSystemState('OVERCLOCK');
-    else setSystemState('IDLE');
+    if (isOverclocked) {
+      setSystemState('OVERCLOCK');
+    } else {
+      setSystemState('IDLE');
+    }
   }, [isOverclocked]);
 
   const toggleOverclock = () => setIsOverclocked(prev => !prev);
 
-  // Softened Semantic Aura Engine for reduced eye strain (Nansen-Branded default)
   const getSafeColors = (): SafeColors => {
     switch (systemState) {
       case 'OVERCLOCK':
         return {
           primary: "text-red-500",
           secondary: "text-red-400",
-          border: "border-red-500/20",
+          border: "border-red-500/30",
           glow: "bg-red-950/25",
-          dotBg: "bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.5)]",
+          dotBg: "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]",
           hoverPrimary: "hover:text-red-400",
-          hoverBorder: "hover:border-red-500/40",
-          bgPulse: "bg-red-950/15",
+          hoverBorder: "hover:border-red-500/50",
+          bgPulse: "bg-red-950/20",
         };
       case 'ANALYZING':
         return {
           primary: "text-amber-400",
           secondary: "text-amber-300",
-          border: "border-amber-500/20",
-          glow: "bg-amber-950/20",
-          dotBg: "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.5)]",
+          border: "border-amber-500/30",
+          glow: "bg-amber-950/25",
+          dotBg: "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]",
           hoverPrimary: "hover:text-amber-400",
-          hoverBorder: "hover:border-amber-500/40",
-          bgPulse: "bg-amber-950/10",
+          hoverBorder: "hover:border-amber-500/50",
+          bgPulse: "bg-amber-950/15",
         };
       case 'MINTING':
         return {
           primary: "text-purple-400",
           secondary: "text-purple-300",
-          border: "border-purple-500/20",
-          glow: "bg-purple-950/20",
-          dotBg: "bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.5)]",
+          border: "border-purple-500/30",
+          glow: "bg-purple-950/25",
+          dotBg: "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]",
           hoverPrimary: "hover:text-purple-400",
-          hoverBorder: "hover:border-purple-500/40",
-          bgPulse: "bg-purple-950/10",
+          hoverBorder: "hover:border-purple-500/50",
+          bgPulse: "bg-purple-950/15",
         };
       case 'LISTENING':
         return {
-          primary: "text-[#00ffa3]/50", 
-          secondary: "text-[#00b8ff]/50",
-          border: "border-white/5",
+          primary: "text-[#00ffa3]/60", 
+          secondary: "text-[#00b8ff]/60",
+          border: "border-white/10",
           glow: "bg-transparent", 
-          dotBg: "bg-[#00ffa3]/20",
+          dotBg: "bg-[#00ffa3]/30",
           hoverPrimary: "hover:text-[#00ffa3]",
-          hoverBorder: "hover:border-[#00ffa3]/20",
-          bgPulse: "bg-black/40", 
+          hoverBorder: "hover:border-[#00ffa3]/30",
+          bgPulse: "bg-black/50", 
         };
       case 'IDLE':
       default:
-        // Softened Liquid Glass default palette (Nansen Mint-Teal Brand Sync)
         return {
           primary: "text-[#00ffa3]",
           secondary: "text-[#00b8ff]",
-          border: "border-white/12",
-          glow: "bg-[#00ffa3]/15",
-          dotBg: "bg-[#00ffa3] shadow-[0_0_10px_rgba(0,255,163,0.3)]",
+          border: "border-white/18", // Increased baseline border opacity for clean edges
+          glow: "bg-[#00ffa3]/20",
+          dotBg: "bg-[#00ffa3] shadow-[0_0_12px_rgba(0,255,163,0.4)]",
           hoverPrimary: "hover:text-[#00ffa3]",
-          hoverBorder: "hover:border-[#00ffa3]/30",
-          bgPulse: "bg-slate-950/20", 
+          hoverBorder: "hover:border-[#00ffa3]/40",
+          bgPulse: "bg-slate-950/25", 
         };
     }
   };
 
   return (
-    <ThemeContext.Provider value={{ systemState, setSystemState, isOverclocked, toggleOverclock, safeColors: getSafeColors() }}>
+    <ThemeContext.Provider value={{ 
+      systemState, 
+      setSystemState, 
+      isOverclocked, 
+      toggleOverclock, 
+      designMode, 
+      setDesignMode, 
+      safeColors: getSafeColors() 
+    }}>
       {children}
     </ThemeContext.Provider>
   );
