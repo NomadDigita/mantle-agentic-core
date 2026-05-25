@@ -33,7 +33,7 @@ BYBIT_API_KEY = os.getenv("BYBIT_API_KEY", "")
 BYBIT_API_SECRET = os.getenv("BYBIT_API_SECRET", "")
 ELFA_API_KEY = os.getenv("ELFA_API_KEY", "elfak_a1f06bf844aa3adf990b7c47bf78e6c67150cc23f")
 
-# --- BOT SECURE TOKENS (LOADED ENTIRELY FROM ENVIRONMENT TO BPASS PUSH PROTECTION) ---
+# --- BOT SECURE TOKENS ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
 
@@ -48,12 +48,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- GLOBAL ASYNC EVENT LOOP REFERENCE FOR BOT DAEMONS ---
+main_loop = None
+
 # --- DATABASE SETUP (SQLITE PERSISTENT COLD SESSION STORAGE) ---
 DB_FILE = "mac_history.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+    # Chat histories mapped to wallets
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS chat_history (
             id TEXT PRIMARY KEY,
@@ -65,6 +69,15 @@ def init_db():
             latency TEXT,
             decision_hash TEXT,
             timestamp REAL
+        )
+    """)
+    # Relational bindings mapping TG/Discord accounts to Web3 wallets
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_bindings (
+            platform TEXT,
+            platform_user_id TEXT,
+            wallet_address TEXT,
+            PRIMARY KEY(platform, platform_user_id)
         )
     """)
     conn.commit()
@@ -354,81 +367,29 @@ BOT_WELCOME_TEXT = (
     "⚡ **01. Live Terminal:** Real-time on-chain analysis and intent execution.\n"
     "🔥 **02. Neural Forge:** Solidity AST compiler & smart contract auditor.\n"
     "🔒 **03. Citadel Vault:** ERC-8004 decentralized risk strategy identity registry.\n\n"
-    "Type any command (e.g., 'What is mETH APY?' or 'Long BTC') to query the decision matrix."
+    "Type any command (e.g., 'What is mETH APY?' or 'Long BTC') to query the decision matrix.\n\n"
+    "🔗 **LINK WALLET:** Type `/link <wallet_address>` to sync your web dashboard data!"
 )
 
 # ---------------------------------------------------------
-# ACTIVE ENDPOINTS
+# IN-PROCESS CORE BRAIN DECISION ENGINE (0MS OVERHEAD FIX)
 # ---------------------------------------------------------
-@app.get("/api/history")
-async def get_history(wallet_address: str):
-    safe_address = wallet_address.lower()
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, role, text, action_payload, thinking_steps, latency, decision_hash 
-        FROM chat_history 
-        WHERE wallet_address = ? 
-        ORDER BY timestamp ASC
-    """, (safe_address,))
-    rows = cursor.fetchall()
-    conn.close()
-
-    history = []
-    for r in rows:
-        payload_dict = json.loads(r[3]) if r[3] else None
-        steps_list = json.loads(r[4]) if r[4] else None
-        history.append({
-            "id": r[0],
-            "role": r[1],
-            "text": r[2],
-            "actionPayload": payload_dict,
-            "thinkingSteps": steps_list,
-            "latency": r[5],
-            "decisionHash": r[6]
-        })
-    return history
-
-@app.post("/api/history")
-async def save_history(payload: HistorySavePayload):
-    safe_address = payload.wallet_address.lower()
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM chat_history WHERE wallet_address = ?", (safe_address,))
-    for idx, msg in enumerate(payload.messages):
-        payload_str = json.dumps(msg.actionPayload) if msg.actionPayload else None
-        steps_str = json.dumps(msg.thinkingSteps) if msg.thinkingSteps else None
-        cursor.execute("""
-            INSERT INTO chat_history 
-            (id, wallet_address, role, text, action_payload, thinking_steps, latency, decision_hash, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            msg.id,
-            safe_address,
-            msg.role,
-            msg.text,
-            payload_str,
-            steps_str,
-            msg.latency,
-            msg.decisionHash,
-            time.time() + idx
-        ))
-    conn.commit()
-    conn.close()
-    return {"status": "success", "synced": len(payload.messages)}
-
-@app.post("/api/execute")
-async def execute_command(payload: CommandPayload):
+async def process_intent_core(command: str, wallet_address: str | None = None) -> dict:
+    """
+    Core reasoning pipeline accessed directly by both HTTP API and Bot threads.
+    Completely bypasses network loopbacks, solving 'Connection refused' permanently.
+    """
     start_time = time.time()
     try:
-        user = f"@{payload.wallet_address[-4:]}" if payload.wallet_address else "GUEST"
-        command_lower = payload.command.lower()
+        user = f"@{wallet_address[-4:]}" if wallet_address else "GUEST"
+        command_lower = command.lower()
 
         thinking_steps = [
             "Intercepting natural language input envelope...",
             "Securing sandbox RPC pipeline to Mantle Sepolia Ledger (Chain ID: 5003)..."
         ]
 
+        # --- ELFA AI INTEL TRIGGER ---
         if "elfa" in command_lower or "sentiment" in command_lower or "trending" in command_lower:
             thinking_steps.append("Establishing context stream to Elfa AI Sentiment endpoints...")
             elfa_data = fetch_elfa_real_time_intel()
@@ -447,6 +408,7 @@ async def execute_command(payload: CommandPayload):
                 "latency": latency
             }
 
+        # --- BYREAL INTENT PARSER & EXECUTION PIPELINE ---
         if "byreal" in command_lower or "clmm" in command_lower:
             thinking_steps.append("Detecting Byreal Agent Skills command structure...")
             cli_args = []
@@ -488,6 +450,7 @@ async def execute_command(payload: CommandPayload):
                 "latency": latency
             }
 
+        # --- NANSEN ALPHA FETCH TRIGGER ---
         if "nansen" in command_lower or "alpha" in command_lower or "smart money" in command_lower:
             thinking_steps.append("Invoking Nansen Data Connector...")
             nansen_data = fetch_nansen_smart_money_data()
@@ -506,6 +469,7 @@ async def execute_command(payload: CommandPayload):
                 "latency": latency
             }
 
+        # --- BYBIT COMPARATIVE ARBITRAGE TRIGGER ---
         if "bybit" in command_lower or "arbitrage" in command_lower:
             thinking_steps.append("Establishing connection to Bybit V5 REST market feed...")
             bybit_data = fetch_bybit_ticker_data("MNTUSDT")
@@ -564,7 +528,7 @@ async def execute_command(payload: CommandPayload):
 
         if ("send" in command_lower or "transfer" in command_lower) and "mac" in command_lower:
             thinking_steps.append("Intent parsed: TOKEN_TRANSFER. Initiating Groq parsing engine (model: Llama-3.1-8b)...")
-            extraction_prompt = f"Extract the numeric amount and the 0x Ethereum address from this text: '{payload.command}'. Return strictly valid JSON with keys 'amount' and 'address'. Do not include markdown formatting or any other words."
+            extraction_prompt = f"Extract the numeric amount and the 0x Ethereum address from this text: '{command}'. Return strictly valid JSON with keys 'amount' and 'address'. Do not include markdown formatting or any other words."
             extraction_res = client.chat.completions.create(
                 messages=[{"role": "user", "content": extraction_prompt}],
                 model="llama-3.1-8b-instant",
@@ -602,7 +566,7 @@ async def execute_command(payload: CommandPayload):
         
         system_prompt = (
             f"You are the Brain Engine for the Mantle Terminal, an advanced Web3 AI Agent. "
-            f"User {user} has issued command: '{payload.command}'. "
+            f"User {user} has issued command: '{command}'. "
             f"SYSTEM DATA: Live Prices: {live_data}. Live MAC Token Supply: {mac_supply}. "
             f"If the user asks about the market, prices, or your token, you MUST use this data in your response. "
             f"Respond with a highly technical, cyber-aesthetic analysis. Keep it to 2-3 sentences. "
@@ -630,16 +594,8 @@ async def execute_command(payload: CommandPayload):
             "latency": "0ms"
         }
 
-@app.post("/api/refuel")
-async def execute_refuel(payload: RefuelPayload):
-    try:
-        refuel_result = execute_mnt_refuel(payload.wallet_address)
-        return {"status": "success", "message": refuel_result}
-    except Exception as e:
-        return {"status": "error", "message": f"Treasury error: {str(e)}"}
-
 # ---------------------------------------------------------
-# BOT API CHANNELS (TELEGRAM & DISCORD INTEGRATIONS)
+# BOT ENDPOINT (Bypasses HTTP loopback connections)
 # ---------------------------------------------------------
 @app.post("/api/bot/webhook")
 async def handle_bot_webhook(payload: BotCommandPayload):
@@ -647,7 +603,91 @@ async def handle_bot_webhook(payload: BotCommandPayload):
     try:
         command_lower = payload.command.lower()
         
-        # Safe trigger to handle bot intro card/help sequences
+        # Command-line link trigger execution
+        if command_lower.startswith("/link") or command_lower.startswith("link") or command_lower.startswith("!mac link"):
+            parts = command_lower.replace("!mac link", "").replace("/link", "").replace("link", "").strip().split()
+            if len(parts) > 0:
+                addr = parts[0]
+                if Web3.is_address(addr):
+                    checksum_addr = Web3.to_checksum_address(addr)
+                    conn = sqlite3.connect(DB_FILE)
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        INSERT OR REPLACE INTO user_bindings (platform, platform_user_id, wallet_address)
+                        VALUES (?, ?, ?)
+                    """, (payload.platform, payload.user_id, checksum_addr.lower()))
+                    conn.commit()
+                    conn.close()
+                    return {
+                        "status": "success",
+                        "response": (
+                            f"🔗 **Unified Web3 Binding Confirmed!**\n\n"
+                            f"Your {payload.platform.capitalize()} ID is now mapped to **{checksum_addr[:8]}...{checksum_addr[-4:]}**.\n"
+                            "Your chat history and live portfolio balances are now fully synchronized "
+                            "across the main dashboard, Discord, and Telegram!"
+                        ),
+                        "latency": "0ms"
+                    }
+                return {
+                    "status": "success",
+                    "response": "❌ Invalid Web3 Address. Format must be `0x...`.",
+                    "latency": "0ms"
+                }
+
+        # Command-line portfolio report trigger execution
+        if command_lower in ["/portfolio", "portfolio", "positions", "!mac portfolio"]:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
+            row = cursor.fetchone()
+            conn.close()
+
+            if not row:
+                return {
+                    "status": "success",
+                    "response": (
+                        "❌ **No Web3 Wallet Linked**\n\n"
+                        "You must bind your account to view your live terminal portfolio.\n"
+                        f"Please type `/link <wallet_address>` (on Telegram) or `!mac link <wallet_address>` (on Discord) to bind your wallet."
+                    ),
+                    "latency": "0ms"
+                }
+
+            bound_address = row[0]
+            # Fetch active positions logged under this wallet
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, text, action_payload FROM chat_history WHERE wallet_address = ? AND role = 'ai' AND action_payload IS NOT NULL", (bound_address,))
+            rows = cursor.fetchall()
+            conn.close()
+
+            if len(rows) == 0:
+                return {
+                    "status": "success",
+                    "response": (
+                        f"📊 **Active Portfolio for {bound_address[:8]}...{bound_address[-4:]}**\n\n"
+                        "No active leveraged deployments mapped to this address.\n"
+                        "Deploy positions on the web dashboard to see them mapped here!"
+                    ),
+                    "latency": "0ms"
+                }
+
+            report = f"📊 **Active Portfolio for {bound_address[:8]}...{bound_address[-4:]}**\n\n"
+            for r in rows:
+                p_data = json.loads(r[2])
+                report += (
+                    f"🔹 **Asset:** {p_data.get('asset')} ({p_data.get('type')} {p_data.get('leverage')}x)\n"
+                    f"   *   Status: Active & Secured\n"
+                    f"   *   Risk Score: {p_data.get('risk')}\n"
+                    f"   *   Ref: `{r[0][:8]}`\n\n"
+                )
+            report += "To manage or close these positions, visit the main dashboard: https://mantle-agentic-core.vercel.app"
+            return {
+                "status": "success",
+                "response": report,
+                "latency": "0ms"
+            }
+
         if command_lower in ["/start", "/help", "help", "hello", "hi"]:
             return {
                 "status": "success",
@@ -655,27 +695,39 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "latency": "0ms"
             }
 
-        live_data = fetch_live_market_data()
-        mac_supply = fetch_mac_token_data()
-        
-        system_prompt = (
-            f"You are the Bot Gateway for Mantle Agentic Core, executing a task from {payload.platform} user: {payload.user_id}. "
-            f"Command: '{payload.command}'. "
-            f"MANTLE ECOSYSTEM STATUS: Live Prices: {live_data}. Live MAC Token Supply: {mac_supply}. "
-            f"Write a sharp, command-line formatted response tailored for bot channel display. Keep it under 4 sentences. "
-            f"Always sign off with '— Sent via MAC Bot Relay'"
-        )
-        chat_completion = client.chat.completions.create(
-            messages=[{"role": "system", "content": system_prompt}],
-            model="llama-3.1-8b-instant"
-        )
+        # Check if this bot user is linked to a Web3 wallet address
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
+        row = cursor.fetchone()
+        conn.close()
+
+        bound_wallet = row[0] if row else None
+
+        # Execute reasoning directly via core function (0ms network loopback)
+        result = await process_intent_core(payload.command, bound_wallet)
         return {
             "status": "success",
-            "response": chat_completion.choices[0].message.content.strip(),
-            "latency": f"{int((time.time() - start_time) * 1000)}ms"
+            "response": result.get("message", "System failure processing command."),
+            "latency": result.get("latency", "0ms")
         }
     except Exception as e:
         return {"status": "error", "response": f"BOT PROCESS FAILURE: {str(e)}"}
+
+@app.post("/api/execute")
+async def execute_command(payload: CommandPayload):
+    return await process_intent_core(payload.command, payload.wallet_address)
+
+# ---------------------------------------------------------
+# BACKEND TREASURY REFUEL
+# ---------------------------------------------------------
+@app.post("/api/refuel")
+async def execute_refuel(payload: RefuelPayload):
+    try:
+        refuel_result = execute_mnt_refuel(payload.wallet_address)
+        return {"status": "success", "message": refuel_result}
+    except Exception as e:
+        return {"status": "error", "message": f"Treasury error: {str(e)}"}
 
 # ---------------------------------------------------------
 # THE NEURAL FORGE ROUTE
@@ -744,8 +796,13 @@ def run_telegram_bot_loop():
                     user_id=str(message.from_user.id),
                     platform="telegram"
                 )
-                res = requests.post("http://127.0.0.1:8000/api/bot/webhook", json=payload.dict(), timeout=8)
-                data = res.json()
+                
+                # Execute direct sync function mapping
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                data = loop.run_until_complete(handle_bot_webhook(payload))
+                loop.close()
+
                 tb_bot.reply_to(message, data.get("response", "Error connecting to matrix."), parse_mode="Markdown")
             except Exception as e:
                 tb_bot.reply_to(message, f"❌ Terminal Timeout: {str(e)}")
@@ -798,8 +855,9 @@ def run_discord_bot_loop():
                         user_id=str(message.author.id),
                         platform="discord"
                     )
-                    res = requests.post("http://127.0.0.1:8000/api/bot/webhook", json=payload.dict(), timeout=8)
-                    data = res.json()
+                    
+                    # Direct async execution loop thread dispatch
+                    data = await handle_bot_webhook(payload)
                     await message.reply(data.get("response", "Error connecting to matrix."))
                 except Exception as e:
                     await message.reply(f"❌ Terminal Timeout: {str(e)}")
