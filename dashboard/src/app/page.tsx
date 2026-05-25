@@ -117,7 +117,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       )}
       
       <div 
-        style={{ transform: "translateZ(38px)" }} // Thicker 3D depth translation
+        style={{ transform: "translateZ(38px)" }} 
         className={`h-full w-full rounded-[23px] transition-all duration-700 p-6 sm:p-8 flex flex-col relative z-10 ${
           designMode === "AURA"
             ? "bg-[rgba(4,6,15,0.6)] backdrop-blur-[65px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.15)] border-t border-l border-white/22 border-b border-r border-white/5"
@@ -211,7 +211,6 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
   );
 }
 
-// --- UPGRADE: GUARANTEED ZERO-UNDEF-RED-LINE CAROUSEL COMPONENT ---
 function SocialMatrixCarousel(): React.ReactElement {
   const socials = [
     { name: "𝕏", url: "https://x.com/MantleCore_", text: "@MantleCore_", color: "text-white" },
@@ -230,7 +229,7 @@ function SocialMatrixCarousel(): React.ReactElement {
     return () => clearInterval(timer);
   }, [socials.length]);
 
-  const active = socials[index] ?? socials[0]; // Strict fallback to prevent undefined warnings
+  const active = socials[index] ?? socials[0]; 
 
   return (
     <a 
@@ -259,7 +258,7 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(false); 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // UPGRADE: Globally Synchronized Theme variables
+  // Globally Synchronized Theme variables
   const { isOverclocked, toggleOverclock, safeColors, setSystemState, designMode, setDesignMode } = useTheme();
   const { primary, secondary, border, dotBg } = safeColors;
 
@@ -493,7 +492,7 @@ export default function Home() {
           address: "0x1E5B64264089aacC547A1506402B94f909215942",
           abi: [
             {
-              inputs: [{ address: "owner", name: "balanceOf", type: "function" }], // Abbreviated call strictly safe in TS
+              inputs: [{ address: "owner", name: "balanceOf", type: "function" }], 
               name: "balanceOf",
               outputs: [{ name: "", type: "uint256" }],
               stateMutability: "view",
@@ -891,7 +890,7 @@ export default function Home() {
   }, []);
 
   if (!mounted) return null;
-  const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0]; // Strict fallback checks
+  const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0]; 
 
   return (
     <main className={`min-h-screen relative p-3 sm:p-6 lg:p-12 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
@@ -964,7 +963,7 @@ export default function Home() {
               </a>
               <a href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/20 hover:border-white transition-all group mobile-touch-target">
                 <svg className="w-4 h-4 text-white/80 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.162 22 12c0-5.523-4.477-10-10-10z" />
                 </svg>
               </a>
             </div>
@@ -1294,21 +1293,64 @@ export default function Home() {
               )}
             </FloatingGlassCard>
 
-            {/* DYNAMIC YIELD WEAVER HUD CARD (AI x RWA) */}
-            <AnimatePresence>{yieldWeaverMode !== "IDLE" && (
-                <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: -20 }} transition={{ duration: 0.4 }} className="w-full">
-                  <FloatingGlassCard designMode={designMode} delay={0.3} className="bg-black/50 border border-purple-500/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-                    <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4"><span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver</span><span className="text-[9px] font-mono text-white/50 font-bold">Active: Mantle RWA</span></div>
-                    <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary font-bold">
-                      <div className="flex justify-between"><span className="text-white/60 font-bold">Ondo USDY APY:</span><span className="text-white font-bold">5.1% APY</span></div>
-                      <div className="flex justify-between"><span className="text-white/60 font-bold">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">7.2% APY</span></div>
-                      <div className="flex justify-between border-t border-white/5 pt-2"><span className="text-white/60 font-bold">WEAVER ALLOCATION:</span><span className="text-purple-400 font-bold">{yieldWeaverMode === "mETH_PREMIUM" ? "100% Mantle mETH" : "100% Ondo USDY"}</span></div>
-                      {yieldWeaverMode === "mETH_PREMIUM" && (<div className="bg-emerald-500/15 border border-emerald-500/40 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col shadow-inner"><span className="font-bold">🚀 PRE-COGNITIVE SWAP CONFIRMED</span><span>Yield path re-allocated successfully to maximize premium spreads.</span></div>)}
-                    </div>
-                    {yieldWeaverMode !== "mETH_PREMIUM" && (<button onClick={handleWeaveYield} className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-black text-[10px] text-white uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target">EXECUTE PRE-COGNITIVE SWAP</button>)}
-                  </FloatingGlassCard>
-                </motion.div>
-            )}</AnimatePresence>
+            {/* UPGRADE: ALWAYS-ON PREMIUM RWA YIELD WEAVER (With 3D Rotating Sphere) */}
+            <FloatingGlassCard designMode={designMode} delay={0.3} className="bg-black/50 border border-purple-500/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.25)]">
+              <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver
+                </span>
+                <span className="text-[9px] font-mono text-white/50">Active: Mantle RWA</span>
+              </div>
+
+              {/* Holographic Breathing Sphere */}
+              <div className="relative w-36 h-36 mx-auto my-6 flex items-center justify-center rounded-full border border-white/20 overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.03)] backdrop-blur-2xl">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.12, 1],
+                    opacity: [0.6, 0.85, 0.6],
+                    rotate: 360
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className={`absolute w-24 h-24 rounded-full blur-xl filter opacity-70 ${
+                    yieldWeaverMode === "mETH_PREMIUM"
+                      ? "bg-purple-600/45 shadow-[0_0_25px_rgba(168,85,247,0.6)]" 
+                      : "bg-[#00ffa3]/40 shadow-[0_0_20px_rgba(16,185,129,0.5)]" 
+                  }`}
+                />
+                
+                {/* SVG Orbital Dash Path */}
+                <svg className="absolute w-full h-full animate-[spin_12s_linear_infinite]" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.05)" strokeWidth="1" fill="none" strokeDasharray="4 8" />
+                  <motion.circle
+                    cx="50" cy="50" r="42"
+                    stroke={yieldWeaverMode === "mETH_PREMIUM" ? "#a855f7" : "#00ffa3"}
+                    strokeWidth="2.2" fill="none"
+                    strokeDasharray="20 120"
+                    animate={{ strokeDashoffset: [0, 360] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  />
+                </svg>
+
+                <div className="relative z-10 text-center">
+                  <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-bold">APY TARGET</span>
+                  <span className="text-xl font-black text-white text-sharp-primary">
+                    {yieldWeaverMode === "mETH_PREMIUM" ? "7.2%" : "5.1%"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary font-bold">
+                <div className="flex justify-between"><span className="text-white/60 font-bold">Ondo USDY APY:</span><span className="text-white font-bold">5.1% APY</span></div>
+                <div className="flex justify-between"><span className="text-white/60 font-bold">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">7.2% APY</span></div>
+                <div className="flex justify-between border-t border-white/5 pt-2"><span className="text-white/60 font-bold">WEAVER ALLOCATION:</span><span className="text-purple-400 font-bold">{yieldWeaverMode === "mETH_PREMIUM" ? "100% Mantle mETH" : "100% Ondo USDY"}</span></div>
+                {yieldWeaverMode === "mETH_PREMIUM" && (<div className="bg-emerald-500/15 border border-emerald-500/40 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col shadow-inner"><span className="font-bold">🚀 PRE-COGNITIVE SWAP CONFIRMED</span><span>Yield path re-allocated successfully to maximize premium spreads.</span></div>)}
+              </div>
+              {yieldWeaverMode !== "mETH_PREMIUM" && (<button onClick={handleWeaveYield} className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-black text-[10px] text-white uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target">EXECUTE PRE-COGNITIVE SWAP</button>)}
+            </FloatingGlassCard>
 
             {/* COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) */}
             <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 h-[220px] shadow-2xl">
@@ -1406,7 +1448,7 @@ export default function Home() {
             <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[80px]">
               <button 
                 onClick={() => open()} 
-                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
+                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
               >
                 {isConnected ? "Connection Active" : "Bridge Wallet"}
               </button>
