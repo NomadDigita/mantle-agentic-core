@@ -10,12 +10,18 @@ import time
 import shutil
 import sqlite3
 import subprocess
+import threading
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from groq import Groq
 from web3 import Web3
+
+# Async safe libraries for bot threads
+import telebot
+import discord
 
 load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
@@ -26,6 +32,10 @@ NANSEN_API_KEY = os.getenv("NANSEN_API_KEY", "")
 BYBIT_API_KEY = os.getenv("BYBIT_API_KEY", "")
 BYBIT_API_SECRET = os.getenv("BYBIT_API_SECRET", "")
 ELFA_API_KEY = os.getenv("ELFA_API_KEY", "elfak_a1f06bf844aa3adf990b7c47bf78e6c67150cc23f")
+
+# --- BOT SECURE TOKENS (LOADED ENTIRELY FROM ENVIRONMENT TO BPASS PUSH PROTECTION) ---
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
 
 client = Groq(api_key=api_key)
 app = FastAPI(title="Mantle Agent Engine")
@@ -336,13 +346,22 @@ def fetch_live_market_data():
         return "MARKET_DATA_OFFLINE"
 
 # ---------------------------------------------------------
+# BOT CORE TEXT DEFINITION
+# ---------------------------------------------------------
+BOT_WELCOME_TEXT = (
+    "🧬 **MANTLE AGENTIC CORE (MAC)** 🧬\n\n"
+    "Welcome to the official autonomous operational terminal for the Mantle ecosystem.\n\n"
+    "⚡ **01. Live Terminal:** Real-time on-chain analysis and intent execution.\n"
+    "🔥 **02. Neural Forge:** Solidity AST compiler & smart contract auditor.\n"
+    "🔒 **03. Citadel Vault:** ERC-8004 decentralized risk strategy identity registry.\n\n"
+    "Type any command (e.g., 'What is mETH APY?' or 'Long BTC') to query the decision matrix."
+)
+
+# ---------------------------------------------------------
 # ACTIVE ENDPOINTS
 # ---------------------------------------------------------
 @app.get("/api/history")
 async def get_history(wallet_address: str):
-    """
-    Fetches the persistent chat log sequence from SQLite, preventing Web2/Web3 browser hydration crashes.
-    """
     safe_address = wallet_address.lower()
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -372,9 +391,6 @@ async def get_history(wallet_address: str):
 
 @app.post("/api/history")
 async def save_history(payload: HistorySavePayload):
-    """
-    Overwrites or appends verified state logs inside persistent SQLite memory.
-    """
     safe_address = payload.wallet_address.lower()
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -413,7 +429,6 @@ async def execute_command(payload: CommandPayload):
             "Securing sandbox RPC pipeline to Mantle Sepolia Ledger (Chain ID: 5003)..."
         ]
 
-        # --- ELFA AI INTEL TRIGGER ---
         if "elfa" in command_lower or "sentiment" in command_lower or "trending" in command_lower:
             thinking_steps.append("Establishing context stream to Elfa AI Sentiment endpoints...")
             elfa_data = fetch_elfa_real_time_intel()
@@ -432,7 +447,6 @@ async def execute_command(payload: CommandPayload):
                 "latency": latency
             }
 
-        # --- BYREAL INTENT PARSER & EXECUTION PIPELINE ---
         if "byreal" in command_lower or "clmm" in command_lower:
             thinking_steps.append("Detecting Byreal Agent Skills command structure...")
             cli_args = []
@@ -474,7 +488,6 @@ async def execute_command(payload: CommandPayload):
                 "latency": latency
             }
 
-        # --- NANSEN ALPHA FETCH TRIGGER ---
         if "nansen" in command_lower or "alpha" in command_lower or "smart money" in command_lower:
             thinking_steps.append("Invoking Nansen Data Connector...")
             nansen_data = fetch_nansen_smart_money_data()
@@ -493,7 +506,6 @@ async def execute_command(payload: CommandPayload):
                 "latency": latency
             }
 
-        # --- BYBIT COMPARATIVE ARBITRAGE TRIGGER ---
         if "bybit" in command_lower or "arbitrage" in command_lower:
             thinking_steps.append("Establishing connection to Bybit V5 REST market feed...")
             bybit_data = fetch_bybit_ticker_data("MNTUSDT")
@@ -631,12 +643,18 @@ async def execute_refuel(payload: RefuelPayload):
 # ---------------------------------------------------------
 @app.post("/api/bot/webhook")
 async def handle_bot_webhook(payload: BotCommandPayload):
-    """
-    Binds Telegram and Discord bots directly to our Llama-3.1 decision matrices.
-    """
     start_time = time.time()
     try:
         command_lower = payload.command.lower()
+        
+        # Safe trigger to handle bot intro card/help sequences
+        if command_lower in ["/start", "/help", "help", "hello", "hi"]:
+            return {
+                "status": "success",
+                "response": BOT_WELCOME_TEXT,
+                "latency": "0ms"
+            }
+
         live_data = fetch_live_market_data()
         mac_supply = fetch_mac_token_data()
         
@@ -698,3 +716,105 @@ async def execute_forge(payload: CommandPayload):
         return response_payload
     except Exception as e:
         return {"status": "error", "message": f"FORGE CORE FAILURE: {str(e)}"}
+
+# ---------------------------------------------------------
+# DAEMON THREAD BOT RUNNERS
+# ---------------------------------------------------------
+def run_telegram_bot_loop():
+    """
+    Spins up pyTelegramBotAPI listener inside an isolated daemon thread.
+    """
+    try:
+        if not TELEGRAM_BOT_TOKEN:
+            print("⚠️ Telegram Bot Token missing from environment. Thread skipped.")
+            return
+            
+        print("🤖 [Daemon] Launching Telegram Bot thread...")
+        tb_bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
+        @tb_bot.message_handler(commands=['start', 'help'])
+        def send_welcome(message):
+            tb_bot.reply_to(message, BOT_WELCOME_TEXT, parse_mode="Markdown")
+
+        @tb_bot.message_handler(func=lambda m: True)
+        def handle_user_command(message):
+            try:
+                payload = BotCommandPayload(
+                    command=message.text,
+                    user_id=str(message.from_user.id),
+                    platform="telegram"
+                )
+                res = requests.post("http://127.0.0.1:8000/api/bot/webhook", json=payload.dict(), timeout=8)
+                data = res.json()
+                tb_bot.reply_to(message, data.get("response", "Error connecting to matrix."), parse_mode="Markdown")
+            except Exception as e:
+                tb_bot.reply_to(message, f"❌ Terminal Timeout: {str(e)}")
+
+        tb_bot.infinity_polling()
+    except Exception as err:
+        print(f"❌ Telegram Bot thread failed: {str(err)}")
+
+def run_discord_bot_loop():
+    """
+    Spins up discord.py client inside an isolated daemon thread with its own asyncio loop.
+    """
+    try:
+        if not DISCORD_BOT_TOKEN:
+            print("⚠️ Discord Bot Token missing from environment. Thread skipped.")
+            return
+
+        print("🤖 [Daemon] Launching Discord Bot thread...")
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        intents = discord.Intents.default()
+        intents.message_content = True
+        discord_client = discord.Client(intents=intents)
+
+        @discord_client.event
+        async def on_ready():
+            print(f"✅ Discord Bot successfully logged in as: {discord_client.user}")
+
+        @discord_client.event
+        async def on_message(message):
+            if message.author == discord_client.user:
+                return
+
+            is_mentioned = discord_client.user in message.mentions
+            content = message.content.strip()
+
+            if is_mentioned or content.startswith("!mac"):
+                clean_content = content.replace(f"<@{discord_client.user.id}>", "").strip()
+                if clean_content.startswith("!mac"):
+                    clean_content = clean_content.replace("!mac", "").strip()
+
+                if clean_content.lower() in ["/start", "/help", "help", "hello", "hi", ""]:
+                    await message.reply(BOT_WELCOME_TEXT)
+                    return
+
+                try:
+                    payload = BotCommandPayload(
+                        command=clean_content,
+                        user_id=str(message.author.id),
+                        platform="discord"
+                    )
+                    res = requests.post("http://127.0.0.1:8000/api/bot/webhook", json=payload.dict(), timeout=8)
+                    data = res.json()
+                    await message.reply(data.get("response", "Error connecting to matrix."))
+                except Exception as e:
+                    await message.reply(f"❌ Terminal Timeout: {str(e)}")
+
+        loop.run_until_complete(discord_client.start(DISCORD_BOT_TOKEN))
+    except Exception as err:
+        print(f"❌ Discord Bot thread failed: {str(err)}")
+
+# --- AUTOSTART BACKGROUND DAEMONS ON FASTAPI STARTUP ---
+@app.on_event("startup")
+async def startup_event():
+    # Start Telegram Daemon
+    tg_thread = threading.Thread(target=run_telegram_bot_loop, daemon=True)
+    tg_thread.start()
+
+    # Start Discord Daemon
+    discord_thread = threading.Thread(target=run_discord_bot_loop, daemon=True)
+    discord_thread.start()

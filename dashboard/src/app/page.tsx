@@ -103,8 +103,8 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       onMouseMove={handleMouse}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-      animate={{ y: [0, -14, 0] }} 
-      transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay }}
+      animate={{ y: [0, -14, 0] }} // Immersive buoyancy floats (swimming cards)
+      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay }}
       className={`relative rounded-3xl p-[1.8px] overflow-hidden transition-all duration-700 ${className}`}
     >
       {isAuraActive && designMode !== "SILENT" && (
@@ -117,7 +117,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       )}
       
       <div 
-        style={{ transform: "translateZ(38px)" }} 
+        style={{ transform: "translateZ(38px)" }} // Thicker 3D depth translation
         className={`h-full w-full rounded-[23px] transition-all duration-700 p-6 sm:p-8 flex flex-col relative z-10 ${
           designMode === "AURA"
             ? "bg-[rgba(4,6,15,0.6)] backdrop-blur-[65px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.15)] border-t border-l border-white/22 border-b border-r border-white/5"
@@ -259,6 +259,7 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(false); 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // UPGRADE: Globally Synchronized Theme variables
   const { isOverclocked, toggleOverclock, safeColors, setSystemState, designMode, setDesignMode } = useTheme();
   const { primary, secondary, border, dotBg } = safeColors;
 
@@ -311,6 +312,14 @@ export default function Home() {
   } as any);
 
   const [isAuraActive, setIsAuraActive] = useState(false);
+
+  // Restore Welcome Intro Card on initial load
+  useEffect(() => {
+    const init = sessionStorage.getItem("systemInitialized");
+    if (init !== "true") {
+      setShowIntro(true);
+    }
+  }, []);
 
   useEffect(() => {
     setIsAuraActive(designMode === "AURA");
@@ -1289,7 +1298,7 @@ export default function Home() {
             <AnimatePresence>{yieldWeaverMode !== "IDLE" && (
                 <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: -20 }} transition={{ duration: 0.4 }} className="w-full">
                   <FloatingGlassCard designMode={designMode} delay={0.3} className="bg-black/50 border border-purple-500/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-                    <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4"><span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver</span><span className="text-[9px] font-mono text-white/50">Active: Mantle RWA</span></div>
+                    <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4"><span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver</span><span className="text-[9px] font-mono text-white/50 font-bold">Active: Mantle RWA</span></div>
                     <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary font-bold">
                       <div className="flex justify-between"><span className="text-white/60 font-bold">Ondo USDY APY:</span><span className="text-white font-bold">5.1% APY</span></div>
                       <div className="flex justify-between"><span className="text-white/60 font-bold">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">7.2% APY</span></div>
@@ -1397,7 +1406,7 @@ export default function Home() {
             <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[80px]">
               <button 
                 onClick={() => open()} 
-                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
+                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
               >
                 {isConnected ? "Connection Active" : "Bridge Wallet"}
               </button>
