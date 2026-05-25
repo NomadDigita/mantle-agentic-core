@@ -12,7 +12,7 @@ body {
   background: var(--background);
   color: white;
   margin: 0;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   touch-action: manipulation;
 }
@@ -20,25 +20,25 @@ body {
 /* HIGH LEGIBILITY CONTRAST ENHANCEMENTS */
 .text-sharp-primary {
   color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .text-sharp-secondary {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .text-sharp-muted {
-  color: rgba(255, 255, 255, 0.65) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* THE LIQUID GLASS UI */
 .liquid-glass {
-  background: rgba(10, 15, 30, 0.25);
-  backdrop-filter: blur(50px);
-  -webkit-backdrop-filter: blur(50px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(5, 7, 15, 0.45);
+  backdrop-filter: blur(55px);
+  -webkit-backdrop-filter: blur(55px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9);
 }
 
 /* TOUCH OPTIMIZED INTERACTION CLASS */
@@ -59,25 +59,25 @@ body {
   50% { transform: scale(1.2) rotate(90deg); opacity: 1; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)); }
 }
 @keyframes twinkle-blue {
-  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0)); }
-  50% { transform: scale(1.0) rotate(-120deg); opacity: 0.9; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)); }
+  0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(0, 184, 255, 0)); }
+  50% { transform: scale(1.0) rotate(-120deg); opacity: 0.9; filter: drop-shadow(0 0 8px rgba(0, 184, 255, 0.8)); }
 }
 @keyframes twinkle-purple {
   0%, 100% { transform: scale(0.3) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(168, 85, 247, 0)); }
   50% { transform: scale(1.1) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.8)); }
 }
-@keyframes twinkle-green {
-  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0)); }
-  50% { transform: scale(1.0) rotate(-45deg); opacity: 0.9; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.8)); }
+@keyframes twinkle-mint {
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.15; filter: drop-shadow(0 0 2px rgba(0, 255, 163, 0)); }
+  50% { transform: scale(1.0) rotate(-45deg); opacity: 0.9; filter: drop-shadow(0 0 6px rgba(0, 255, 163, 0.8)); }
 }
 
 .star-yellow { animation: twinkle-yellow 4s infinite ease-in-out; }
 .star-white { animation: twinkle-white 3.5s infinite ease-in-out; }
 .star-blue { animation: twinkle-blue 5s infinite ease-in-out; }
 .star-purple { animation: twinkle-purple 4.5s infinite ease-in-out; }
-.star-green { animation: twinkle-green 6s infinite ease-in-out; }
+.star-mint { animation: twinkle-mint 6s infinite ease-in-out; }
 
-/* GEMINI FLOWING GRADIENT BORDER SYSTEM */
+/* GEMINI STYLE GLOWING GRADIENT BORDER SWEEP */
 @keyframes laser-sweep {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -88,10 +88,10 @@ body {
   background: conic-gradient(
     from 0deg,
     transparent 20%,
-    rgba(16, 185, 129, 0.6) 35%,
-    rgba(59, 130, 246, 0.6) 50%,
+    rgba(0, 255, 163, 0.6) 35%,
+    rgba(0, 184, 255, 0.6) 50%,
     transparent 65%,
-    rgba(168, 85, 247, 0.6) 80%,
+    rgba(168, 85, 247, 0.5) 80%,
     transparent 100%
   );
 }
@@ -122,13 +122,6 @@ body {
   );
 }
 
-/* TERMINAL TEXT */
-.terminal-text {
-  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
-  font-size: 0.85rem;
-  line-height: 1.7;
-}
-
 /* CUSTOM SCROLLBAR */
 ::-webkit-scrollbar {
   width: 6px;
@@ -141,5 +134,5 @@ body {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.4);
+  background: rgba(0, 255, 163, 0.4);
 }

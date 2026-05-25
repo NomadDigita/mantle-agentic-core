@@ -41,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const toggleOverclock = () => setIsOverclocked(prev => !prev);
 
-  // Softened Semantic Aura Engine for reduced eye strain
+  // Softened Semantic Aura Engine for reduced eye strain (Nansen-Branded default)
   const getSafeColors = (): SafeColors => {
     switch (systemState) {
       case 'OVERCLOCK':
@@ -57,8 +57,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         };
       case 'ANALYZING':
         return {
-          primary: "text-amber-500",
-          secondary: "text-amber-400/80",
+          primary: "text-amber-400",
+          secondary: "text-amber-300",
           border: "border-amber-500/20",
           glow: "bg-amber-950/20",
           dotBg: "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.5)]",
@@ -79,26 +79,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         };
       case 'LISTENING':
         return {
-          primary: "text-emerald-500/40", 
-          secondary: "text-emerald-400/40",
+          primary: "text-[#00ffa3]/50", 
+          secondary: "text-[#00b8ff]/50",
           border: "border-white/5",
           glow: "bg-transparent", 
-          dotBg: "bg-emerald-500/20",
-          hoverPrimary: "hover:text-emerald-400",
-          hoverBorder: "hover:border-emerald-500/20",
+          dotBg: "bg-[#00ffa3]/20",
+          hoverPrimary: "hover:text-[#00ffa3]",
+          hoverBorder: "hover:border-[#00ffa3]/20",
           bgPulse: "bg-black/40", 
         };
       case 'IDLE':
       default:
-        // Softened Liquid Glass default palette
+        // Softened Liquid Glass default palette (Nansen Mint-Teal Brand Sync)
         return {
-          primary: "text-emerald-400",
-          secondary: "text-emerald-300",
-          border: "border-white/10",
-          glow: "bg-emerald-950/15",
-          dotBg: "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.3)]",
-          hoverPrimary: "hover:text-emerald-300",
-          hoverBorder: "hover:border-emerald-400/30",
+          primary: "text-[#00ffa3]",
+          secondary: "text-[#00b8ff]",
+          border: "border-white/12",
+          glow: "bg-[#00ffa3]/15",
+          dotBg: "bg-[#00ffa3] shadow-[0_0_10px_rgba(0,255,163,0.3)]",
+          hoverPrimary: "hover:text-[#00ffa3]",
+          hoverBorder: "hover:border-[#00ffa3]/30",
           bgPulse: "bg-slate-950/20", 
         };
     }

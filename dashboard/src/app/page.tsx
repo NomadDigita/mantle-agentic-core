@@ -148,18 +148,18 @@ function IntroSequence({ onComplete, designMode = "AURA" }: { onComplete: () => 
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 text-left">
-          <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="bg-black/50 p-5 rounded-2xl border border-white/5">
-            <h3 className="text-emerald-400 font-bold text-xs uppercase mb-2 tracking-widest">01. Live Terminal</h3>
-            <p className="text-white/80 text-[10px] font-mono leading-relaxed">Real-time market analysis and agentic execution.</p>
-          </motion.div>
-          <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="bg-black/50 p-5 rounded-2xl border border-white/5">
+          <div className="bg-black/50 p-5 rounded-2xl border border-white/5 font-sans font-semibold">
+            <h3 className="text-[#00ffa3] font-bold text-xs uppercase mb-2 tracking-widest">01. Live Terminal</h3>
+            <p className="text-white/80 text-[10px] leading-relaxed">Real-time market analysis and agentic execution.</p>
+          </div>
+          <div className="bg-black/50 p-5 rounded-2xl border border-white/5 font-sans font-semibold">
             <h3 className="text-amber-400 font-bold text-xs uppercase mb-2 tracking-widest">02. Neural Forge</h3>
-            <p className="text-white/80 text-[10px] font-mono leading-relaxed">Autonomous smart contract compilation and auditing.</p>
-          </motion.div>
-          <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="bg-black/50 p-5 rounded-2xl border border-white/5">
+            <p className="text-white/80 text-[10px] leading-relaxed">Autonomous smart contract compilation and auditing.</p>
+          </div>
+          <div className="bg-black/50 p-5 rounded-2xl border border-white/5 font-sans font-semibold">
             <h3 className="text-purple-400 font-bold text-xs uppercase mb-2 tracking-widest">03. Citadel Vault</h3>
-            <p className="text-white/80 text-[10px] font-mono leading-relaxed">ERC-8004 Agent Identity minting and risk management.</p>
-          </motion.div>
+            <p className="text-white/80 text-[10px] leading-relaxed">ERC-8004 Agent Identity minting and risk management.</p>
+          </div>
         </div>
 
         <motion.button 
@@ -339,12 +339,17 @@ export default function Home() {
     { id: "init-3", agent: "Alpha Trace", color: "text-amber-500", text: "Tracking multi-sig smart wallets on Mantle Sepolia..." }
   ]);
 
-  // --- NATIVE MNT GAS MONITORING ---
+  // --- NATIVE MNT GAS MONITORING (SAFE BIGINT MATH WITH COMPLETE UNDEFINED COERCION) ---
   const { data: balanceData, refetch: refetchBalance } = useBalance({
     address: address as `0x${string}`,
-    chainId: 5003
+    chainId: 5003,
+    query: { enabled: !!address } // Gate hook to prevent undefined query key crashes
   });
-  const mntGasBalance = balanceData ? parseFloat((balanceData as any).formatted) : 5.0; 
+  
+  const mntGasBalance = (balanceData && typeof balanceData.value !== "undefined" && typeof balanceData.decimals !== "undefined")
+    ? Number(balanceData.value) / (10 ** balanceData.decimals) 
+    : 5.0; 
+
   const [isRefueling, setIsRefueling] = useState(false);
   const [refuelResultHash, setRefuelResultHash] = useState<string | null>(null);
 
@@ -355,36 +360,72 @@ export default function Home() {
     query: { enabled: !!refuelFeeHash }
   });
 
-  useEffect(() => { 
-    setMounted(true); 
-    if (sessionStorage.getItem("systemInitialized") !== "true") setShowIntro(true);
-  }, []);
+  const [headerText, setHeaderText] = useState("> SCANNING MANTLE MEMPOOL...");
+  const [activeCoinIndex, setActiveCoinIndex] = useState(0);
 
+  // --- UPGRADE: HANDLERS & PROCEDURAL EFFECT FUNCTIONS ---
   const handleIntroComplete = () => {
     sessionStorage.setItem("systemInitialized", "true");
     setShowIntro(false);
   };
 
-  const [headerText, setHeaderText] = useState("> SCANNING MANTLE MEMPOOL...");
+  // --- SAFE MULTI-SESSION CLOUD HISTORY SYNCHRONIZER (Bypasses local storage hydration bugs) ---
   useEffect(() => {
-    const lines = [
-      "> SCANNING MANTLE MEMPOOL...", 
-      "> ANALYZING L2 LIQUIDITY...", 
-      "> ERC-8004 PROTOCOLS ACTIVE...", 
-      "> WAITING FOR EXECUTIVE COMMAND..."
-    ];
-    let i = 0;
-    const interval = setInterval(() => { i = (i + 1) % lines.length; setHeaderText(lines[i]); }, 4500);
-    return () => clearInterval(interval);
-  }, []);
+    if (isConnected && address) {
+      setIsRestored(false); 
+      const safeAddress = address.toLowerCase();
+
+      const fetchPermanentHistory = async () => {
+        try {
+          const response = await fetch(`https://mantle-agentic-core.onrender.com/api/history?wallet_address=${safeAddress}`);
+          const parsedHistory = await response.json();
+          if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
+            setMessages(parsedHistory);
+          } else {
+            setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
+          }
+        } catch (err) {
+          console.warn("History Vault unreachable. Loading safe system defaults.");
+          setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
+        } finally {
+          setIsRestored(true);
+        }
+      };
+
+      fetchPermanentHistory();
+    } else {
+      setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
+      setIsRestored(true);
+    }
+  }, [isConnected, address]);
+
+  // --- SAVE HISTORY EMIT PIPELINE ---
+  useEffect(() => {
+    if (isConnected && address && isRestored && messages.length > 1) {
+      const safeAddress = address.toLowerCase();
+      
+      const persistHistoryToVault = async () => {
+        try {
+          await fetch("https://mantle-agentic-core.onrender.com/api/history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ wallet_address: safeAddress, messages })
+          });
+        } catch (err) {
+          console.error("Failed to persist session state to Online History Vault.");
+        }
+      };
+
+      persistHistoryToVault();
+    }
+  }, [messages, isConnected, address, isRestored]);
 
   const marketCoins = [
     { symbol: 'BTC', pair: 'BTCUSDT', name: 'BITCOIN', color: 'text-emerald-400', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
     { symbol: 'ETH', pair: 'ETHUSDT', name: 'ETHEREUM', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
     { symbol: 'SOL', pair: 'SOLUSDT', name: 'SOLANA', color: 'text-amber-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]', border: 'border-amber-500/30', bg: 'bg-amber-500/10' }
   ];
-  const [activeCoinIndex, setActiveCoinIndex] = useState(0);
-  
+
   // --- REALISTIC DUMMY VOLATILITY ENGINE ---
   const basePrices = useRef<Record<string, number>>({'BTCUSDT': 84420.50, 'ETHUSDT': 4704.12, 'SOLUSDT': 142.85});
   const [rawPrices, setRawPrices] = useState<Record<string, number>>({'BTCUSDT': 84420.50, 'ETHUSDT': 4704.12, 'SOLUSDT': 142.85});
@@ -436,34 +477,10 @@ export default function Home() {
 
   // --- MATRIX RELAY PROCEDURAL SEQUENCER ENGINE ---
   useEffect(() => {
-    const relayTemplates: { agent: "Yield Scribe" | "Sentinel Hub" | "Alpha Trace", color: string, text: string[] }[] = [
-      {
-        agent: "Yield Scribe",
-        color: "text-emerald-400",
-        text: [
-          "Ondo USDY vault rebalancings calculated. Yield premium: +1.2%",
-          "Mantle Staking mETH pool index matches expectations. APY target: 7.21%",
-          "Escrow contract fee successfully locked into L2 staking vaults."
-        ]
-      },
-      {
-        agent: "Sentinel Hub",
-        color: "text-purple-400",
-        text: [
-          "Mempool sequence verified. No abnormal reentrancy patterns logged.",
-          "Mantle Registry state verified. On-chain ownership checksum passed.",
-          "Sentinel monitoring secured at block height: 543292."
-        ]
-      },
-      {
-        agent: "Alpha Trace",
-        color: "text-amber-500",
-        text: [
-          "Mantle whale wallet movements indexed. Net inflows: +2.4M MNT",
-          "Mempool gas price stable. Target gas execution is 0.05 MNT.",
-          "Pre-cognitive sentiment metrics signaling buy pressure."
-        ]
-      }
+    const relayTemplates = [
+      { agent: "Yield Scribe", color: "text-emerald-400", text: ["Ondo USDY vault rebalancings calculated. Yield premium: +1.2%", "Mantle Staking mETH pool index matches expectations. APY target: 7.21%", "Escrow contract fee successfully locked into L2 staking vaults."] },
+      { agent: "Sentinel Hub", color: "text-purple-400", text: ["Mempool sequence verified. No abnormal reentrancy patterns logged.", "Mantle Registry state verified. On-chain ownership checksum passed.", "Sentinel monitoring secured at block height: 543292."] },
+      { agent: "Alpha Trace", color: "text-amber-500", text: ["Mantle whale wallet movements indexed. Net inflows: +2.4M MNT", "Mempool gas price stable. Target gas execution is 0.05 MNT.", "Pre-cognitive sentiment metrics signaling buy pressure."] }
     ];
 
     const generateRelayPing = () => {
@@ -472,7 +489,7 @@ export default function Home() {
       const uniqueId = `${selectedTemplate.agent}-${Date.now()}-${Math.random()}`; // Fix duplicate key exception
       
       setRelayLogs(prev => {
-        const nextLogs = [{ id: uniqueId, agent: selectedTemplate.agent, color: selectedTemplate.color, text }, ...prev];
+        const nextLogs = [{ id: uniqueId, agent: selectedTemplate.agent as any, color: selectedTemplate.color, text }, ...prev];
         return nextLogs.slice(0, 8); 
       });
     };
@@ -480,37 +497,6 @@ export default function Home() {
     const interval = setInterval(generateRelayPing, 3500);
     return () => clearInterval(interval);
   }, []);
-
-  // --- STATE-LOCKED CACHE RESTORATION ---
-  useEffect(() => {
-    if (isConnected && address) {
-      setIsRestored(false); 
-      const cachedMessages = localStorage.getItem(`mac_messages_${address.toLowerCase()}`);
-      const cachedPositions = localStorage.getItem(`mac_positions_${address.toLowerCase()}`);
-      
-      if (cachedMessages) setMessages(JSON.parse(cachedMessages));
-      else setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
-      
-      if (cachedPositions) setActivePositions(JSON.parse(cachedPositions));
-      else setActivePositions([]);
-      
-      setIsRestored(true); 
-    }
-  }, [isConnected, address]);
-
-  // --- WRITE MONITORS CACHED ---
-  useEffect(() => {
-    if (isConnected && address && isRestored && messages.length > 1) {
-      localStorage.setItem(`mac_messages_${address.toLowerCase()}`, JSON.stringify(messages));
-    }
-  }, [messages, isConnected, address, isRestored]);
-
-  useEffect(() => {
-    if (isConnected && address && isRestored) {
-      localStorage.setItem(`mac_positions_${address.toLowerCase()}`, JSON.stringify(activePositions));
-    }
-  }, [activePositions, isConnected, address, isRestored]);
-
 
   // --- IDENTITY SCANNER FIXED & ESCAPED ---
   useEffect(() => {
@@ -522,6 +508,7 @@ export default function Home() {
     const scanOnChainAgent = async () => {
       setIsCheckingAgent(true);
       try {
+        const safeAddress = address.toLowerCase();
         const client = createPublicClient({
           chain: {
             id: 5003,
@@ -544,11 +531,11 @@ export default function Home() {
             }
           ],
           functionName: "balanceOf",
-          args: [address as `0x${string}`]
+          args: [safeAddress as `0x${string}`]
         }) as bigint;
 
         if (balance > BigInt(0)) {
-          const cachedProfile = localStorage.getItem(`mac_agent_${address.toLowerCase()}`);
+          const cachedProfile = localStorage.getItem(`mac_agent_${safeAddress}`);
           if (cachedProfile) {
             setAgentProfile(JSON.parse(cachedProfile));
             setIsCheckingAgent(false);
@@ -559,7 +546,7 @@ export default function Home() {
             const logs = await client.getLogs({
               address: "0x1E5B64264089aacC547A1506402B94f909215942",
               event: parseAbiItem("event AgentAwakened(address indexed creator, uint256 indexed agentId, string riskStrategy)"),
-              args: { creator: address as `0x${string}` },
+              args: { creator: safeAddress as `0x${string}` },
               fromBlock: "earliest",
               toBlock: "latest"
             });
@@ -584,7 +571,7 @@ export default function Home() {
                 };
 
                 setAgentProfile(fetchedProfile);
-                localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(fetchedProfile));
+                localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
                 return;
               }
             }
@@ -608,7 +595,7 @@ export default function Home() {
                   args: [BigInt(i)]
                 }) as `0x${string}`;
 
-                if (owner.toLowerCase() === address.toLowerCase()) {
+                if (owner.toLowerCase() === safeAddress) {
                   const rawProfile = await (client as any).readContract({
                     address: "0x1E5B64264089aacC547A1506402B94f909215942",
                     abi: ERC8004_IDENTITY_ABI, 
@@ -624,7 +611,7 @@ export default function Home() {
                   };
 
                   setAgentProfile(fetchedProfile);
-                  localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(fetchedProfile));
+                  localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
                   break;
                 }
               } catch (ownerErr) {
@@ -644,21 +631,6 @@ export default function Home() {
 
     scanOnChainAgent();
   }, [isConnected, address]);
-
-  // --- SMART SCROLL EFFECT ---
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
-    const hasNewMessage = messages.length > prevMessagesLength.current;
-
-    if (hasNewMessage || isNearBottom) {
-      container.scrollTop = container.scrollHeight;
-    }
-
-    prevMessagesLength.current = messages.length;
-  }, [messages, activePositions]);
 
   const handleSignExecution = async (msgId: string, payload: ActionPayload) => {
     if (agentProfile) {
@@ -816,8 +788,7 @@ export default function Home() {
       let sanitizedMessage = data.message.replace(/@asiwajubtc/gi, "Mantle SecOps").replace(/ASIWAJU TERMINAL/gi, "MANTLE AGENTIC CORE").replace(/Asiwaju/gi, "Mantle Agent");
       
       // --- UPGRADE: OPTION C REASONING HASH ---
-      const generatedHash = "0x" + Array.from(new TextEncoder().encode(data.message || ""))
-        .map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 64);
+      const generatedHash = "0x" + Array.from(new TextEncoder().encode(data.message || "")).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 64);
 
       setMessages(prev => [...prev, { 
         id: (Date.now() + 1).toString(), 
@@ -864,13 +835,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    if (isWeaveConfirmed) {
-      setYieldWeaverMode("mETH_PREMIUM");
-      if (!isOverclocked) setSystemState('IDLE');
-    }
-  }, [isWeaveConfirmed, isOverclocked, setSystemState]);
-
   const handleRescueSecOps = async () => {
     setSystemState('MINTING');
     try {
@@ -897,18 +861,6 @@ export default function Home() {
       if (!isOverclocked) setSystemState('IDLE');
     }
   };
-
-  useEffect(() => {
-    if (isRescueSuccess) {
-      setExploitAlert(false);
-      toggleOverclock(); 
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: "system",
-        text: `🛡️ SECOPS Sentinel: Exploit front-run successful. Deployed contract state paused.\nRegistry Safe Vault successfully locked with hash: ${rescueHash}.`
-      }]);
-    }
-  }, [isRescueSuccess]);
 
   // REQUEST AUTONOMOUS MNT GAS REFUEL
   const handleRequestRefuel = async () => {
@@ -971,6 +923,10 @@ export default function Home() {
     }
   }, [isRefuelFeeSuccess, address, refetchBalance]);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!mounted) return null;
   const currentMarket = marketCoins[activeCoinIndex];
 
@@ -987,21 +943,21 @@ export default function Home() {
 
       {/* DEEP LIQUID NODE PARTICLE BACKGROUND */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 opacity-30">
-        <div className="absolute top-[10%] left-[20%] w-[45vw] h-[45vw] bg-emerald-500/5 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[10%] right-[10%] w-[55vw] h-[55vw] bg-blue-500/5 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite_delay-2s]" />
+        <div className="absolute top-[10%] left-[20%] w-[45vw] h-[45vw] bg-[#00ffa3]/5 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[10%] right-[10%] w-[55vw] h-[55vw] bg-[#00b8ff]/5 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite_delay-2s]" />
         
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#000_100%)]" />
         
-        <div className="absolute top-[20%] left-[30%] w-2 h-2 rounded-full bg-emerald-400 opacity-20 animate-ping [animation-duration:5s]" />
-        <div className="absolute top-[65%] left-[15%] w-1.5 h-1.5 rounded-full bg-blue-400 opacity-20 animate-ping [animation-duration:7s]" />
+        <div className="absolute top-[20%] left-[30%] w-2 h-2 rounded-full bg-[#00ffa3] opacity-20 animate-ping [animation-duration:5s]" />
+        <div className="absolute top-[65%] left-[15%] w-1.5 h-1.5 rounded-full bg-[#00b8ff] opacity-20 animate-ping [animation-duration:7s]" />
         <div className="absolute top-[45%] left-[80%] w-2 h-2 rounded-full bg-purple-400 opacity-20 animate-ping [animation-duration:6s]" />
 
         <svg className="absolute bottom-0 left-0 w-full h-[35vh] opacity-10" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill="url(#water-grad)" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,218.7C672,203,768,149,864,138.7C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
           <defs>
             <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+              <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#00b8ff" stopOpacity="0" />
             </linearGradient>
           </defs>
         </svg>
@@ -1022,25 +978,25 @@ export default function Home() {
         {/* ========================================================= */}
         <div className="relative rounded-3xl p-[1px] overflow-hidden transition-all duration-700 w-full">
           {/* Dynamic glowing border depending on Overclock status */}
-          <div className={`absolute inset-0 bg-gradient-to-r ${isOverclocked ? 'from-red-500/30 via-red-950/20 to-red-600/30' : 'from-emerald-500/25 via-purple-500/15 to-blue-500/25'} blur-sm pointer-events-none`} />
+          <div className={`absolute inset-0 bg-gradient-to-r ${isOverclocked ? 'from-red-500/30 via-red-950/20 to-red-600/30' : 'from-[#00ffa3]/25 via-purple-500/15 to-[#00b8ff]/25'} blur-sm pointer-events-none`} />
           
           <div className="relative rounded-[23px] bg-[rgba(6,9,20,0.45)] backdrop-blur-[55px] p-5 border border-white/15 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden shadow-2xl">
             {/* Absolute Twinkling Mini-Stars (Pure CSS keyframes powered) */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
               <div className="star-yellow absolute top-[20%] left-[8%] w-1.5 h-1.5 bg-amber-400 rounded-full" />
-              <div className="star-white absolute top-[70%] left-[15%] w-1 h-1 bg-white rounded-full" />
-              <div className="star-blue absolute top-[30%] left-[45%] w-1.5 h-1.5 bg-blue-400 rounded-full" />
-              <div className="star-purple absolute top-[80%] left-[55%] w-1 h-1 bg-purple-400 rounded-full" />
-              <div className="star-green absolute top-[40%] left-[75%] w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-              <div className="star-white absolute top-[25%] left-[90%] w-1 h-1 bg-white rounded-full" />
-              <div className="star-yellow absolute top-[75%] left-[85%] w-1 h-1 bg-amber-300 rounded-full" />
+              <div className="star-white absolute top-[70%] left-[15%] w-1.5 h-1.5 bg-white rounded-full" />
+              <div className="star-blue absolute top-[30%] left-[45%] w-1.5 h-1.5 bg-[#00b8ff] rounded-full" />
+              <div className="star-purple absolute top-[80%] left-[55%] w-1.5 h-1.5 bg-purple-400 rounded-full" />
+              <div className="star-mint absolute top-[40%] left-[75%] w-1.5 h-1.5 bg-[#00ffa3] rounded-full" />
+              <div className="star-white absolute top-[25%] left-[90%] w-1.5 h-1.5 bg-white rounded-full" />
+              <div className="star-yellow absolute top-[75%] left-[85%] w-1.5 h-1.5 bg-amber-300 rounded-full" />
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left z-10 relative">
-              <div className={`px-4 py-1.5 rounded-full border text-[9px] font-mono tracking-[0.2em] uppercase font-black ${isOverclocked ? 'from-red-500/10 to-red-700/10 border-red-500/40 text-red-400' : 'from-emerald-500/10 to-blue-500/10 border-emerald-500/30 text-emerald-300'}`}>
+              <div className={`px-4 py-1.5 rounded-full border text-[9px] font-mono tracking-[0.2em] uppercase font-black ${isOverclocked ? 'from-red-500/10 to-red-700/10 border-red-500/40 text-red-400' : 'from-[#00ffa3]/10 to-[#00b8ff]/10 border-[#00ffa3]/30 text-[#00ffa3]'}`}>
                 OFFICIAL PORTALS
               </div>
-              <p className="text-[10px] sm:text-xs font-mono text-sharp-secondary font-medium">Secure verification lines synced with the principal ledger.</p>
+              <p className="text-[10px] sm:text-xs font-sans font-semibold text-sharp-secondary tracking-tight">Secure verification lines synced with the principal ledger.</p>
             </div>
 
             {/* Custom SVG social matrix buttons, optimized with brands color indicators */}
@@ -1074,14 +1030,14 @@ export default function Home() {
                 title="Enter Discord Sanctuary"
               >
                 <svg className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.27 4.73a16.13 16.13 0 0 0-3.97-1.23.1.1 0 0 0-.1.05c-.35.62-.74 1.44-1.01 2.1a15 15 0 0 0-4.38 0c-.27-.66-.67-1.48-1.02-2.1a.1.1 0 0 0-.1-.05 16.13 16.13 0 0 0-3.97 1.23.1.1 0 0 0-.05.04C1.9 9.36 1.02 13.84 1.48 18.25a.1.1 0 0 0 .04.07 16.27 16.27 0 0 0 4.9 2.48.1.1 0 0 0 .11-.04c.38-.51.72-1.07 1-1.66a.1.1 0 0 0-.06-.13 10.74 10.74 0 0 1-1.51-.72.1.1 0 0 1-.01-.16c.1-.08.2-.15.3-.23a.1.1 0 0 1 .11-.01c3.15 1.44 6.57 1.44 9.66 0a.1.1 0 0 1 .11.01c.1.08.2.15.3.23a.1.1 0 0 1-.01.16 10.5 10.5 0 0 1-1.51.72.1.1 0 0 0-.06.13c.29.59.63 1.15 1 1.66a.1.1 0 0 0 .11.04 16.27 16.27 0 0 0 4.9-2.48.1.1 0 0 0 .04-.07c.56-5.1-.9-9.54-3.57-13.48a.1.1 0 0 0-.05-.04zM8.52 14.85c-.95 0-1.72-.87-1.72-1.94s.75-1.94 1.72-1.94c.98 0 1.73.88 1.72 1.94 0 1.07-.75 1.94-1.72 1.94zm6.96 0c-.95 0-1.72-.87-1.72-1.94s.75-1.94 1.72-1.94c.98 0 1.73.88 1.72 1.94 0 1.07-.75 1.94-1.72 1.94z"/>
+                  <path d="M19.27 4.73a16.13 16.13 0 0 0-3.97-1.23.1.1 0 0 0-.1.05c-.35.62-.74 1.44-1.01 2.1a15 15 0 0 0-4.38 0c-.27-.66-.67-1.48-1.02-2.1a.1.1 0 0 0-.1-.05 16.13 16.13 0 0 0-3.97 1.23.1.1 0 0 0-.05.04C1.9 9.36 1.02 13.84 1.48 18.25a.1.1 0 0 0 .04-.07 16.27 16.27 0 0 0 4.9 2.48.1.1 0 0 0 .11-.04c.38-.51.72-1.07 1-1.66a.1.1 0 0 0-.06-.13 10.74 10.74 0 0 1-1.51-.72.1.1 0 0 1-.01-.16c.1-.08.2-.15.3-.23a.1.1 0 0 1 .11-.01c3.15 1.44 6.57 1.44 9.66 0a.1.1 0 0 1 .11.01c.1.08.2.15.3.23a.1.1 0 0 1-.01.16 10.5 10.5 0 0 1-1.51.72.1.1 0 0 0-.06.13c.29.59.63 1.15 1 1.66a.1.1 0 0 0 .11.04 16.27 16.27 0 0 0 4.9-2.48.1.1 0 0 0 .04-.07c.56-5.1-.9-9.54-3.57-13.48a.1.1 0 0 0-.05-.04z"/>
                 </svg>
               </a>
 
               {/* Gmail Envelope */}
               <a 
                 href="mailto:mantlecore.agent@gmail.com"
-                className="p-3 rounded-xl bg-black/40 border border-white/10 hover:border-red-400/40 hover:bg-red-950/20 transition-all flex items-center justify-center group mobile-touch-target"
+                className="p-3 rounded-xl bg-black/40 border border-white/15 hover:border-red-400/40 hover:bg-red-950/20 transition-all flex items-center justify-center group mobile-touch-target"
                 title="Direct Operator Line"
               >
                 <svg className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -1140,8 +1096,8 @@ export default function Home() {
             >
               {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
             </button>
-            <Link href="/citadel"><button className="px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/80 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg mobile-touch-target">Citadel</button></Link>
-            <Link href="/forge"><button className="px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/80 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg mobile-touch-target">Forge</button></Link>
+            <Link href="/citadel"><button className="px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/85 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg mobile-touch-target">Citadel</button></Link>
+            <Link href="/forge"><button className="px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/85 bg-black/20 border border-white/10 hover:bg-white/10 transition-colors backdrop-blur-md shadow-lg mobile-touch-target">Forge</button></Link>
           </div>
         </div>
 
@@ -1162,9 +1118,7 @@ export default function Home() {
                 </AnimatePresence>
 
                 {/* --- UPGRADE: INJECTED SOCIAL PORTAL CAROUSEL HUDBAR --- */}
-                <div className="flex-shrink-0">
-                  <SocialMatrixCarousel />
-                </div>
+                <div className="flex-shrink-0"><SocialMatrixCarousel /></div>
               </div>
               
               <div ref={scrollRef} className="p-4 sm:p-8 font-mono text-xs sm:text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
@@ -1172,33 +1126,22 @@ export default function Home() {
                 <AnimatePresence>
                   {activePositions.length > 0 && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6">
-                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active Deployments
-                      </div>
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {activePositions.map(pos => (
                           <div key={pos.id} className="bg-black/40 border border-white/10 rounded-xl p-4 backdrop-blur-md relative overflow-hidden">
-                            <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,1)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)]'}`} />
+                            <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3] shadow-[0_0_15px_rgba(0,255,163,1)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)]'}`} />
                             <div className="flex justify-between items-start mb-2 pl-2">
                               <div>
                                 <span className="text-white font-black text-base sm:text-lg">{pos.asset}</span>
-                                <span className={`ml-2 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
-                                  {pos.type} {pos.leverage}x
-                                </span>
+                                <span className={`ml-2 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-[#00ffa3]/20 text-[#00ffa3] border border-[#00ffa3]/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{pos.type} {pos.leverage}x</span>
                               </div>
                               <div className="text-right">
-                                <div className={`font-mono text-base sm:text-lg font-black tracking-tighter ${pos.pnl >= 0 ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>
-                                  {pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}
-                                </div>
-                                <div className={`text-[8px] sm:text-[10px] font-bold ${pos.pnl >= 0 ? 'text-emerald-500/70' : 'text-red-500/70'}`}>
-                                  {pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%
-                                </div>
+                                <div className={`font-mono text-base sm:text-lg font-black tracking-tighter ${pos.pnl >= 0 ? 'text-[#00ffa3] drop-shadow-[0_0_8px_rgba(0,255,163,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>{pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}</div>
+                                <div className={`text-[8px] sm:text-[10px] font-bold ${pos.pnl >= 0 ? 'text-[#00ffa3]/70' : 'text-red-500/70'}`}>{pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%</div>
                               </div>
                             </div>
-                            <div className="flex justify-between text-[8px] sm:text-[10px] font-mono text-white/60 pl-2 border-t border-white/5 pt-2 mt-2">
-                              <span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                              <span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                            </div>
+                            <div className="flex justify-between text-[8px] sm:text-[10px] font-mono text-white/60 pl-2 border-t border-white/5 pt-2 mt-2"><span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span><span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
                           </div>
                         ))}
                       </div>
@@ -1219,9 +1162,7 @@ export default function Home() {
                         }`}
                       >
                         {msg.role !== 'system' && (
-                          <span className={`text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/50' : secondary}`}>
-                            {msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}
-                          </span>
+                          <span className={`text-[8px] sm:text-[9px] uppercase font-bold tracking-[0.2em] ${msg.role === 'user' ? 'text-white/50' : secondary}`}>{msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}</span>
                         )}
 
                         {/* Collapsible Reasoning Logs */}
@@ -1239,16 +1180,14 @@ export default function Home() {
                                 <div className="w-1.5 h-3 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
                               </span>
                               {msg.actionPayload.status === 'SUCCESS' ? (
-                                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>EXECUTED</span>
+                                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
                               ) : (
                                 <span className="text-[10px] text-amber-400 font-mono flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING SIGNATURE..." : "AWAITING SIGNATURE"}</span>
                               )}
                             </div>
 
                             <div className="mb-5 bg-white/5 p-4 rounded-lg border border-white/5 flex gap-4 items-start">
-                                <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]">
-                                   <span className={`text-[10px] font-bold ${msg.actionPayload.confidence > 70 ? 'text-emerald-400' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span>
-                                </div>
+                                <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]"><span className={`text-[10px] font-bold ${msg.actionPayload.confidence > 70 ? 'text-emerald-400' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
                                 <div>
                                     <span className="text-[9px] uppercase tracking-widest text-white/50 block mb-1">STRATEGY ANALYSIS</span>
                                     <p className="text-xs text-white/85 font-mono leading-relaxed">{msg.actionPayload.analysis}</p>
@@ -1324,7 +1263,7 @@ export default function Home() {
                     type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
                     onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                     onBlur={() => !isOverclocked && setSystemState('IDLE')}
-                    placeholder="Enter executive command (e.g. 'Long ETH')..." 
+                    placeholder="Enter executive command (e.g. 'Long ETH')...." 
                     className="flex-1 bg-transparent px-6 py-4 text-sm focus:outline-none text-white placeholder:text-white/40 font-mono pointer-events-auto"
                     disabled={isExecuting}
                   />
@@ -1382,7 +1321,7 @@ export default function Home() {
                 <div className="text-center py-4">
                   <p className="text-xs text-white/60 mb-3">No active ERC-8004 identity found mapped to your address.</p>
                   <Link href="/citadel">
-                    <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-white/10 transition-colors mobile-touch-target">
+                    <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-[#00ffa3] hover:bg-white/10 transition-colors mobile-touch-target">
                       Awaken Identity
                     </button>
                   </Link>
@@ -1415,24 +1354,13 @@ export default function Home() {
                      {exploitAlert && <div className="text-red-400 font-bold uppercase animate-pulse mt-2">⚠️ FLASH LOAN ATTACK SIGNATURE FLAG</div>}
                   </div>
 
-                  <AnimatePresence>
-                    {exploitAlert && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-red-950/20 border border-red-500/30 p-4 rounded-xl mt-2"
-                      >
+                  <AnimatePresence>{exploitAlert && (
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-red-950/20 border border-red-500/30 p-4 rounded-xl mt-2">
                          <span className="text-[9px] text-red-400 font-mono uppercase block mb-1">DEFENSIVE INTERVENTION REQUIRED</span>
                          <p className="text-[10px] text-sharp-secondary font-mono leading-relaxed mb-4">Autonomous agent detects exploit vectors inside the pending mempool stream.</p>
-                         
-                         <button
-                           onClick={handleRescueSecOps}
-                           className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95 mobile-touch-target"
-                         >
-                           {isSecuringRescue ? "BROADCASTING FRONT-RUN..." : "CONFIRM SECURE RESCUE"}
-                         </button>
+                         <button onClick={handleRescueSecOps} className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95 mobile-touch-target">CONFIRM SECURE RESCUE</button>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
+                  )}</AnimatePresence>
                 </div>
               ) : (
                 <p className="text-xs text-white/50 text-center py-2 font-mono">SecOps threat detection stream is standing by.</p>
@@ -1440,102 +1368,42 @@ export default function Home() {
             </FloatingGlassCard>
 
             {/* DYNAMIC YIELD WEAVER HUD CARD (AI x RWA) */}
-            <AnimatePresence>
-              {yieldWeaverMode !== "IDLE" && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                  transition={{ duration: 0.4 }}
-                  className="w-full"
-                >
+            <AnimatePresence>{yieldWeaverMode !== "IDLE" && (
+                <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: -20 }} transition={{ duration: 0.4 }} className="w-full">
                   <FloatingGlassCard designMode={designMode} delay={0.3} className="bg-black/40 border border-purple-500/30 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.25)]">
-                    <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                      <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver
-                      </span>
-                      <span className="text-[9px] font-mono text-white/50">Active: Mantle RWA</span>
-                    </div>
-
+                    <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4"><span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> AI Yield Weaver</span><span className="text-[9px] font-mono text-white/50">Active: Mantle RWA</span></div>
                     <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary">
-                      <div className="flex justify-between">
-                        <span className="text-white/60">Ondo USDY APY:</span>
-                        <span className="text-white font-bold">5.1% APY</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-white/60">Mantle mETH APY:</span>
-                        <span className="text-emerald-400 font-bold">7.2% APY</span>
-                      </div>
-                      <div className="flex justify-between border-t border-white/5 pt-2">
-                        <span className="text-white/60">WEAVER ALLOCATION:</span>
-                        <span className="text-purple-400 font-bold">
-                          {yieldWeaverMode === "mETH_PREMIUM" ? "100% Mantle mETH" : "100% Ondo USDY"}
-                        </span>
-                      </div>
-
-                      {yieldWeaverMode === "mETH_PREMIUM" && (
-                        <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col">
-                          <span className="font-bold">🚀 PRE-COGNITIVE SWAP CONFIRMED</span>
-                          <span>Yield path re-allocated successfully to maximize premium APY spreads.</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between"><span className="text-white/60">Ondo USDY APY:</span><span className="text-white font-bold">5.1% APY</span></div>
+                      <div className="flex justify-between"><span className="text-white/60">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">7.2% APY</span></div>
+                      <div className="flex justify-between border-t border-white/5 pt-2"><span className="text-white/60">WEAVER ALLOCATION:</span><span className="text-purple-400 font-bold">{yieldWeaverMode === "mETH_PREMIUM" ? "100% Mantle mETH" : "100% Ondo USDY"}</span></div>
+                      {yieldWeaverMode === "mETH_PREMIUM" && (<div className="bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col"><span className="font-bold">🚀 PRE-COGNITIVE SWAP CONFIRMED</span><span>Yield path re-allocated successfully to maximize premium APY spreads.</span></div>)}
                     </div>
-
-                    {yieldWeaverMode !== "mETH_PREMIUM" && (
-                      <button
-                        onClick={handleWeaveYield}
-                        className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 font-black text-[10px] text-white uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target"
-                      >
-                        {isWeavingTx ? "AUTHORIZING SWAP..." : "EXECUTE PRE-COGNITIVE SWAP"}
-                      </button>
-                    )}
+                    {yieldWeaverMode !== "mETH_PREMIUM" && (<button onClick={handleWeaveYield} className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 font-black text-[10px] text-white uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target">EXECUTE PRE-COGNITIVE SWAP</button>)}
                   </FloatingGlassCard>
                 </motion.div>
-              )}
-            </AnimatePresence>
+            )}</AnimatePresence>
 
             {/* --- COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) --- */}
             <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/10 rounded-3xl p-6 h-[220px]">
-               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0">
-                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />
-                 Mantle Agent Matrix Relay
-               </h4>
+               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0"><div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />Mantle Agent Matrix Relay</h4>
                <div className="font-mono text-[9px] space-y-3 leading-relaxed text-sharp-secondary overflow-y-auto scrollbar-hide flex-1 max-h-[140px]">
-                 <AnimatePresence>
-                   {relayLogs.map((log) => (
-                     <motion.div 
-                       key={log.id} // Fix Framer Motion exiting key animation crash
-                       initial={{ opacity: 0, x: -10 }} 
-                       animate={{ opacity: 1, x: 0 }} 
-                       exit={{ opacity: 0, scale: 0.95 }}
-                       className="flex gap-2 border-b border-white/5 pb-2 last:border-0"
-                     >
-                       <span className={`${log.color} font-bold flex-shrink-0`}>[{log.agent}]:</span>
-                       <span>{log.text}</span>
+                 <AnimatePresence>{relayLogs.map((log) => (
+                     <motion.div key={log.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-2 border-b border-white/5 pb-2 last:border-0">
+                       <span className={`${log.color} font-bold flex-shrink-0`}>[{log.agent}]:</span><span>{log.text}</span>
                      </motion.div>
-                   ))}
-                 </AnimatePresence>
+                 ))}</AnimatePresence>
                </div>
             </FloatingGlassCard>
 
             <FloatingGlassCard designMode={designMode} delay={0.4} className={`bg-white/5 backdrop-blur-3xl p-8 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-colors duration-500`}>
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-8 border-b border-white/10 pb-4">
-                Node Topology
-              </h4>
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-8 border-b border-white/10 pb-4">Node Topology</h4>
               <div className="space-y-4">
                 <div className="bg-black/30 border border-white/5 rounded-2xl p-5 flex justify-between items-center backdrop-blur-md shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
-                  <div>
-                    <p className="text-sm font-bold text-white mb-1">Local Backend</p>
-                    <p className={`text-[10px] font-mono drop-shadow-[0_0_5px_currentColor] ${secondary}`}>Port: 8000</p>
-                  </div>
+                  <div><p className="text-sm font-bold text-white mb-1">Local Backend</p><p className={`text-[10px] font-mono drop-shadow-[0_0_5px_currentColor] ${secondary}`}>Port: 8000</p></div>
                   <div className={`w-3 h-3 rounded-full animate-pulse shadow-[0_0_15px_currentColor] ${dotBg}`} />
                 </div>
-
                 <div className="bg-black/30 border border-white/5 rounded-2xl p-5 flex justify-between items-center backdrop-blur-md shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
-                  <div>
-                    <p className="text-sm font-bold text-white mb-1">Wallet Core</p>
-                    <p className="text-[10px] font-mono text-sharp-secondary">{isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : "Standby"}</p>
-                  </div>
+                  <div><p className="text-sm font-bold text-white mb-1">Wallet Core</p><p className="text-[10px] font-mono text-sharp-secondary">{isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : "Standby"}</p></div>
                   <div className={`w-3 h-3 rounded-full ${isConnected ? `animate-pulse shadow-[0_0_15px_currentColor] ${dotBg}` : 'bg-white/10'}`} />
                 </div>
               </div>
@@ -1545,29 +1413,16 @@ export default function Home() {
             <FloatingGlassCard designMode={designMode} delay={0.6} className={`bg-transparent rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)]`}>
               <div className="relative overflow-hidden rounded-3xl h-full w-full">
                 <div className="relative h-full w-full">
-                  <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Market Sentinel</span>
-                     <div className={`w-2 h-2 rounded-full animate-pulse ${currentMarket.bg}`} />
-                  </div>
-                  
+                  <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Market Sentinel</span><div className={`w-2 h-2 rounded-full animate-pulse ${currentMarket.bg}`} /></div>
                   <AnimatePresence mode="wait">
-                    <motion.div 
-                      key={currentMarket.symbol}
-                      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                      className="text-center mb-6"
-                    >
-                       <div className="text-4xl font-black text-white drop-shadow-md">
-                         {(livePrices as any)[currentMarket.pair]}
-                       </div>
-                       <div className={`text-[12px] font-bold tracking-widest mt-1 ${currentMarket.color} ${currentMarket.glow}`}>
-                         {currentMarket.name}
-                       </div>
+                    <motion.div key={currentMarket.symbol} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center mb-6">
+                       <div className="text-4xl font-black text-white drop-shadow-md">{(livePrices as any)[currentMarket.pair]}</div>
+                       <div className={`text-[12px] font-bold tracking-widest mt-1 ${currentMarket.color} ${currentMarket.glow}`}>{currentMarket.name}</div>
                     </motion.div>
                   </AnimatePresence>
-
                   <div className="flex gap-3">
                      <button className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-xl py-3 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target`}>Long</button>
-                     <button className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl py-3 text-xs font-black uppercase tracking-widest hover:bg-red-500/30 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target">Short</button>
+                     <button className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl py-3 text-xs font-black uppercase tracking-widest hover:bg-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target">Short</button>
                   </div>
                 </div>
               </div>
@@ -1597,7 +1452,7 @@ export default function Home() {
                          <span>Your Wallet Balance:</span>
                          <span className="text-red-400 font-bold">{mntGasBalance.toFixed(4)} MNT</span>
                        </div>
-                       <p className="text-[10px] text-sharp-secondary leading-relaxed pt-2 border-t border-white/5">
+                       <p className="text-[10px] text-[#8e9aa5] leading-relaxed pt-2 border-t border-white/5">
                          Your gas balance is insufficient to authorize on-chain executions. Swap 5.00 MAC for an immediate native 2.00 MNT autonomous refuel.
                        </p>
                        
