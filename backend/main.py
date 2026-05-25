@@ -48,9 +48,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- GLOBAL ASYNC EVENT LOOP REFERENCE FOR BOT DAEMONS ---
-main_loop = None
-
 # --- DATABASE SETUP (SQLITE PERSISTENT COLD SESSION STORAGE) ---
 DB_FILE = "mac_history.db"
 
@@ -357,6 +354,52 @@ def fetch_live_market_data():
         return f"BTC: ${data['bitcoin']['usd']}, ETH: ${data['ethereum']['usd']}, MNT: ${data['mantle']['usd']}"
     except Exception as e:
         return "MARKET_DATA_OFFLINE"
+
+# --- ON-CHAIN AGENT PROFILE RESOLVER (WEB3.PY MANTLE COLD-SCANNER) ---
+def fetch_onchain_agent_profile_raw(wallet_address: str) -> dict:
+    """
+    Directly queries the Mantle Sepolia network to read the user's active risk strategy parameters.
+    """
+    try:
+        rpc_url = os.getenv("MANTLE_RPC_URL")
+        registry_address = "0x1E5B64264089aacC547A1506402B94f909215942"
+        if not rpc_url:
+            return {"status": "error", "error": "Mantle node configuration missing."}
+            
+        web3 = Web3(Web3.HTTPProvider(rpc_url))
+        checksum_user = web3.to_checksum_address(wallet_address)
+        
+        # Check balanceOf
+        balance_abi = [{"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]
+        contract = web3.eth.contract(address=registry_address, abi=balance_abi)
+        balance = contract.functions.balanceOf(checksum_user).call()
+        
+        if balance > 0:
+            profile_abi = [
+                {"inputs":[{"name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"},
+                {"inputs":[{"name":"agentId","type":"uint256"}],"name":"getAgentProfile","outputs":[{"components":[{"name":"riskStrategy","type":"string"},{"name":"maxDrawdown","type":"uint256"},{"name":"birthTimestamp","type":"uint256"},{"name":"isAutonomous","type":"bool"}],"type":"tuple"}],"stateMutability":"view","type":"function"}
+            ]
+            registry_contract = web3.eth.contract(address=registry_address, abi=profile_abi)
+            
+            # Scan tokens 1 to 50 for ownership (Fallback sequential indexer)
+            for token_id in range(1, 51):
+                try:
+                    owner = registry_contract.functions.ownerOf(token_id).call()
+                    if owner.lower() == wallet_address.lower():
+                        profile = registry_contract.functions.getAgentProfile(token_id).call()
+                        return {
+                            "status": "active",
+                            "riskStrategy": profile[0],
+                            "maxDrawdown": profile[1],
+                            "birthTimestamp": profile[2],
+                            "isAutonomous": profile[3],
+                            "tokenId": token_id
+                        }
+                except:
+                    continue
+        return {"status": "none"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 # ---------------------------------------------------------
 # BOT CORE TEXT DEFINITION
@@ -667,7 +710,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "response": (
                         f"📊 **Active Portfolio for {bound_address[:8]}...{bound_address[-4:]}**\n\n"
                         "No active leveraged deployments mapped to this address.\n"
-                        "Deploy positions on the web dashboard to see them mapped here!"
+                        "Deploy positions on the web dApp dashboard to see them mapped here!"
                     ),
                     "latency": "0ms"
                 }
@@ -686,6 +729,91 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "status": "success",
                 "response": report,
                 "latency": "0ms"
+            }
+
+        # --- UPGRADE: LIVE ON-CHAIN CITADEL SCANNER FOR BOTS ---
+        if command_lower in ["/citadel", "citadel", "!mac citadel"]:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
+            row = cursor.fetchone()
+            conn.close()
+
+            if not row:
+                return {
+                    "status": "success",
+                    "response": (
+                        "❌ **No Web3 Wallet Linked**\n\n"
+                        "You must bind your account to view your on-chain agent profile.\n"
+                        f"Please type `/link <wallet_address>` (on Telegram) or `!mac link <wallet_address>` (on Discord) to bind your wallet."
+                    ),
+                    "latency": "0ms"
+                }
+
+            bound_address = row[0]
+            # Query Mantle Sepolia network directly via Web3
+            profile_data = fetch_onchain_agent_profile_raw(bound_address)
+            
+            if profile_data.get("status") == "active":
+                return {
+                    "status": "success",
+                    "response": (
+                        f"🔒 **ERC-8004 ON-CHAIN AGENT IDENTITY**\n\n"
+                        f"Owner Wallet: `{bound_address[:8]}...{bound_address[-4:]}`\n"
+                        f"Agent tokenID: `#{profile_data.get('tokenId')}`\n"
+                        f"Risk Strategy: **{profile_data.get('riskStrategy')}**\n"
+                        f"Max Drawdown Limit: **{profile_data.get('maxDrawdown')}%**\n"
+                        f"Status: **Sovereign Autonomous Copilot Active**"
+                    ),
+                    "latency": "0ms"
+                }
+            elif profile_data.get("status") == "none":
+                return {
+                    "status": "success",
+                    "response": (
+                        f"🔒 **ERC-8004 CITADEL VAULT**\n\n"
+                        f"Linked Wallet: `{bound_address[:8]}...{bound_address[-4:]}`\n"
+                        f"Status: **No On-Chain Agent NFT Found**\n\n"
+                        "To awaken your autonomous on-chain identity, you must sign the minting transaction via the web dApp interface [2.1.5].\n"
+                        "Visit: https://mantle-agentic-core.vercel.app/citadel"
+                    ),
+                    "latency": "0ms"
+                }
+            else:
+                return {
+                    "status": "success",
+                    "response": f"❌ Citadel Query Failed: {profile_data.get('error', 'Network sync error.')}",
+                    "latency": "0ms"
+                }
+
+        # --- UPGRADE: LIVE NEURAL FORGE COMPILER FOR BOTS ---
+        if command_lower.startswith("/forge") or command_lower.startswith("!mac forge") or command_lower.startswith("forge "):
+            blueprint_prompt = command_lower.replace("!mac forge", "").replace("/forge", "").replace("forge", "").strip()
+            if not blueprint_prompt:
+                return {
+                    "status": "success",
+                    "response": "❌ Please specify a smart contract concept or blueprint (e.g. `/forge write a custom staking contract`).",
+                    "latency": "0ms"
+                }
+            
+            # Formulate system prompt matrix
+            system_prompt = (
+                "You are the Neural Forge, an elite Web3 smart contract auditor and Solidity developer operating within the Mantle Terminal. "
+                "Write the secure Solidity code matching the user's requested concept. Use standard markdown code blocks for the code. "
+                "STRICT FORMATTING RULE: Start directly with the compiled Solidity code block and minor audit notes. "
+                "Sign off with '— Forge SecOps Verified'"
+            )
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": blueprint_prompt}
+                ],
+                model="llama-3.1-8b-instant",
+            )
+            return {
+                "status": "success",
+                "response": chat_completion.choices[0].message.content.strip(),
+                "latency": f"{int((time.time() - start_time) * 1000)}ms"
             }
 
         if command_lower in ["/start", "/help", "help", "hello", "hi"]:
