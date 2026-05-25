@@ -47,9 +47,9 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
         style={{ transform: "translateZ(30px)" }} 
         className={`h-full w-full rounded-[23px] transition-all duration-700 p-5 sm:p-7 flex flex-col relative z-10 ${
           designMode === "AURA"
-            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_50px_100px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/20 border-b border-r border-white/5"
+            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/20 border-b border-r border-white/5"
             : designMode === "CHROME"
-            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/50 to-pink-950/40 backdrop-blur-[65px] shadow-[0_50px_100px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
+            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/55 to-pink-950/40 backdrop-blur-[65px] shadow-[0_55px_110px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
             : "bg-[rgba(10,15,30,0.4)] backdrop-blur-[70px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border border-white/15 hover:border-white/30"
         }`}
       >
@@ -65,6 +65,7 @@ export default function CitadelVault() {
   const { safeColors, setSystemState, isOverclocked, designMode } = useTheme();
   const { primary, border, glow } = safeColors;
   
+  // AppKit Hook
   const { open } = useAppKit();
 
   const { address, isConnected, chainId } = useAccount();
@@ -74,9 +75,14 @@ export default function CitadelVault() {
   const [maxDrawdown, setMaxDrawdown] = useState("10");
   const [mintSuccess, setMintSuccess] = useState(false);
 
+  // --- UPGRADE: DYNAMIC BOT-CREATED IDENTITY BLUEPRINT BRIDGE ---
+  const [pendingBotIdentity, setPendingBotIdentity] = useState<{ riskStrategy: string, maxDrawdown: number } | null>(null);
+  const [isFetchingBot, setIsFetchingBot] = useState(false);
+
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
+  // Prevent hydration mismatch by waiting for mount
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -84,6 +90,37 @@ export default function CitadelVault() {
   useEffect(() => { 
     if (mounted && !isOverclocked) setSystemState('IDLE'); 
   }, [setSystemState, isOverclocked, mounted]);
+
+  // Sync virtual bot profile configurations
+  useEffect(() => {
+    if (mounted && isConnected && address) {
+      const fetchBotDraftedProfile = async () => {
+        setIsFetchingBot(true);
+        try {
+          const response = await fetch(`https://mantle-agentic-core.onrender.com/api/bot/virtual-identity?wallet_address=${address.toLowerCase()}`);
+          const data = await response.json();
+          if (data.status === "pending") {
+            setPendingBotIdentity({
+              riskStrategy: data.riskStrategy,
+              maxDrawdown: data.maxDrawdown
+            });
+            // Automatically prefill forms
+            setRiskLevel(data.riskStrategy);
+            setMaxDrawdown(data.maxDrawdown.toString());
+          } else {
+            setPendingBotIdentity(null);
+          }
+        } catch (err) {
+          console.error("Failed to fetch pending bot virtual identity", err);
+        } finally {
+          setIsFetchingBot(false);
+        }
+      };
+      fetchBotDraftedProfile();
+    } else {
+      setPendingBotIdentity(null);
+    }
+  }, [address, isConnected, mounted]);
 
   useEffect(() => {
     if (isConfirmed && address && mounted) {
@@ -95,6 +132,7 @@ export default function CitadelVault() {
       };
       
       localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(mintedProfile));
+      
       setMintSuccess(true);
       setTimeout(() => {
         if (!isOverclocked) setSystemState('IDLE');
@@ -132,8 +170,8 @@ export default function CitadelVault() {
         : ''
     }`}>
       
-      {/* GLOWING CYBER-NODES BACKGROUND */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-40">
+      {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-45">
         <div className="absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-emerald-500 animate-ping [animation-duration:3s]" />
         <div className="absolute top-[60%] left-[80%] w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping [animation-duration:4s]" />
         
@@ -172,6 +210,31 @@ export default function CitadelVault() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-6">
+            
+            {/* GLOWING DYNAMIC BOT DETECTOR NOTICE CARD */}
+            <AnimatePresence>
+              {pendingBotIdentity && !mintSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="bg-purple-950/20 border border-purple-500/40 p-5 rounded-3xl backdrop-blur-2xl shadow-[0_0_30px_rgba(168,85,247,0.25)] flex items-center gap-4 relative overflow-hidden">
+                    <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping flex-shrink-0" />
+                    <div>
+                      <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase block mb-1">🧬 DNA Blueprint Detected from Bot Relay!</span>
+                      <p className="text-xs text-white/90 font-mono leading-relaxed font-bold">
+                        Your drafted profile configured via chat is ready for blockchain activation: 
+                        Strategy: **{pendingBotIdentity.riskStrategy}**, Max Drawdown: **{pendingBotIdentity.maxDrawdown}%**. 
+                        Click &apos;AWAKEN AGENT IDENTITY&apos; to mint and lock this configuration on-chain!
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <FloatingGlassCard designMode={designMode} className={`bg-white/5 backdrop-blur-3xl border ${border} rounded-3xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.65)] transition-colors duration-700 ease-out`}>
               <AnimatePresence mode="wait">
                 {!mintSuccess ? (
