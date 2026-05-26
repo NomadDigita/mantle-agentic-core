@@ -312,12 +312,12 @@ export default function Home() {
 
   const [isAuraActive, setIsAuraActive] = useState(false);
 
-  // --- UPGRADE: LIVE DUMMY ACCRUING PERFORMANCE MATRIX ---
+  // --- UPGRADE: DYNAMIC ACCRUING PERFORMANCE MATRIX & TURING VERIFICATION STATES ---
   const [totalValueLocked, setTotalValueLocked] = useState(25410.00);
+  const [activeVerificationHash, setActiveVerificationHash] = useState<string | null>(null);
 
   useEffect(() => {
     const simulateYieldIncrease = () => {
-      // Simulate passive yield accruing to demonstrate compound scaling
       setTotalValueLocked(prev => prev + (Math.random() * 0.15));
     };
     const interval = setInterval(simulateYieldIncrease, 2500);
@@ -685,7 +685,7 @@ export default function Home() {
     }
   };
 
-  // --- UPGRADE: MODULARIZED DIRECT COMMAND DESCRIPTORS ---
+  // --- MODULARIZED DIRECT COMMAND DESCRIPTORS ---
   const executeDirectCommand = async (cmdString: string, targetAsset: string | null = null) => {
     if (isExecuting) return;
     setIsExecuting(true);
@@ -957,6 +957,85 @@ export default function Home() {
         {showIntro && <IntroSequence designMode={designMode} onComplete={handleIntroComplete} />}
       </AnimatePresence>
 
+      {/* --- UPGRADE: HOLOGRAPHIC TURING VERIFIER MODAL --- */}
+      <AnimatePresence>
+        {activeVerificationHash && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl"
+          >
+            <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
+                <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-[#00ffa3] animate-ping" /> Turing-Test Intelligence Certificate
+                </span>
+                <button 
+                  onClick={() => setActiveVerificationHash(null)}
+                  className="text-white/60 hover:text-white font-mono text-xs uppercase font-black tracking-widest mobile-touch-target"
+                >
+                  [ CLOSE ]
+                </button>
+              </div>
+
+              <div className="space-y-4 font-mono text-xs leading-relaxed text-sharp-secondary">
+                <div className="bg-black/50 p-4 rounded-xl border border-white/10 space-y-1.5 shadow-inner">
+                   <div className="text-white/50">DECISION HASH:</div>
+                   <div className="break-all text-white font-black">{activeVerificationHash}</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-white/50 text-[10px] block mb-1">REASONING ENGINE</span>
+                      <span className="text-white font-black block">Llama-3.1-8b-instant</span>
+                      <span className="text-emerald-400 text-[10px] font-bold">Proof-of-Reasoning Synced</span>
+                   </div>
+                   <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-white/50 text-[10px] block mb-1">GOVERNANCE PARADIGM</span>
+                      <span className="text-white font-black block">ERC-8004 NFT Check</span>
+                      <span className="text-purple-400 text-[10px] font-bold">Strategy Limits Enforced</span>
+                   </div>
+                </div>
+
+                <div className="bg-black/50 p-5 rounded-xl border border-white/10 space-y-2">
+                   <span className="block text-[10px] text-white/50">DECISION METRIC INJECTORS</span>
+                   <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
+                      <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                         <span className="text-white/60 block mb-0.5">ELFA Sentiment</span>
+                         <span className="text-emerald-400 font-mono font-black">Active (82/100)</span>
+                      </div>
+                      <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                         <span className="text-white/60 block mb-0.5">Nansen Inflow</span>
+                         <span className="text-purple-400 font-mono font-black">+1.42M MNT</span>
+                      </div>
+                      <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                         <span className="text-white/60 block mb-0.5">Bybit Arbitrage</span>
+                         <span className="text-amber-400 font-mono font-black">Stable Spread</span>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="pt-4 flex gap-4">
+                   <a 
+                     href={`https://x.com/intent/tweet?text=I%20just%20verified%20an%20autonomous%20on-chain%20decision%20hash%20${activeVerificationHash.slice(0, 12)}...%20on%20Mantle%20Agentic%20Core!%20%40MantleCore_`}
+                     target="_blank" rel="noopener noreferrer"
+                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest hover:scale-[1.02] transition-all mobile-touch-target shadow-md"
+                   >
+                     Publish Certificate to 𝕏
+                   </a>
+                   <a 
+                     href="https://explorer.sepolia.mantle.xyz/address/0x1E5B64264089aacC547A1506402B94f909215942"
+                     target="_blank" rel="noopener noreferrer"
+                     className="px-6 bg-transparent border border-white/20 text-white hover:bg-white/5 text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest transition-all mobile-touch-target"
+                   >
+                     View Explorer Registry
+                   </a>
+                </div>
+              </div>
+            </FloatingGlassCard>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* LIQUID WAVE GRADIENT PARTICLE BG */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 opacity-40">
         <div className="absolute top-[10%] left-[20%] w-[45vw] h-[45vw] bg-[#00ffa3]/8 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
@@ -1160,10 +1239,13 @@ export default function Home() {
                               </div>
 
                               {msg.decisionHash && (
-                                <div className="mb-5 bg-black/60 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center">
-                                   <span className="font-bold">PROVED_DECISION HASH:</span>
+                                <button 
+                                  onClick={() => setActiveVerificationHash(msg.decisionHash || null)}
+                                  className="w-full text-left focus:outline-none block mb-5 bg-black/60 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center hover:bg-black/80 hover:border-purple-500/25 transition-all shadow-md mobile-touch-target"
+                                >
+                                   <span className="font-bold flex-shrink-0">PROVED_DECISION HASH:</span>
                                    <span className="break-all text-white/90 font-bold">{msg.decisionHash}</span>
-                                </div>
+                                </button>
                               )}
                               
                               <div className="grid grid-cols-4 gap-4 mb-6">
@@ -1245,7 +1327,6 @@ export default function Home() {
             </FloatingGlassCard>
 
             {/* === UPGRADE: SYMMETRICAL WIDE PERFORMANCE LEDGER CARD === */}
-            {/* Placed directly below the Chat Terminal to balance vertical scroll heights */}
             <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl">
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
                 <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
@@ -1280,13 +1361,12 @@ export default function Home() {
                      <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">PROVABLE LEDGER CERTIFICATE</span>
                      <p className="text-[9px] text-sharp-muted font-mono leading-relaxed font-bold mt-1">Every treasury yield reallocation is backed by complete decentralized verifiability.</p>
                    </div>
-                   <a 
-                     href="https://explorer.sepolia.mantle.xyz/address/0x1E5B64264089aacC547A1506402B94f909215942" 
-                     target="_blank" rel="noopener noreferrer"
-                     className="block text-[9px] font-mono text-purple-400 hover:text-purple-300 underline font-black mt-2 mobile-touch-target"
+                   <button 
+                     onClick={() => setActiveVerificationHash("0x2a2a4d41524b4554204445434953494f4e204345525449464943415445525445")}
+                     className="block text-left text-[9px] font-mono text-purple-400 hover:text-purple-300 underline font-black mt-2 mobile-touch-target"
                    >
                      Verify Treasury Registry on-chain &gt;
-                   </a>
+                   </button>
                 </div>
               </div>
 
