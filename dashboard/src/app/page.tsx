@@ -312,17 +312,57 @@ export default function Home() {
 
   const [isAuraActive, setIsAuraActive] = useState(false);
 
-  // --- UPGRADE: DYNAMIC ACCRUING PERFORMANCE MATRIX & TURING VERIFICATION STATES ---
+  // --- UPGRADE: LIVE DUMMY ACCRUING PERFORMANCE MATRIX & TURING VERIFICATION STATES ---
   const [totalValueLocked, setTotalValueLocked] = useState(25410.00);
   const [activeVerificationHash, setActiveVerificationHash] = useState<string | null>(null);
 
+  // --- UPGRADE: SCROLLING GRAPH PLOT COORDINATES ---
+  const [graphPoints, setGraphPoints] = useState<number[]>([
+    25, 30, 28, 35, 42, 38, 48, 46, 52, 50, 58, 55, 62, 60, 68, 65, 72, 70, 78, 75
+  ]);
+
   useEffect(() => {
-    const simulateYieldIncrease = () => {
+    const simulateYieldAndGraphTick = () => {
+      // 1. Accrue TVC yields
       setTotalValueLocked(prev => prev + (Math.random() * 0.15));
+
+      // 2. Scroll the performance graph coordinates cleanly
+      setGraphPoints(prev => {
+        const nextPoints = [...prev];
+        const lastPoint = nextPoints[nextPoints.length - 1] ?? 50;
+        
+        // Dynamic upward compound trend with minor localized fluctuations
+        const trend = 0.42; 
+        const volatility = (Math.random() * 8 - 3.8); 
+        const nextVal = Math.max(15, Math.min(85, lastPoint + trend + volatility));
+        
+        nextPoints.push(nextVal);
+        if (nextPoints.length > 20) {
+          nextPoints.shift(); // Lock maximum 20 viewport coordinates
+        }
+        return nextPoints;
+      });
     };
-    const interval = setInterval(simulateYieldIncrease, 2500);
+    const interval = setInterval(simulateYieldAndGraphTick, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  // Map coordinate array to standard SVG path string
+  const getSvgPathString = () => {
+    if (graphPoints.length === 0) return "";
+    return graphPoints.reduce((acc, val, idx) => {
+      const x = idx * (600 / (graphPoints.length - 1));
+      const y = 80 - (val * 0.7); // Safe scale coordinate mapping
+      if (idx === 0) return `M ${x} ${y}`;
+      return `${acc} L ${x} ${y}`;
+    }, "");
+  };
+
+  // Tracking points on leading edge of chart
+  const lastIdx = graphPoints.length - 1;
+  const lastVal = graphPoints[lastIdx] ?? 50;
+  const lastX = lastIdx * (600 / (graphPoints.length - 1));
+  const lastY = 80 - (lastVal * 0.7);
 
   // Restore Welcome Intro Card on initial load
   useEffect(() => {
@@ -1231,7 +1271,7 @@ export default function Home() {
                               </div>
 
                               <div className="mb-5 bg-white/5 p-4 rounded-lg border border-white/5 flex gap-4 items-start">
-                                  <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-emerald-400' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
+                                  <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-[#00ffa3]' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
                                   <div>
                                       <span className="text-[9px] uppercase tracking-widest text-white/60 block mb-1 font-bold">STRATEGY ANALYSIS</span>
                                       <p className="text-xs text-white leading-relaxed font-bold">{msg.actionPayload.analysis}</p>
@@ -1359,7 +1399,7 @@ export default function Home() {
                 <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner h-full flex flex-col justify-between">
                    <div>
                      <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">PROVABLE LEDGER CERTIFICATE</span>
-                     <p className="text-[9px] text-sharp-muted font-mono leading-relaxed font-bold mt-1">Every treasury yield reallocation is backed by complete decentralized verifiability.</p>
+                     <p className="text-[9px] text-sharp-muted font-mono leading-relaxed font-bold mt-1">Every treasury reallocation is backed by complete decentralized verification proofs [1.1.5].</p>
                    </div>
                    <button 
                      onClick={() => setActiveVerificationHash("0x2a2a4d41524b4554204445434953494f4e204345525449464943415445525445")}
@@ -1370,11 +1410,46 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Animated SVG Yield Acceleration Line */}
-              <div className="relative w-full h-[60px] bg-black/30 border border-white/5 rounded-2xl mt-6 overflow-hidden flex items-end">
-                <svg className="absolute inset-0 w-full h-full stroke-[#00ffa3] stroke-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 50 Q 150 45, 300 35 T 600 20 T 900 10" className="animate-[dash_10s_linear_infinite]" />
+              {/* === UPGRADE: HIGH-FIDELITY TICKING PERFORMANCE GRAPH === */}
+              {/* Replacing the old diagonal static path with a dynamically rendering coordinate wave */}
+              <div className="relative w-full h-[80px] bg-black/40 border border-white/5 rounded-2xl mt-6 overflow-hidden flex items-end">
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 100" preserveAspectRatio="none">
+                  {/* Glowing Bottom Shadow Fill Area */}
+                  <defs>
+                    <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#00ffa3" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Dynamic Shaded Area Path */}
+                  <path 
+                    d={`${getSvgPathString()} L ${lastX} 100 L 0 100 Z`} 
+                    fill="url(#chart-glow)" 
+                    className="transition-all duration-1000"
+                  />
+
+                  {/* Pulsing Neon Lead Line */}
+                  <path 
+                    d={getSvgPathString()} 
+                    fill="none" 
+                    stroke="#00ffa3" 
+                    strokeWidth="2.5" 
+                    className="transition-all duration-1000 stroke-dasharray-[1200] stroke-dashoffset-[0]" 
+                  />
+
+                  {/* Ticking Led Indicator Circle snapping directly to latest coordinate */}
+                  <motion.circle
+                    cx={lastX}
+                    cy={lastY}
+                    r="4.5"
+                    fill="#00ffa3"
+                    animate={{ r: [4.5, 7.5, 4.5], opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="transition-all duration-1000"
+                  />
                 </svg>
+                
                 <div className="absolute inset-x-0 bottom-1 px-4 flex justify-between text-[8px] font-mono text-white/40 font-bold">
                    <span>Accruing block interest cycle...</span>
                    <span>MNT / mETH Matrix active</span>
@@ -1545,7 +1620,7 @@ export default function Home() {
                 <div className="flex justify-between"><span className="text-white/60 font-bold">Ondo USDY APY:</span><span className="text-white font-bold">5.1% APY</span></div>
                 <div className="flex justify-between"><span className="text-white/60 font-bold">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">7.2% APY</span></div>
                 <div className="flex justify-between border-t border-white/5 pt-2"><span className="text-white/60 font-bold">WEAVER ALLOCATION:</span><span className="text-purple-400 font-bold">{yieldWeaverMode === "mETH_PREMIUM" ? "100% Mantle mETH" : "100% Ondo USDY"}</span></div>
-                {yieldWeaverMode === "mETH_PREMIUM" && (<div className="bg-emerald-500/15 border border-emerald-500/40 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col shadow-inner"><span className="font-bold">🚀 PRE-COGNITIVE SWAP CONFIRMED</span><span>Yield path re-allocated successfully to maximize premium spreads.</span></div>)}
+                {yieldWeaverMode === "mETH_PREMIUM" && (<div className="bg-emerald-500/10 border border-emerald-500/40 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col shadow-inner"><span className="font-bold">🚀 PRE-COGNITIVE SWAP CONFIRMED</span><span>Yield path re-allocated successfully to maximize premium spreads.</span></div>)}
               </div>
               {yieldWeaverMode !== "mETH_PREMIUM" && (<button onClick={handleWeaveYield} className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-black text-[10px] text-white uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target">EXECUTE PRE-COGNITIVE SWAP</button>)}
             </FloatingGlassCard>
