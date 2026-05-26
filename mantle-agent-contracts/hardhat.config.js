@@ -1,4 +1,8 @@
-import "@nomicfoundation/hardhat-ethers";
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
+import "@nomicfoundation/hardhat-toolbox"; // Registers Mocha, Chai, and test runners globally
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -7,7 +11,7 @@ export default {
   solidity: {
     version: "0.8.24",
     settings: {
-      evmVersion: "cancun", // 🚀 THIS ENABLES THE MCOPY OPCODE
+      evmVersion: "cancun", // Enables the MCOPY opcode optimized for Mantle Sepolia
       optimizer: {
         enabled: true,
         runs: 200,
