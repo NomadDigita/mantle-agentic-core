@@ -11,7 +11,7 @@ import { useTheme } from "../ThemeContext";
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 
-function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" }) {
+function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) {
   const { systemState } = useTheme();
   
   const x = useMotionValue(0);
@@ -47,9 +47,11 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
         style={{ transform: "translateZ(30px)" }} 
         className={`h-full w-full rounded-[23px] transition-all duration-700 p-5 sm:p-7 flex flex-col relative z-10 ${
           designMode === "AURA"
-            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/20 border-b border-r border-white/5"
+            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/22 border-b border-r border-white/5"
             : designMode === "CHROME"
             ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/55 to-pink-950/40 backdrop-blur-[65px] shadow-[0_55px_110px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
+            : designMode === "CYBER"
+            ? "bg-black/90 backdrop-blur-[70px] shadow-[0_55px_110px_rgba(0,255,163,0.15),inset_0_1.5px_1.5px_rgba(0,255,163,0.15)] border border-[#00ffa3]/30"
             : "bg-[rgba(10,15,30,0.4)] backdrop-blur-[70px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border border-white/15 hover:border-white/30"
         }`}
       >
