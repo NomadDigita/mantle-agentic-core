@@ -134,14 +134,12 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   );
 }
 
-function IntroSequence({ onComplete, designMode = "SILENT" }: { onComplete: () => void, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) { 
-  return ( 
-    <motion.div
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }} 
+function IntroSequence({ onComplete, designMode = "SILENT" }: { onComplete: () => void, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
       transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl" 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl"
     >
       <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full text-center">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
@@ -155,15 +153,15 @@ function IntroSequence({ onComplete, designMode = "SILENT" }: { onComplete: () =
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 text-left">
           <div className="bg-black/60 p-5 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-[#00ffa3] font-black text-xs uppercase mb-2 tracking-widest">01. Live Terminal</h3>
-            <p className="text-white/85 text-[10px] leading-relaxed font-semibold font-sans">Real-time market analysis and agentic execution.</p>
+            <p className="text-white/85 text-[10px] leading-relaxed font-semibold">Real-time market analysis and agentic execution.</p>
           </div>
           <div className="bg-black/60 p-5 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-amber-400 font-black text-xs uppercase mb-2 tracking-widest">02. Neural Forge</h3>
-            <p className="text-white/85 text-[10px] leading-relaxed font-semibold font-sans">Autonomous smart contract compilation and auditing.</p>
+            <p className="text-white/85 text-[10px] leading-relaxed font-semibold">Autonomous smart contract compilation and auditing.</p>
           </div>
           <div className="bg-black/60 p-5 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-purple-400 font-black text-xs uppercase mb-2 tracking-widest">03. Citadel Vault</h3>
-            <p className="text-white/85 text-[10px] leading-relaxed font-semibold font-sans">ERC-8004 Agent Identity minting and risk management.</p>
+            <p className="text-white/85 text-[10px] leading-relaxed font-semibold">ERC-8004 Agent Identity minting and risk management.</p>
           </div>
         </div>
 
@@ -175,7 +173,7 @@ function IntroSequence({ onComplete, designMode = "SILENT" }: { onComplete: () =
         </motion.button>
       </FloatingGlassCard>
     </motion.div>
-  ); 
+  );
 }
 
 function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: string }) {
@@ -405,7 +403,7 @@ export default function Home() {
       }
     };
     fetchOracleStream();
-    const interval = setInterval(fetchOracleStream, 6000); // Scans the ledger every 6 seconds
+    const interval = setInterval(fetchOracleStream, 6000); // Scans the ledger every 6 seconds [2.2.4]
     return () => clearInterval(interval);
   }, [mounted]);
 
@@ -766,7 +764,6 @@ export default function Home() {
     }
   };
 
-  // --- MODULARIZED DIRECT COMMAND DESCRIPTORS ---
   const executeDirectCommand = async (cmdString: string, targetAsset: string | null = null) => {
     if (isExecuting) return;
     setIsExecuting(true);
@@ -1026,17 +1023,19 @@ export default function Home() {
   }, []);
 
   if (!mounted) return null;
-  const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0];
+  const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0]; 
 
   return (
     <main className={`min-h-screen relative p-3 sm:p-6 lg:p-12 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
-      isOverclocked ? 'shadow-[inset_0_0_120px_rgba(239,68,68,0.22)] bg-red-950/10' : ''
+      isOverclocked 
+        ? 'shadow-[inset_0_0_120px_rgba(239,68,68,0.22)] bg-red-950/10' 
+        : ''
     }`}>
       <AnimatePresence>
         {showIntro && <IntroSequence designMode={designMode} onComplete={handleIntroComplete} />}
       </AnimatePresence>
 
-      {/* --- UPGRADE: HOLOGRAPHIC TURING VERIFIER MODAL --- */}
+      {/* --- HOLOGRAPHIC TURING VERIFIER MODAL --- */}
       <AnimatePresence>
         {activeVerificationHash && (
           <motion.div 
@@ -1097,7 +1096,7 @@ export default function Home() {
                    <a 
                      href={`https://x.com/intent/tweet?text=I%20just%20verified%20an%20autonomous%20on-chain%20decision%20hash%20${activeVerificationHash.slice(0, 12)}...%20on%20Mantle%20Agentic%20Core!%20%40MantleCore_`}
                      target="_blank" rel="noopener noreferrer"
-                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest hover:scale-[1.02] transition-all mobile-touch-target"
+                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest hover:scale-[1.02] transition-all mobile-touch-target shadow-md"
                    >
                      Publish Certificate to 𝕏
                    </a>
@@ -1310,7 +1309,7 @@ export default function Home() {
                             </div>
 
                             <div className="mb-5 bg-white/5 p-4 rounded-lg border border-white/5 flex gap-4 items-start">
-                                <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-emerald-400' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
+                                <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-[#00ffa3]' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
                                 <div>
                                     <span className="text-[9px] uppercase tracking-widest text-white/60 block mb-1 font-bold">STRATEGY ANALYSIS</span>
                                     <p className="text-xs text-white leading-relaxed font-bold">{msg.actionPayload.analysis}</p>
@@ -1318,10 +1317,13 @@ export default function Home() {
                             </div>
 
                             {msg.decisionHash && (
-                              <div className="mb-5 bg-black/60 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center">
-                                 <span className="font-bold">PROVED_DECISION HASH:</span>
+                              <button 
+                                onClick={() => setActiveVerificationHash(msg.decisionHash || null)}
+                                className="w-full text-left focus:outline-none block mb-5 bg-black/60 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center hover:bg-black/80 hover:border-purple-500/25 transition-all shadow-md mobile-touch-target"
+                              >
+                                 <span className="font-bold flex-shrink-0">PROVED_DECISION HASH:</span>
                                  <span className="break-all text-white/90 font-bold">{msg.decisionHash}</span>
-                              </div>
+                              </button>
                             )}
                             
                             <div className="grid grid-cols-4 gap-4 mb-6">
