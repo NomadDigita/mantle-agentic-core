@@ -7,7 +7,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type SystemState = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'MINTING' | 'OVERCLOCK';
-export type DesignMode = 'SILENT' | 'AURA' | 'CHROME';
+export type DesignMode = 'SILENT' | 'AURA' | 'CHROME' | 'CYBER'; // Upgraded to include CYBER mode
 
 type SafeColors = {
   primary: string;
@@ -35,7 +35,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [systemState, setSystemState] = useState<SystemState>('IDLE');
   const [isOverclocked, setIsOverclocked] = useState(false);
-  // Defaulting designMode to SILENT as requested
   const [designMode, setDesignMode] = useState<DesignMode>('SILENT');
 
   useEffect(() => {
@@ -96,10 +95,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         };
       case 'IDLE':
       default:
+        // Adjust design base pallets dynamically depending on DesignMode
+        if (designMode === "CYBER") {
+          return {
+            primary: "text-[#00ffa3]",
+            secondary: "text-[#00b8ff]",
+            border: "border-[#00ffa3]/30",
+            glow: "bg-black/90",
+            dotBg: "bg-[#00ffa3] shadow-[0_0_15px_rgba(0,255,163,0.8)]",
+            hoverPrimary: "hover:text-[#00ffa3]",
+            hoverBorder: "hover:border-[#00ffa3]/60",
+            bgPulse: "bg-[#00ffa3]/10",
+          };
+        }
         return {
           primary: "text-[#00ffa3]",
           secondary: "text-[#00b8ff]",
-          border: "border-white/18", // Increased baseline border opacity for clean edges
+          border: "border-white/18", 
           glow: "bg-[#00ffa3]/20",
           dotBg: "bg-[#00ffa3] shadow-[0_0_12px_rgba(0,255,163,0.4)]",
           hoverPrimary: "hover:text-[#00ffa3]",

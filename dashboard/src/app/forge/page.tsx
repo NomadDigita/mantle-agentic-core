@@ -11,7 +11,7 @@ import { useTheme } from "../ThemeContext";
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useSwitchChain, useDeployContract, useWaitForTransactionReceipt } from 'wagmi';
 
-function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" }) {
+function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) {
   const { systemState } = useTheme();
   
   const x = useMotionValue(0);
@@ -47,9 +47,11 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
         style={{ transform: "translateZ(30px)" }} 
         className={`h-full w-full rounded-[23px] transition-all duration-700 p-5 sm:p-7 flex flex-col relative z-10 ${
           designMode === "AURA"
-            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_50px_100px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/20 border-b border-r border-white/5"
+            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/20 border-b border-r border-white/5"
             : designMode === "CHROME"
-            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/50 to-pink-950/40 backdrop-blur-[65px] shadow-[0_50px_100px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
+            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/55 to-pink-950/40 backdrop-blur-[65px] shadow-[0_55px_110px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
+            : designMode === "CYBER"
+            ? "bg-black/90 backdrop-blur-[70px] shadow-[0_55px_110px_rgba(0,255,163,0.15),inset_0_1.5px_1.5px_rgba(0,255,163,0.15)] border border-[#00ffa3]/30"
             : "bg-[rgba(10,15,30,0.4)] backdrop-blur-[70px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border border-white/15 hover:border-white/30"
         }`}
       >
@@ -65,6 +67,7 @@ export default function NeuralForge() {
   const { safeColors, setSystemState, isOverclocked, designMode } = useTheme();
   const { border, glow } = safeColors;
   
+  // AppKit Hook
   const { open } = useAppKit();
 
   const { isConnected, chainId } = useAccount();
@@ -74,6 +77,7 @@ export default function NeuralForge() {
   const [isForging, setIsForging] = useState(false);
   const [output, setOutput] = useState("// Awaiting smart contract parameters or raw code for audit...");
 
+  // LAUNCHPAD STATE MODULES
   const [deployableABI, setDeployableABI] = useState<any[] | null>(null);
   const [deployableBytecode, setDeployableBytecode] = useState<string | null>(null);
   const [contractName, setContractName] = useState<string | null>(null);
@@ -81,6 +85,7 @@ export default function NeuralForge() {
   const { deployContract, data: deployHash, isPending: isDeploying } = useDeployContract();
   const { isLoading: isTxConfirming, isSuccess: isDeployed, data: receipt } = useWaitForTransactionReceipt({ hash: deployHash });
 
+  // Prevent hydration mismatch by waiting for mount
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -108,6 +113,7 @@ export default function NeuralForge() {
       
       if (data.status === "success" || data.message) {
         setOutput(data.message);
+        
         if (data.bytecode && data.abi) {
           setDeployableABI(data.abi);
           setDeployableBytecode(data.bytecode);
@@ -128,11 +134,11 @@ export default function NeuralForge() {
     if (!deployableABI || !deployableBytecode) return;
     setSystemState('MINTING');
     try {
+      // UPGRADE: Removed hardcoded gas limits, enabling dynamic on-chain estimation
       deployContract({
         abi: deployableABI,
         bytecode: deployableBytecode as `0x${string}`,
-        args: [],
-        gas: BigInt(1500000)
+        args: []
       });
     } catch (err) {
       console.error("Contract deployment failed:", err);
@@ -158,9 +164,11 @@ export default function NeuralForge() {
     }`}>
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-40">
-        <div className="absolute top-[10%] left-[20%] w-2 h-2 rounded-full bg-emerald-500 animate-ping [animation-duration:4s]" />
-        <div className="absolute top-[70%] left-[75%] w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping [animation-duration:3s]" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-45">
+        <div className="absolute top-[10%] left-[20%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping [animation-duration:4s]" />
+        <div className="absolute top-[70%] left-[75%] w-2 h-2 rounded-full bg-purple-500 animate-ping [animation-duration:3s]" />
+        <div className="absolute top-[50%] left-[30%] w-1 h-1 rounded-full bg-blue-400 animate-ping [animation-duration:6s]" />
+        <div className="absolute top-[85%] left-[10%] w-2 h-2 rounded-full bg-emerald-400 animate-ping [animation-duration:3.2s]" />
         
         <svg className="absolute inset-0 w-full h-full stroke-white/5 stroke-[0.8]" xmlns="http://www.w3.org/2000/svg">
           <line x1="20%" y1="10%" x2="30%" y2="50%" />
@@ -169,6 +177,7 @@ export default function NeuralForge() {
         </svg>
       </div>
 
+      {/* --- UPGRADE: IMMERSIVE FULL SCREEN OVERCLOCK Glow --- */}
       {isOverclocked && (
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0.9)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
       )}
@@ -183,7 +192,7 @@ export default function NeuralForge() {
             <h1 className="text-4xl font-black tracking-tighter text-white uppercase mb-1 drop-shadow-md text-sharp-primary">
               NEURAL <span className="text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]">FORGE</span>
             </h1>
-            <p className="text-white/80 uppercase tracking-[0.25em] text-[10px] font-mono font-black">
+            <p className="text-white/85 uppercase tracking-[0.25em] text-[10px] font-mono font-black">
               Autonomous Smart Contract Auditor & Compiler
             </p>
           </div>
@@ -208,7 +217,7 @@ export default function NeuralForge() {
                 onChange={(e) => setBlueprint(e.target.value)}
                 onFocus={() => !isOverclocked && setSystemState('LISTENING')}
                 onBlur={() => !isOverclocked && setSystemState('IDLE')}
-                placeholder="Paste Solidity code or describe a custom smart contract concept..."
+                placeholder="Paste raw Solidity code to audit vulnerabilities, OR type a prompt to generate a new smart contract..."
                 className="w-full bg-transparent text-white font-mono text-sm p-6 focus:outline-none resize-none flex-1 min-h-[300px] font-bold placeholder:text-white/40"
               />
             </FloatingGlassCard>
@@ -231,7 +240,7 @@ export default function NeuralForge() {
           <div className="flex flex-col gap-6">
             <FloatingGlassCard designMode={designMode} delay={0.4} className={`bg-white/5 backdrop-blur-3xl border ${border} rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.65)] flex flex-col h-[350px] transition-colors duration-500`}>
               <div className="bg-black/30 px-6 py-4 border-b border-white/10 flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 border-b border-white/10 pb-2 mb-3">
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2">
                   Forge Output Log
                 </span>
                 <div className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse" />
@@ -241,6 +250,7 @@ export default function NeuralForge() {
               </div>
             </FloatingGlassCard>
 
+            {/* MANTLE DEPLOYMENT LAUNCHPAD HUD */}
             <AnimatePresence>
               {deployableBytecode && (
                 <motion.div
@@ -285,13 +295,13 @@ export default function NeuralForge() {
                     {!isDeployed && (
                       <div>
                         {!isConnected ? (
-                          <div className="text-center p-3 bg-white/5 border border-white/10 rounded-xl text-[10px] text-white/60 font-mono font-bold">
+                          <div className="text-center p-3 bg-white/5 border border-white/10 rounded-xl text-[10px] text-white/50 font-mono font-bold">
                             Please connect your wallet to enable Mantle deployment.
                           </div>
                         ) : chainId !== 5003 ? (
                           <button
                             onClick={() => switchChain({ chainId: 5003 })}
-                            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all mobile-touch-target shadow-md"
+                            className="w-full py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all mobile-touch-target shadow-md"
                           >
                             SWITCH TO MANTLE SEPOLIA
                           </button>
@@ -315,6 +325,7 @@ export default function NeuralForge() {
               )}
             </AnimatePresence>
 
+            {/* SYNCED BRIDGE WALLET CARD MODULE */}
             <FloatingGlassCard designMode={designMode} className={`bg-white/5 backdrop-blur-3xl p-6 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)]`}>
               <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-6 border-b border-white/15 pb-4">
                 Bridge Wallet Link
