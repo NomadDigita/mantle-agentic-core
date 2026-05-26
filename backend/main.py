@@ -33,9 +33,14 @@ BYBIT_API_KEY = os.getenv("BYBIT_API_KEY", "")
 BYBIT_API_SECRET = os.getenv("BYBIT_API_SECRET", "")
 ELFA_API_KEY = os.getenv("ELFA_API_KEY", "elfak_a1f06bf844aa3adf990b7c47bf78e6c67150cc23f")
 
-# --- BOT SECURE TOKENS ---
+# --- SECURE API TOKENS (LOADED FROM ENV) ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
+
+TWITTER_CONSUMER_KEY = os.getenv("TWITTER_CONSUMER_KEY", "")
+TWITTER_CONSUMER_SECRET = os.getenv("TWITTER_CONSUMER_SECRET", "")
+TWITTER_ACCESS_TOKEN = os.getenv("TWITTER_ACCESS_TOKEN", "")
+TWITTER_ACCESS_TOKEN_SECRET = os.getenv("TWITTER_ACCESS_TOKEN_SECRET", "")
 
 client = Groq(api_key=api_key)
 app = FastAPI(title="Mantle Agent Engine")
@@ -48,27 +53,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- DUAL-ENGINE PERSISTENCE (POSTGRESQL WITH SQLITE FALLBACK) ---
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+# --- GLOBAL ASYNC EVENT LOOP REFERENCE FOR BOT DAEMONS ---
+main_loop = None
+
+# --- DATABASE SETUP (SQLITE PERSISTENT COLD SESSION STORAGE) ---
+DB_FILE = "mac_history.db"
 
 def get_db_connection():
-    """
-    Returns a connection to PostgreSQL if DATABASE_URL is configured,
-    otherwise falls back to SQLite.
-    """
-    if DATABASE_URL:
+    database_url = os.getenv("DATABASE_URL", "")
+    if database_url:
         import psycopg2
-        # Support render standard external postgresql urls
-        return psycopg2.connect(DATABASE_URL)
+        return psycopg2.connect(database_url)
     else:
-        return sqlite3.connect("mac_history.db")
+        return sqlite3.connect(DB_FILE)
 
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
+    database_url = os.getenv("DATABASE_URL", "")
     
-    if DATABASE_URL:
-        # PostgreSQL syntax
+    if database_url:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id VARCHAR(255) PRIMARY KEY,
@@ -99,7 +103,6 @@ def init_db():
             )
         """)
     else:
-        # SQLite syntax
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS chat_history (
                 id TEXT PRIMARY KEY,
@@ -158,6 +161,33 @@ class BotCommandPayload(BaseModel):
     command: str
     user_id: str
     platform: str  # "telegram" or "discord"
+
+# ---------------------------------------------------------
+# AUTONOMOUS TWITTER/𝕏 DISPATCHER (TweePy v2 Client)
+# ---------------------------------------------------------
+def post_autonomous_tweet(text: str) -> str:
+    """
+    Posts an automated transaction or audit proof to X via OAuth 1.0a User Context.
+    Fails over gracefully to a local mock log if the tokens are unset.
+    """
+    if not all([TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET]):
+        print(f"📡 [Twitter Mock-Log] {text}")
+        return "mock_success"
+    try:
+        import tweepy
+        twitter_client = tweepy.Client(
+            consumer_key=TWITTER_CONSUMER_KEY,
+            consumer_secret=TWITTER_CONSUMER_SECRET,
+            access_token=TWITTER_ACCESS_TOKEN,
+            access_token_secret=TWITTER_ACCESS_TOKEN_SECRET
+        )
+        response = twitter_client.create_tweet(text=text)
+        tweet_id = response.data.get("id")
+        print(f"✅ [Twitter] Tweet posted successfully! ID: {tweet_id}")
+        return f"success_id_{tweet_id}"
+    except Exception as e:
+        print(f"❌ [Twitter] Autopost failed: {str(e)}")
+        return f"error_{str(e)}"
 
 # ---------------------------------------------------------
 # CONSTANT SHANGHAI COMPATIBLE SIMPLE STORAGE BYTECODE
@@ -815,7 +845,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "latency": "0ms"
             }
 
-        # --- LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
+        # --- UPGRADE: LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
         if command_lower.startswith("/citadel") or command_lower.startswith("!mac citadel") or command_lower.startswith("citadel"):
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -969,7 +999,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "latency": "0ms"
                 }
 
-        # --- LIVE NEURAL FORGE SOLIDITY WRITER FOR BOTS ---
+        # --- UPGRADE: LIVE NEURAL FORGE SOLIDITY WRITER FOR BOTS ---
         if command_lower.startswith("/forge") or command_lower.startswith("!mac forge") or command_lower.startswith("forge "):
             blueprint_prompt = command_lower.replace("!mac forge", "").replace("/forge", "").replace("forge", "").strip()
             if not blueprint_prompt:
@@ -1201,9 +1231,6 @@ def run_discord_bot_loop():
 
 # --- KEEP AWAKE BACKGROUND SELF-PING DAEMON ---
 def run_render_keep_awake_loop():
-    """
-    Asynchronously ping the Render URL every 10 minutes to prevent the container from sleeping.
-    """
     render_url = os.getenv("RENDER_EXTERNAL_URL")
     if not render_url:
         print("⚠️ RENDER_EXTERNAL_URL environment variable is missing. Keep-awake thread skipped.")
@@ -1212,13 +1239,12 @@ def run_render_keep_awake_loop():
     print(f"🚀 [Keep-Awake] Monitoring active container path: {render_url}")
     while True:
         try:
-            # Query backend to keep container active
             res = requests.get(f"{render_url}/api/history?wallet_address=0x0000000000000000000000000000000000000000", timeout=10)
             if res.status_code == 200:
                 print("💚 [Keep-Awake] Heartbeat successfully registered on Render container.")
         except Exception as err:
             print(f"⚠️ [Keep-Awake] Heartbeat timeout: {str(err)}")
-        time.sleep(600) # Ping every 10 minutes (600 seconds)
+        time.sleep(600)
 
 # --- AUTOSTART BACKGROUND DAEMONS ON FASTAPI STARTUP ---
 @app.on_event("startup")

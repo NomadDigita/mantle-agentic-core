@@ -1,3 +1,5 @@
+# “Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+
 fastapi==0.110.0
 uvicorn==0.28.0
 pydantic==2.6.4
@@ -8,3 +10,4 @@ requests==2.31.0
 pyTelegramBotAPI==4.15.0
 discord.py==2.3.2
 psycopg2-binary==2.9.9
+tweepy==4.14.0
