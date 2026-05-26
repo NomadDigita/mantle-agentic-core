@@ -48,44 +48,87 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- DATABASE SETUP (SQLITE PERSISTENT COLD SESSION STORAGE) ---
-DB_FILE = "mac_history.db"
+# --- DUAL-ENGINE PERSISTENCE (POSTGRESQL WITH SQLITE FALLBACK) ---
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+
+def get_db_connection():
+    """
+    Returns a connection to PostgreSQL if DATABASE_URL is configured,
+    otherwise falls back to SQLite.
+    """
+    if DATABASE_URL:
+        import psycopg2
+        # Support render standard external postgresql urls
+        return psycopg2.connect(DATABASE_URL)
+    else:
+        return sqlite3.connect("mac_history.db")
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    # Chat histories mapped to wallets
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS chat_history (
-            id TEXT PRIMARY KEY,
-            wallet_address TEXT,
-            role TEXT,
-            text TEXT,
-            action_payload TEXT,
-            thinking_steps TEXT,
-            latency TEXT,
-            decision_hash TEXT,
-            timestamp REAL
-        )
-    """)
-    # Relational bindings mapping TG/Discord accounts to Web3 wallets
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_bindings (
-            platform TEXT,
-            platform_user_id TEXT,
-            wallet_address TEXT,
-            PRIMARY KEY(platform, platform_user_id)
-        )
-    """)
-    # Virtual bot-minted identities to bridge to web
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS virtual_identities (
-            wallet_address TEXT PRIMARY KEY,
-            risk_strategy TEXT,
-            max_drawdown INTEGER,
-            timestamp REAL
-        )
-    """)
+    
+    if DATABASE_URL:
+        # PostgreSQL syntax
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS chat_history (
+                id VARCHAR(255) PRIMARY KEY,
+                wallet_address VARCHAR(255),
+                role VARCHAR(50),
+                text TEXT,
+                action_payload TEXT,
+                thinking_steps TEXT,
+                latency VARCHAR(50),
+                decision_hash VARCHAR(255),
+                timestamp DOUBLE PRECISION
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_bindings (
+                platform VARCHAR(50),
+                platform_user_id VARCHAR(255),
+                wallet_address VARCHAR(255),
+                PRIMARY KEY(platform, platform_user_id)
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS virtual_identities (
+                wallet_address VARCHAR(255) PRIMARY KEY,
+                risk_strategy VARCHAR(100),
+                max_drawdown INTEGER,
+                timestamp DOUBLE PRECISION
+            )
+        """)
+    else:
+        # SQLite syntax
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS chat_history (
+                id TEXT PRIMARY KEY,
+                wallet_address TEXT,
+                role TEXT,
+                text TEXT,
+                action_payload TEXT,
+                thinking_steps TEXT,
+                latency TEXT,
+                decision_hash TEXT,
+                timestamp REAL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_bindings (
+                platform TEXT,
+                platform_user_id TEXT,
+                wallet_address TEXT,
+                PRIMARY KEY(platform, platform_user_id)
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS virtual_identities (
+                wallet_address TEXT PRIMARY KEY,
+                risk_strategy TEXT,
+                max_drawdown INTEGER,
+                timestamp REAL
+            )
+        """)
     conn.commit()
     conn.close()
 
@@ -679,12 +722,22 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 addr = parts[0]
                 if Web3.is_address(addr):
                     checksum_addr = Web3.to_checksum_address(addr)
-                    conn = sqlite3.connect(DB_FILE)
+                    conn = get_db_connection()
                     cursor = conn.cursor()
-                    cursor.execute("""
-                        INSERT OR REPLACE INTO user_bindings (platform, platform_user_id, wallet_address)
-                        VALUES (?, ?, ?)
-                    """, (payload.platform, payload.user_id, checksum_addr.lower()))
+                    
+                    if DATABASE_URL:
+                        cursor.execute("""
+                            INSERT INTO user_bindings (platform, platform_user_id, wallet_address)
+                            VALUES (%s, %s, %s)
+                            ON CONFLICT (platform, platform_user_id) 
+                            DO UPDATE SET wallet_address = EXCLUDED.wallet_address
+                        """, (payload.platform, payload.user_id, checksum_addr.lower()))
+                    else:
+                        cursor.execute("""
+                            INSERT OR REPLACE INTO user_bindings (platform, platform_user_id, wallet_address)
+                            VALUES (?, ?, ?)
+                        """, (payload.platform, payload.user_id, checksum_addr.lower()))
+                        
                     conn.commit()
                     conn.close()
                     return {
@@ -705,9 +758,12 @@ async def handle_bot_webhook(payload: BotCommandPayload):
 
         # Command-line portfolio report trigger execution
         if command_lower in ["/portfolio", "portfolio", "positions", "!mac portfolio"]:
-            conn = sqlite3.connect(DB_FILE)
+            conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
+            if DATABASE_URL:
+                cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = %s AND platform_user_id = %s", (payload.platform, payload.user_id))
+            else:
+                cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
             row = cursor.fetchone()
             conn.close()
 
@@ -723,10 +779,12 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 }
 
             bound_address = row[0]
-            # Fetch active positions logged under this wallet
-            conn = sqlite3.connect(DB_FILE)
+            conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT id, text, action_payload FROM chat_history WHERE wallet_address = ? AND role = 'ai' AND action_payload IS NOT NULL", (bound_address,))
+            if DATABASE_URL:
+                cursor.execute("SELECT id, text, action_payload FROM chat_history WHERE wallet_address = %s AND role = 'ai' AND action_payload IS NOT NULL", (bound_address,))
+            else:
+                cursor.execute("SELECT id, text, action_payload FROM chat_history WHERE wallet_address = ? AND role = 'ai' AND action_payload IS NOT NULL", (bound_address,))
             rows = cursor.fetchall()
             conn.close()
 
@@ -757,11 +815,14 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "latency": "0ms"
             }
 
-        # --- UPGRADE: LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
+        # --- LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
         if command_lower.startswith("/citadel") or command_lower.startswith("!mac citadel") or command_lower.startswith("citadel"):
-            conn = sqlite3.connect(DB_FILE)
+            conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
+            if DATABASE_URL:
+                cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = %s AND platform_user_id = %s", (payload.platform, payload.user_id))
+            else:
+                cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
             row = cursor.fetchone()
             conn.close()
 
@@ -816,13 +877,21 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                         "latency": "0ms"
                     }
 
-                # Save Virtual bot profile directly to SQLite
-                conn = sqlite3.connect(DB_FILE)
+                # Save Virtual bot profile directly to Database
+                conn = get_db_connection()
                 cursor = conn.cursor()
-                cursor.execute("""
-                    INSERT OR REPLACE INTO virtual_identities (wallet_address, risk_strategy, max_drawdown, timestamp)
-                    VALUES (?, ?, ?, ?)
-                """, (bound_address, strategy_input, drawdown_val, time.time()))
+                if DATABASE_URL:
+                    cursor.execute("""
+                        INSERT INTO virtual_identities (wallet_address, risk_strategy, max_drawdown, timestamp)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (wallet_address)
+                        DO UPDATE SET risk_strategy = EXCLUDED.risk_strategy, max_drawdown = EXCLUDED.max_drawdown, timestamp = EXCLUDED.timestamp
+                    """, (bound_address, strategy_input, drawdown_val, time.time()))
+                else:
+                    cursor.execute("""
+                        INSERT OR REPLACE INTO virtual_identities (wallet_address, risk_strategy, max_drawdown, timestamp)
+                        VALUES (?, ?, ?, ?)
+                    """, (bound_address, strategy_input, drawdown_val, time.time()))
                 conn.commit()
                 conn.close()
 
@@ -857,10 +926,13 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "latency": "0ms"
                 }
             elif profile_data.get("status") == "none":
-                # Check for a pending virtual identity in our SQLite database
-                conn = sqlite3.connect(DB_FILE)
+                # Check for a pending virtual identity in our database
+                conn = get_db_connection()
                 cursor = conn.cursor()
-                cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (bound_address,))
+                if DATABASE_URL:
+                    cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = %s", (bound_address,))
+                else:
+                    cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (bound_address,))
                 v_row = cursor.fetchone()
                 conn.close()
 
@@ -897,7 +969,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     "latency": "0ms"
                 }
 
-        # --- UPGRADE: LIVE NEURAL FORGE SOLIDITY WRITER FOR BOTS ---
+        # --- LIVE NEURAL FORGE SOLIDITY WRITER FOR BOTS ---
         if command_lower.startswith("/forge") or command_lower.startswith("!mac forge") or command_lower.startswith("forge "):
             blueprint_prompt = command_lower.replace("!mac forge", "").replace("/forge", "").replace("forge", "").strip()
             if not blueprint_prompt:
@@ -936,9 +1008,12 @@ async def handle_bot_webhook(payload: BotCommandPayload):
             }
 
         # Check if this bot user is linked to a Web3 wallet address
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
+        if DATABASE_URL:
+            cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = %s AND platform_user_id = %s", (payload.platform, payload.user_id))
+        else:
+            cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
         row = cursor.fetchone()
         conn.close()
 
@@ -965,9 +1040,12 @@ async def get_bot_virtual_identity(wallet_address: str):
     Exposes pending bot-created profile drafts so the Next.js frontend can detect them on connect.
     """
     safe_address = wallet_address.lower()
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (safe_address,))
+    if DATABASE_URL:
+        cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = %s", (safe_address,))
+    else:
+        cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (safe_address,))
     row = cursor.fetchone()
     conn.close()
 
@@ -1034,9 +1112,6 @@ async def execute_forge(payload: CommandPayload):
 # DAEMON THREAD BOT RUNNERS
 # ---------------------------------------------------------
 def run_telegram_bot_loop():
-    """
-    Spins up pyTelegramBotAPI listener inside an isolated daemon thread.
-    """
     try:
         if not TELEGRAM_BOT_TOKEN:
             print("⚠️ Telegram Bot Token missing from environment. Thread skipped.")
@@ -1073,9 +1148,6 @@ def run_telegram_bot_loop():
         print(f"❌ Telegram Bot thread failed: {str(err)}")
 
 def run_discord_bot_loop():
-    """
-    Spins up discord.py client inside an isolated daemon thread with its own asyncio loop.
-    """
     try:
         if not DISCORD_BOT_TOKEN:
             print("⚠️ Discord Bot Token missing from environment. Thread skipped.")
@@ -1127,9 +1199,34 @@ def run_discord_bot_loop():
     except Exception as err:
         print(f"❌ Discord Bot thread failed: {str(err)}")
 
+# --- KEEP AWAKE BACKGROUND SELF-PING DAEMON ---
+def run_render_keep_awake_loop():
+    """
+    Asynchronously ping the Render URL every 10 minutes to prevent the container from sleeping.
+    """
+    render_url = os.getenv("RENDER_EXTERNAL_URL")
+    if not render_url:
+        print("⚠️ RENDER_EXTERNAL_URL environment variable is missing. Keep-awake thread skipped.")
+        return
+        
+    print(f"🚀 [Keep-Awake] Monitoring active container path: {render_url}")
+    while True:
+        try:
+            # Query backend to keep container active
+            res = requests.get(f"{render_url}/api/history?wallet_address=0x0000000000000000000000000000000000000000", timeout=10)
+            if res.status_code == 200:
+                print("💚 [Keep-Awake] Heartbeat successfully registered on Render container.")
+        except Exception as err:
+            print(f"⚠️ [Keep-Awake] Heartbeat timeout: {str(err)}")
+        time.sleep(600) # Ping every 10 minutes (600 seconds)
+
 # --- AUTOSTART BACKGROUND DAEMONS ON FASTAPI STARTUP ---
 @app.on_event("startup")
 async def startup_event():
+    # Start Keep-Awake Loop
+    keep_awake_thread = threading.Thread(target=run_render_keep_awake_loop, daemon=True)
+    keep_awake_thread.start()
+
     # Start Telegram Daemon
     tg_thread = threading.Thread(target=run_telegram_bot_loop, daemon=True)
     tg_thread.start()
