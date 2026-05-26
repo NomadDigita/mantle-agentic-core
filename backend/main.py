@@ -57,7 +57,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- DATABASE SETUP (SQLITE PERSISTENT COLD SESSION STORAGE) ---
+# --- DUAL-ENGINE PERSISTENCE (POSTGRESQL WITH SQLITE FALLBACK) ---
 DB_FILE = "mac_history.db"
 
 def get_db_connection():
@@ -234,7 +234,7 @@ def execute_byreal_cli(args: list[str]) -> dict:
     else:
         return {
             "overview": {
-                "grid_tvl": "$48,912,450",
+                "dex_tvl": "$48,912,450",
                 "volume24h": "$9,450,200",
                 "fees24h": "$28,350",
                 "active_pools": 12
@@ -448,6 +448,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
             "Securing sandbox RPC pipeline to Mantle Sepolia Ledger (Chain ID: 5003)..."
         ]
 
+        # --- GREETINGS CONVERSATIONAL TRIGGER UPGRADE ---
         if any(greet in command_lower for greet in ["hello", "hi", "hey", "start", "welcome"]):
             live_data = fetch_live_market_data()
             thinking_steps.append("Processing user greeting and framing capabilities manual...")
@@ -507,7 +508,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
                 cli_args = ["overview"]
                 thinking_steps.append("Executing shell: byreal-cli overview -o json")
 
-            byreal_json = execute_byreal_cli(cli_args)
+            byreal_json = execute_byreal_cli(args)
             thinking_steps.append("Byreal CLI execution complete. Formatting context output...")
             latency = f"{int((time.time() - start_time) * 1000)}ms"
 
@@ -700,7 +701,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                     conn = get_db_connection()
                     cursor = conn.cursor()
                     
-                    if DATABASE_URL:
+                    if os.getenv("DATABASE_URL"):
                         cursor.execute("""
                             INSERT INTO user_bindings (platform, platform_user_id, wallet_address)
                             VALUES (%s, %s, %s)
@@ -735,7 +736,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
         if command_lower in ["/portfolio", "portfolio", "positions", "!mac portfolio"]:
             conn = get_db_connection()
             cursor = conn.cursor()
-            if DATABASE_URL:
+            if os.getenv("DATABASE_URL"):
                 cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = %s AND platform_user_id = %s", (payload.platform, payload.user_id))
             else:
                 cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
@@ -756,7 +757,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
             bound_address = row[0]
             conn = get_db_connection()
             cursor = conn.cursor()
-            if DATABASE_URL:
+            if os.getenv("DATABASE_URL"):
                 cursor.execute("SELECT id, text, action_payload FROM chat_history WHERE wallet_address = %s AND role = 'ai' AND action_payload IS NOT NULL", (bound_address,))
             else:
                 cursor.execute("SELECT id, text, action_payload FROM chat_history WHERE wallet_address = ? AND role = 'ai' AND action_payload IS NOT NULL", (bound_address,))
@@ -790,11 +791,11 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "latency": "0ms"
             }
 
-        # --- LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
+        # --- UPGRADE: LIVE ON-CHAIN CITADEL SCANNER & DATABASE PROFILE MINTER ---
         if command_lower.startswith("/citadel") or command_lower.startswith("!mac citadel") or command_lower.startswith("citadel"):
             conn = get_db_connection()
             cursor = conn.cursor()
-            if DATABASE_URL:
+            if os.getenv("DATABASE_URL"):
                 cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = %s AND platform_user_id = %s", (payload.platform, payload.user_id))
             else:
                 cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
@@ -855,7 +856,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 # Save Virtual bot profile directly to Database
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                if DATABASE_URL:
+                if os.getenv("DATABASE_URL"):
                     cursor.execute("""
                         INSERT INTO virtual_identities (wallet_address, risk_strategy, max_drawdown, timestamp)
                         VALUES (%s, %s, %s, %s)
@@ -904,7 +905,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 # Check for a pending virtual identity in our database
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                if DATABASE_URL:
+                if os.getenv("DATABASE_URL"):
                     cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = %s", (bound_address,))
                 else:
                     cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (bound_address,))
@@ -985,7 +986,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
         # Check if this bot user is linked to a Web3 wallet address
         conn = get_db_connection()
         cursor = conn.cursor()
-        if DATABASE_URL:
+        if os.getenv("DATABASE_URL"):
             cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = %s AND platform_user_id = %s", (payload.platform, payload.user_id))
         else:
             cursor.execute("SELECT wallet_address FROM user_bindings WHERE platform = ? AND platform_user_id = ?", (payload.platform, payload.user_id))
@@ -1017,7 +1018,7 @@ async def get_bot_virtual_identity(wallet_address: str):
     safe_address = wallet_address.lower()
     conn = get_db_connection()
     cursor = conn.cursor()
-    if DATABASE_URL:
+    if os.getenv("DATABASE_URL"):
         cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = %s", (safe_address,))
     else:
         cursor.execute("SELECT risk_strategy, max_drawdown FROM virtual_identities WHERE wallet_address = ?", (safe_address,))
