@@ -17,7 +17,7 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ["latin"] });
 
 const ParticleBackground: React.FC = () => {
-  const { isOverclocked, systemState } = useTheme();
+  const { isOverclocked, systemState, designMode } = useTheme();
   const [init, setInit] = useState(false);
 
   useEffect(() => {
@@ -44,8 +44,9 @@ const ParticleBackground: React.FC = () => {
 
   const particleColor = getParticleColor(systemState);
   const isListening = systemState === 'LISTENING'; 
+  const isCyberMode = designMode === "CYBER";
 
-  // Option config prioritizing thick, highly visible particles and connection webs
+  // Dynamic parameters mapping directly to global design mode selections
   const options = useMemo<any>(() => ({
     background: { color: { value: "#020204" } },
     fpsLimit: 60, 
@@ -66,26 +67,43 @@ const ParticleBackground: React.FC = () => {
         color: particleColor,
         distance: 130,
         enable: true,
-        // Highly visible linking paths
-        opacity: isOverclocked ? 0.45 : (isListening ? 0.08 : 0.28),
-        width: 2.2, // Significantly thickened link lines
+        // Brighter links for CYBER-grid mode
+        opacity: isCyberMode 
+          ? (isOverclocked ? 0.65 : (isListening ? 0.15 : 0.55)) 
+          : (isOverclocked ? 0.45 : (isListening ? 0.08 : 0.28)),
+        // Thickened vector paths for CYBER mode
+        width: isCyberMode ? 2.8 : 2.2, 
       },
       move: {
         enable: true,
-        speed: isOverclocked ? 1.6 : (isListening ? 0.18 : 0.8), 
+        // High-velocity acceleration for CYBER data streams
+        speed: isCyberMode 
+          ? (isListening ? 0.25 : 2.5) 
+          : (isOverclocked ? 1.6 : (isListening ? 0.18 : 0.8)), 
       },
       number: {
-        value: isOverclocked ? 50 : 35, 
+        // Increased node density for CYBER mode
+        value: isCyberMode 
+          ? (isOverclocked ? 65 : 45) 
+          : (isOverclocked ? 50 : 35), 
       },
       opacity: {
-        value: { min: 0.18, max: isOverclocked ? 0.7 : (isListening ? 0.12 : 0.45) },
+        value: { 
+          min: isCyberMode ? 0.22 : 0.18, 
+          max: isCyberMode 
+            ? (isOverclocked ? 0.8 : (isListening ? 0.18 : 0.6)) 
+            : (isOverclocked ? 0.7 : (isListening ? 0.12 : 0.45)) 
+        },
       },
       size: {
-        value: { min: 2.5, max: 4.8 }, // Thicker, clearly defined particle nodes
+        value: { 
+          min: isCyberMode ? 3.0 : 2.5, 
+          max: isCyberMode ? 5.5 : 4.8 
+        }, 
       },
     },
     detectRetina: true,
-  }), [isOverclocked, particleColor, isListening]);
+  }), [isOverclocked, particleColor, isListening, isCyberMode]);
 
   if (!init) return null;
   
