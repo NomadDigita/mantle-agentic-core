@@ -211,6 +211,7 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
   );
 }
 
+// --- UPGRADE: GUARANTEED ZERO-UNDEF-RED-LINE CAROUSEL COMPONENT ---
 function SocialMatrixCarousel(): React.ReactElement {
   const socials = [
     { name: "𝕏", url: "https://x.com/MantleCore_", text: "@MantleCore_", color: "text-white" },
@@ -673,34 +674,62 @@ export default function Home() {
     }
   };
 
-  const handleExecute = async () => {
-    if (!command.trim()) return;
-    const userMsg: Message = { id: Date.now().toString(), role: "user", text: command };
-    setMessages(prev => [...prev, userMsg]);
+  // --- UPGRADE: MODULARIZED DIRECT COMMAND DESCRIPTORS ---
+  const executeDirectCommand = async (cmdString: string, targetAsset: string | null = null) => {
+    if (isExecuting) return;
     setIsExecuting(true);
-    
     if (!isOverclocked) setSystemState('ANALYZING');
 
-    const lowerCmd = command.toLowerCase();
+    const lowerCmd = cmdString.toLowerCase();
     const leverageMatch = lowerCmd.match(/(\d+)x/);
     const parsedLeverage = leverageMatch ? parseInt(leverageMatch[1]) : 10;
 
     let pendingAction: ActionPayload | undefined = undefined;
-    
-    if (lowerCmd.includes("simulate") || lowerCmd.includes("attack")) {
-       setSecOpsActive(true);
-       setExploitAlert(true);
-       toggleOverclock(); 
-    }
-    if (lowerCmd.includes("weave") || lowerCmd.includes("yield")) {
-       setYieldWeaverMode("WEAVING");
-    }
+    const resolvedAsset = targetAsset || (lowerCmd.includes("btc") ? "BTC" : lowerCmd.includes("eth") ? "ETH" : "SOL");
+    const resolvedPair = `${resolvedAsset}USDT`;
+    const resolvedType = lowerCmd.includes("long") ? "LONG" : "SHORT";
 
-    if (lowerCmd.includes("short btc")) pendingAction = { asset: "BTC", pair: "BTCUSDT", type: "SHORT", leverage: parsedLeverage, status: "PENDING", confidence: 78, risk: "HIGH", analysis: "Heavy resistance detected at $85k zone. Institutional distribution likely." };
-    else if (lowerCmd.includes("long btc")) pendingAction = { asset: "BTC", pair: "BTCUSDT", type: "LONG", leverage: parsedLeverage, status: "PENDING", confidence: 62, risk: "MEDIUM", analysis: "Moving averages crossing bullish, but volume remains constrained on L2." };
-    else if (lowerCmd.includes("short eth")) pendingAction = { asset: "ETH", pair: "ETHUSDT", type: "SHORT", leverage: parsedLeverage, status: "PENDING", confidence: 45, risk: "HIGH", analysis: "Counter-trend execution. Smart money is currently accumulating spot ETH." };
-    else if (lowerCmd.includes("long eth")) pendingAction = { asset: "ETH", pair: "ETHUSDT", type: "LONG", leverage: parsedLeverage, status: "PENDING", confidence: 88, risk: "LOW", analysis: "Golden cross confirmed. Ecosystem liquidity flowing heavily into LSTs." };
-    else if (lowerCmd.includes("swap") || lowerCmd.includes("buy")) pendingAction = { asset: "MNT", pair: "BTCUSDT", type: "SWAP", leverage: 1, status: "PENDING", confidence: 99, risk: "LOW", analysis: "Optimal routing path found via Agni Finance. Slippage < 0.1%." };
+    // Build specific analytical insights for Sentinel one-click triggers
+    if (resolvedAsset === "BTC") {
+      pendingAction = {
+        asset: "BTC",
+        pair: "BTCUSDT",
+        type: resolvedType as any,
+        leverage: parsedLeverage,
+        status: "PENDING",
+        confidence: resolvedType === "LONG" ? 62 : 78,
+        risk: resolvedType === "LONG" ? "MEDIUM" : "HIGH",
+        analysis: resolvedType === "LONG" 
+          ? "Moving averages crossing bullish, but volume remains constrained on L2." 
+          : "Heavy resistance detected at $85k zone. Institutional distribution likely."
+      };
+    } else if (resolvedAsset === "ETH") {
+      pendingAction = {
+        asset: "ETH",
+        pair: "ETHUSDT",
+        type: resolvedType as any,
+        leverage: parsedLeverage,
+        status: "PENDING",
+        confidence: resolvedType === "LONG" ? 88 : 45,
+        risk: resolvedType === "LONG" ? "LOW" : "HIGH",
+        analysis: resolvedType === "LONG" 
+          ? "Golden cross confirmed. Ecosystem liquidity flowing heavily into LSTs." 
+          : "Counter-trend execution. Smart money is currently accumulating spot ETH."
+      };
+    } else if (resolvedAsset === "SOL") {
+      pendingAction = {
+        asset: "SOL",
+        pair: "SOLUSDT",
+        type: resolvedType as any,
+        leverage: parsedLeverage,
+        status: "PENDING",
+        confidence: resolvedType === "LONG" ? 70 : 55,
+        risk: "MEDIUM",
+        analysis: resolvedType === "LONG" 
+          ? "High velocity momentum indicators turning bullish. Prepare for local breakouts." 
+          : "Solana is showing signs of localized distribution. Wait for confirmatory breakdowns."
+      };
+    }
 
     if (pendingAction && agentProfile) {
       const strategy = agentProfile.riskStrategy.toLowerCase();
@@ -708,10 +737,9 @@ export default function Home() {
         setMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           role: "error",
-          text: `🛑 AGENT INTERCEPT ERROR:\nActive identity is Conservative. Leverage trades (>5x) are disabled.`
+          text: `🛑 AGENT INTERCEPT ERROR:\nCommand execution blocked. Active on-chain identity is locked into Conservative parameters. High leverage trades (>5x) are disabled.`
         }]);
         setIsExecuting(false);
-        setCommand("");
         if (!isOverclocked) setSystemState('IDLE');
         return;
       }
@@ -719,16 +747,19 @@ export default function Home() {
         setMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           role: "error",
-          text: `🛑 AGENT INTERCEPT ERROR:\nActive identity is Balanced. Leverage trades (>10x) are disabled.`
+          text: `🛑 AGENT INTERCEPT ERROR:\nCommand execution blocked. Active on-chain identity is locked into Balanced parameters. High leverage trades (>10x) are disabled.`
         }]);
         setIsExecuting(false);
-        setCommand("");
         if (!isOverclocked) setSystemState('IDLE');
         return;
       }
     }
 
-    let finalPayload = command;
+    // Push clean user log directly to screen
+    const userMsg: Message = { id: Date.now().toString(), role: "user", text: cmdString };
+    setMessages(prev => [...prev, userMsg]);
+
+    let finalPayload = cmdString;
     if (isOverclocked) finalPayload += "\n\n<SYSTEM_DIRECTIVE>CRITICAL: OVERCLOCK mode. Act like a hyper-aggressive Web3 degen. Use ALL CAPS. Include system parsing logs in your output.</SYSTEM_DIRECTIVE>";
     else finalPayload += "\n\n<SYSTEM_DIRECTIVE>Maintain system formatting. Include diagnostic headers and system directive tags in your analysis.</SYSTEM_DIRECTIVE>";
 
@@ -754,9 +785,22 @@ export default function Home() {
       setMessages(prev => [...prev, { id: Date.now().toString(), role: "error", text: "CONNECTION FAILURE: Brain Engine unreachable." }]);
     } finally {
       setIsExecuting(false); 
-      setCommand("");
       if (!isOverclocked) setSystemState('IDLE');
     }
+  };
+
+  const handleExecute = () => {
+    if (!command.trim()) return;
+    executeDirectCommand(command);
+    setCommand("");
+  };
+
+  // --- UPGRADE: SENTINEL INTERACTIVE BUTTON CLICK TRIGGERS ---
+  const handleSentinelClick = (type: 'LONG' | 'SHORT') => {
+    if (isExecuting) return;
+    const activeCoin = currentMarket;
+    const generatedCmd = `${type === 'LONG' ? 'Long' : 'Short'} ${activeCoin.symbol} 10x`;
+    executeDirectCommand(generatedCmd, activeCoin.symbol);
   };
 
   const handleWeaveYield = async () => {
@@ -1293,7 +1337,7 @@ export default function Home() {
               )}
             </FloatingGlassCard>
 
-            {/* UPGRADE: ALWAYS-ON PREMIUM RWA YIELD WEAVER (With 3D Rotating Sphere) */}
+            {/* ALWAYS-ON PREMIUM RWA YIELD WEAVER (With 3D Rotating Sphere) */}
             <FloatingGlassCard designMode={designMode} delay={0.3} className="bg-black/50 border border-purple-500/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.25)]">
               <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                 <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2">
@@ -1378,20 +1422,37 @@ export default function Home() {
               </div>
             </FloatingGlassCard>
 
-            {/* MARKET SENTINEL COMPONENT */}
+            {/* UPGRADE: INTERACTIVE CLICK-TO-TRADE MARKET SENTINEL COMPONENT */}
             <FloatingGlassCard designMode={designMode} delay={0.6} className={`bg-transparent rounded-3xl shadow-2xl`}>
               <div className="relative overflow-hidden rounded-3xl h-full w-full">
                 <div className="relative h-full w-full">
-                  <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4"><span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50">Market Sentinel</span><div className={`w-2.5 h-2.5 rounded-full animate-pulse ${currentMarket.bg}`} /></div>
+                  <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50">Market Sentinel</span>
+                    <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${currentMarket.bg}`} />
+                  </div>
                   <AnimatePresence mode="wait">
                     <motion.div key={currentMarket.symbol} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center mb-6">
                        <div className="text-5xl font-black text-white drop-shadow-md text-sharp-primary">{(livePrices as any)[currentMarket.pair]}</div>
                        <div className={`text-[12px] font-black tracking-[0.2em] mt-2.5 ${currentMarket.color} ${currentMarket.glow}`}>{currentMarket.name}</div>
                     </motion.div>
                   </AnimatePresence>
+                  
+                  {/* Connected interactive trigger button mapping */}
                   <div className="flex gap-3">
-                     <button className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target shadow-md`}>Long</button>
-                     <button className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target shadow-md">Short</button>
+                     <button 
+                       onClick={() => handleSentinelClick('LONG')}
+                       disabled={isExecuting}
+                       className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed`}
+                     >
+                       Long
+                     </button>
+                     <button 
+                       onClick={() => handleSentinelClick('SHORT')}
+                       disabled={isExecuting}
+                       className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed"
+                     >
+                       Short
+                     </button>
                   </div>
                 </div>
               </div>
@@ -1448,7 +1509,7 @@ export default function Home() {
             <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[80px]">
               <button 
                 onClick={() => open()} 
-                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
+                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
               >
                 {isConnected ? "Connection Active" : "Bridge Wallet"}
               </button>
