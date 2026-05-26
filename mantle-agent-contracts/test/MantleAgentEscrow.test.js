@@ -3,7 +3,8 @@
 */
 
 import { expect } from "chai";
-import hre from "hardhat"; // Import the main Hardhat Runtime Environment cleanly
+import hre from "hardhat"; 
+const { ethers } = hre;
 
 describe("MantleAgentEscrow Unit-Test Suite", function () {
   let macToken;
@@ -14,10 +15,6 @@ describe("MantleAgentEscrow Unit-Test Suite", function () {
   let recipient;
   
   beforeEach(async function () {
-    // --- RESOLVES LAZY-LOADING RACE CONDITIONS PERMANENTLY ---
-    // Pull ethers dynamically inside the hook AFTER the runtime has fully booted
-    const { ethers } = hre;
-    
     // Retrieve signers securely from the runtime environment
     [owner, user, treasury, recipient] = await ethers.getSigners();
     
@@ -47,10 +44,10 @@ describe("MantleAgentEscrow Unit-Test Suite", function () {
   });
 
   describe("Collateral Escrow Deposits", function () {
-    it("Should successfully deposit and apply the exact 5% token transfer tax", async function () {
-      const { ethers } = hre; // Pull dynamically inside sub-tests
+    it("Should successfully deposit the exact MAC amount (transferFrom has 0% tax)", async function () {
+      const { ethers } = hre;
       const depositAmount = ethers.parseEther("100");
-      const expectedEscrowCollateral = ethers.parseEther("95"); // 100 - 5% tax
+      const expectedEscrowCollateral = ethers.parseEther("100"); // transferFrom bypasses overridden transfer tax
 
       // User approves Escrow contract to spend MAC tokens
       await macToken.connect(user).approve(await escrow.getAddress(), depositAmount);
@@ -101,18 +98,18 @@ describe("MantleAgentEscrow Unit-Test Suite", function () {
     beforeEach(async function () {
       const { ethers } = hre;
       const depositAmount = ethers.parseEther("100");
-      lockedAmount = ethers.parseEther("95"); // 5% fee-on-transfer applied
+      lockedAmount = ethers.parseEther("100"); // transferFrom is untaxed
       positionId = ethers.keccak256(ethers.toUtf8Bytes("position-trace-hash-04"));
 
       await macToken.connect(user).approve(await escrow.getAddress(), depositAmount);
       await escrow.connect(user).depositEscrow(positionId, depositAmount);
     });
 
-    it("Should programmatically release locked collateral back to recipient (called by Owner/Agent)", async function () {
+    it("Should programmatically release locked collateral back to recipient with 5% exit tax", async function () {
       const { ethers } = hre;
       const initialRecipientBalance = await macToken.balanceOf(recipient.address);
 
-      // Owner (Sovereign backend agent) releases escrow
+      // Owner (Sovereign backend agent) releases escrow (emits full transfer value)
       await expect(escrow.connect(owner).releaseEscrow(positionId, recipient.address))
         .to.emit(escrow, "EscrowReleased")
         .withArgs(positionId, recipient.address, lockedAmount);
@@ -122,8 +119,8 @@ describe("MantleAgentEscrow Unit-Test Suite", function () {
       expect(session.isActive).to.be.false;
       expect(session.amount).to.equal(0n);
 
-      // Verify recipient received the tokens (5% fee applied on exit transfer)
-      const expectedTransfer = ethers.parseEther("90.25"); // 95 - 5% tax
+      // Verify recipient received the tokens (5% exit fee applied on transfer)
+      const expectedTransfer = ethers.parseEther("95.00"); // 100 - 5% tax
       expect(await macToken.balanceOf(recipient.address))
         .to.equal(initialRecipientBalance + expectedTransfer);
     });
@@ -142,14 +139,14 @@ describe("MantleAgentEscrow Unit-Test Suite", function () {
     beforeEach(async function () {
       const { ethers } = hre;
       const depositAmount = ethers.parseEther("200");
-      lockedAmount = ethers.parseEther("190"); // 5% fee-on-transfer applied
+      lockedAmount = ethers.parseEther("200"); // transferFrom is untaxed
       positionId = ethers.keccak256(ethers.toUtf8Bytes("position-trace-hash-05"));
 
       await macToken.connect(user).approve(await escrow.getAddress(), depositAmount);
       await escrow.connect(user).depositEscrow(positionId, depositAmount);
     });
 
-    it("Should successfully seize collateral and route to treasury (called by Owner/Agent)", async function () {
+    it("Should successfully seize collateral and route to treasury with 5% exit tax", async function () {
       const { ethers } = hre;
       const initialTreasuryBalance = await macToken.balanceOf(treasury.address);
 
@@ -163,8 +160,8 @@ describe("MantleAgentEscrow Unit-Test Suite", function () {
       expect(session.isActive).to.be.false;
       expect(session.amount).to.equal(0n);
 
-      // Verify treasury received the tokens (5% fee applied on exit transfer)
-      const expectedTransfer = ethers.parseEther("180.5"); // 190 - 5% tax
+      // Verify treasury received the tokens (5% exit fee applied on transfer)
+      const expectedTransfer = ethers.parseEther("190.00"); // 200 - 5% tax
       expect(await macToken.balanceOf(treasury.address))
         .to.equal(initialTreasuryBalance + expectedTransfer);
     });

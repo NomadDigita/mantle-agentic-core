@@ -31,14 +31,8 @@ contract MantleAgentEscrow is Ownable {
 
     constructor(address _macTokenAddress) Ownable(msg.sender) {
         require(_macTokenAddress != address(0), "Invalid token address");
-        macToken = IERC20(_macmacTokenAddress());
-    }
-
-    /**
-     * @dev Private helper to obtain the contract token address safely.
-     */
-    function _macmacTokenAddress() private view returns (address) {
-        return address(macToken);
+        // FIX: Directly assign the input token address to initialize the contract
+        macToken = IERC20(_macTokenAddress);
     }
 
     /**
