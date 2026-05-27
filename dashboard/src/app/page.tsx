@@ -82,8 +82,20 @@ type RelayPingLog = {
   text: string;
 };
 
-// --- UPGRADE: PREMIUM 3D SWIMMING & FLOATING PARALLAX CONTAINER ---
-function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) {
+// --- PREMIUM 3D SWIMMING & FLOATING PARALLAX CONTAINER ---
+function FloatingGlassCard({ 
+  children, 
+  className, 
+  delay = 0, 
+  isAuraActive = true, 
+  designMode = "SILENT" 
+}: { 
+  children: React.ReactNode, 
+  className: string, 
+  delay?: number, 
+  isAuraActive?: boolean, 
+  designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" 
+}) {
   const { systemState } = useTheme();
   
   const x = useMotionValue(0);
@@ -103,7 +115,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       onMouseMove={handleMouse}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-      animate={{ y: [0, -14, 0] }} // Immersive buoyancy floats (swimming cards)
+      animate={{ y: [0, -14, 0] }}
       transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay }}
       className={`relative rounded-3xl p-[1.8px] overflow-hidden transition-all duration-700 ${className}`}
     >
@@ -134,10 +146,18 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
   );
 }
 
-function IntroSequence({ onComplete, designMode = "SILENT" }: { onComplete: () => void, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) {
+function IntroSequence({ 
+  onComplete, 
+  designMode = "SILENT" 
+}: { 
+  onComplete: () => void, 
+  designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" 
+}) {
   return (
     <motion.div 
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
       transition={{ duration: 0.8 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl"
     >
@@ -195,7 +215,9 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }}
+            initial={{ height: 0 }} 
+            animate={{ height: "auto" }} 
+            exit={{ height: 0 }}
             className="overflow-hidden bg-black/40"
           >
             <div className="p-5 space-y-2.5 font-mono text-[10px] text-white/90 leading-relaxed border-t border-white/5">
@@ -215,8 +237,8 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
 
 function SocialMatrixCarousel(): React.ReactElement {
   const socials = [
-    { name: "𝕏", url: "https://x.com/MantleCore_", text: "@MantleCore_", color: "text-white" },
-    { name: "✈️", url: "https://t.me/MantleAgentic", text: "t.me/MantleAgentic", color: "text-blue-400" },
+    { name: "𝕏", url: "https://x.com/asiwajubtc", text: "@asiwajubtc", color: "text-white" },
+    { name: "✈️", url: "https://t.me/DigitalVagabond", text: "t.me/DigitalVagabond", color: "text-blue-400" },
     { name: "💬", url: "https://discord.gg/RZDdfKvWYC", text: "discord.gg/MantleCore", color: "text-indigo-400" },
     { name: "✉️", url: "mailto:mantlecore.agent@gmail.com", text: "mantlecore.agent@gmail.com", color: "text-red-400" },
     { name: "🐙", url: "https://github.com/NomadDigita/mantle-agentic-core", text: "github/MantleAgentic", color: "text-white/90" }
@@ -235,7 +257,9 @@ function SocialMatrixCarousel(): React.ReactElement {
 
   return (
     <a 
-      href={active.url} target="_blank" rel="noopener noreferrer"
+      href={active.url} 
+      target="_blank" 
+      rel="noopener noreferrer"
       className="flex items-center gap-2 bg-white/10 border border-white/15 px-4 py-2 rounded-full hover:bg-white/20 hover:border-purple-500/60 transition-all shadow-md overflow-hidden relative max-w-[150px] sm:max-w-[200px] mobile-touch-target"
     >
       <span className="text-xs flex-shrink-0">{active.name}</span>
@@ -314,11 +338,11 @@ export default function Home() {
 
   const [isAuraActive, setIsAuraActive] = useState(false);
 
-  // --- UPGRADE: LIVE DUMMY ACCRUING PERFORMANCE MATRIX & TURING VERIFICATION STATES ---
+  // --- LIVE ACCRUING PERFORMANCE MATRIX & TURING VERIFICATION STATES ---
   const [totalValueLocked, setTotalValueLocked] = useState(25410.00);
   const [activeVerificationHash, setActiveVerificationHash] = useState<string | null>(null);
 
-  // --- UPGRADE: LIVE BLOCK TELEMETRY & ON-CHAIN TRANSACTION FEED ---
+  // --- LIVE BLOCK TELEMETRY & ON-CHAIN TRANSACTION FEED ---
   const [oracleData, setOracleData] = useState<any>({
     block_number: 3914041,
     gas_price: "0.15 Gwei",
@@ -328,7 +352,7 @@ export default function Home() {
     ]
   });
 
-  // --- UPGRADE: SCROLLING GRAPH PLOT COORDINATES ---
+  // --- SCROLLING GRAPH PLOT COORDINATES ---
   const [graphPoints, setGraphPoints] = useState<number[]>([
     25, 30, 28, 35, 42, 38, 48, 46, 52, 50, 58, 55, 62, 60, 68, 65, 72, 70, 78, 75
   ]);
@@ -388,7 +412,7 @@ export default function Home() {
     setIsAuraActive(designMode === "AURA");
   }, [designMode]);
 
-  // --- UPGRADE: LIVE ON-CHAIN BLOCK QUERY ROUTER ---
+  // --- LIVE ON-CHAIN BLOCK QUERY ROUTER ---
   useEffect(() => {
     if (!mounted) return;
     const fetchOracleStream = async () => {
@@ -403,7 +427,7 @@ export default function Home() {
       }
     };
     fetchOracleStream();
-    const interval = setInterval(fetchOracleStream, 6000); // Scans the ledger every 6 seconds [2.2.4]
+    const interval = setInterval(fetchOracleStream, 6000); // Scans the ledger every 6 seconds
     return () => clearInterval(interval);
   }, [mounted]);
 
@@ -666,7 +690,7 @@ export default function Home() {
                     maxDrawdown: Number(rawProfile[1]),
                     birthTimestamp: Number(rawProfile[2]),
                     isAutonomous: rawProfile[3]
-                };
+                  };
 
                   setAgentProfile(fetchedProfile);
                   localStorage.setItem(`mac_agent_${safeAddress}`, JSON.stringify(fetchedProfile));
@@ -778,7 +802,6 @@ export default function Home() {
     const resolvedPair = `${resolvedAsset}USDT`;
     const resolvedType = lowerCmd.includes("long") ? "LONG" : "SHORT";
 
-    // Build specific analytical insights for Sentinel one-click triggers
     if (resolvedAsset === "BTC") {
       pendingAction = {
         asset: "BTC",
@@ -844,7 +867,6 @@ export default function Home() {
       }
     }
 
-    // Push clean user log directly to screen
     const userMsg: Message = { id: Date.now().toString(), role: "user", text: cmdString };
     setMessages(prev => [...prev, userMsg]);
 
@@ -884,7 +906,6 @@ export default function Home() {
     setCommand("");
   };
 
-  // --- SENTINEL INTERACTIVE BUTTON CLICK TRIGGERS ---
   const handleSentinelClick = (type: 'LONG' | 'SHORT') => {
     if (isExecuting) return;
     const activeCoin = currentMarket;
@@ -1023,7 +1044,7 @@ export default function Home() {
   }, []);
 
   if (!mounted) return null;
-  const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0]; 
+  const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0];
 
   return (
     <main className={`min-h-screen relative p-3 sm:p-6 lg:p-12 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
@@ -1055,7 +1076,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="space-y-4 font-mono text-xs leading-relaxed text-sharp-secondary">
+              <div className="space-y-4 font-mono text-xs leading-relaxed text-sharp-secondary font-bold">
                 <div className="bg-black/50 p-4 rounded-xl border border-white/10 space-y-1.5 shadow-inner">
                    <div className="text-white/50">DECISION HASH:</div>
                    <div className="break-all text-white font-black">{activeVerificationHash}</div>
@@ -1075,11 +1096,11 @@ export default function Home() {
                 </div>
 
                 <div className="bg-black/50 p-5 rounded-xl border border-white/10 space-y-2">
-                   <span className="block text-[10px] text-white/50">DECISION METRIC INJECTORS</span>
+                   <span className="block text-[10px] text-white/50 font-black">DECISION METRIC INJECTORS</span>
                    <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
                       <div className="bg-white/5 p-2 rounded-lg border border-white/5">
                          <span className="text-white/60 block mb-0.5">ELFA Sentiment</span>
-                         <span className="text-emerald-400 font-mono font-black">Active (82/100)</span>
+                         <span className="text-[#00ffa3] font-mono font-black">Active (82/100)</span>
                       </div>
                       <div className="bg-white/5 p-2 rounded-lg border border-white/5">
                          <span className="text-white/60 block mb-0.5">Nansen Inflow</span>
@@ -1096,7 +1117,7 @@ export default function Home() {
                    <a 
                      href={`https://x.com/intent/tweet?text=I%20just%20verified%20an%20autonomous%20on-chain%20decision%20hash%20${activeVerificationHash.slice(0, 12)}...%20on%20Mantle%20Agentic%20Core!%20%40MantleCore_`}
                      target="_blank" rel="noopener noreferrer"
-                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest hover:scale-[1.02] transition-all mobile-touch-target shadow-md"
+                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest hover:scale-[1.02] transition-all mobile-touch-target"
                    >
                      Publish Certificate to 𝕏
                    </a>
@@ -1158,12 +1179,12 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap justify-center items-center gap-3 z-10 relative">
-              <a href="https://x.com/MantleCore_" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-white hover:bg-black transition-all group mobile-touch-target">
+              <a href="https://x.com/asiwajubtc" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-white hover:bg-black transition-all group mobile-touch-target">
                 <svg className="w-4 h-4 text-white group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               </a>
-              <a href="https://t.me/MantleAgentic" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-blue-400 group mobile-touch-target">
+              <a href="https://t.me/DigitalVagabond" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-blue-400 group mobile-touch-target">
                 <svg className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
                 </svg>
@@ -1176,287 +1197,391 @@ export default function Home() {
               <a href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/20 hover:border-white transition-all group mobile-touch-target">
                 <svg className="w-4 h-4 text-white/80 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.162 22 12c0-5.523-4.477-10-10-10z" />
-              </svg>
-            </a>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* RESPONSIVE HEADER DECK */}
-      <div className={`flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 backdrop-blur-2xl border ${border} p-5 sm:p-7 rounded-3xl shadow-2xl transition-all duration-500`}>
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center bg-black/50 border border-white/15 shadow-2xl">
-            <div className={`w-5.5 h-5.5 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]' : dotBg}`} />
+        {/* RESPONSIVE HEADER DECK */}
+        <div className={`flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 backdrop-blur-2xl border ${border} p-5 sm:p-7 rounded-3xl shadow-2xl transition-all duration-500`}>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-black/50 border border-white/15 shadow-2xl">
+              <div className={`w-5.5 h-5.5 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]' : dotBg}`} />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-white uppercase drop-shadow-md text-sharp-primary">
+                MANTLE <span className={primary}>CORE</span>
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-white uppercase drop-shadow-md text-sharp-primary">
-              MANTLE <span className={primary}>CORE</span>
-            </h1>
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
-           <button 
-            onClick={handleToggleDesignMode}
-            className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg mobile-touch-target relative z-50 ${
-              designMode === "AURA" 
-                ? 'bg-purple-500/25 text-purple-400 border-purple-500/60 hover:bg-purple-500/40' 
-                : designMode === "CHROME"
-                ? 'bg-indigo-500/25 text-indigo-400 border-indigo-500/60 hover:bg-indigo-500/40'
-                : 'bg-black/30 text-white/70 border-white/20 hover:border-white hover:text-white'
-            }`}
-          >
-            {designMode === "AURA" ? 'AURA MATRIX: ON' : designMode === "CHROME" ? 'CHROME 4D: ON' : 'SILENT GLASS: ON'}
-          </button>
-           <button 
-            onClick={handleToggleOverclockClick}
-            className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg mobile-touch-target relative z-50 ${
-              isOverclocked 
-                ? 'bg-red-500/40 text-red-400 border-red-500/80 hover:bg-red-500/60' 
-                : 'bg-black/30 text-white/70 border-white/20 hover:border-emerald-500 hover:text-emerald-400'
-            }`}
-          >
-            {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
-          </button>
-          <Link href="/citadel"><button className="px-5 sm:px-7 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/90 bg-black/30 border border-white/15 hover:bg-white/10 transition-all backdrop-blur-md shadow-lg mobile-touch-target">Citadel</button></Link>
-          <Link href="/forge"><button className="px-5 sm:px-7 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/90 bg-black/30 border border-white/15 hover:bg-white/10 transition-all backdrop-blur-md shadow-lg mobile-touch-target">Forge</button></Link>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* LEFT COLUMN COMPONENT STACK (lg:col-span-2) */}
-        <div className="lg:col-span-2 space-y-6 flex flex-col">
           
-          {/* MAIN CHAT TERMINAL */}
-          <FloatingGlassCard designMode={designMode} className={`bg-white/5 backdrop-blur-3xl border transition-all duration-1000 shadow-2xl ${border} flex-1`}>
-            <div className="flex flex-col h-[520px] sm:h-[680px] overflow-hidden rounded-3xl bg-gradient-to-b from-white/[0.05] to-transparent">
-              <div className="bg-black/30 px-5 sm:px-8 py-4 sm:py-5 border-b border-white/10 flex justify-between items-center gap-2">
-                <AnimatePresence mode="wait">
-                  <motion.span 
-                    key={headerText}
-                    initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                    className={`text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest truncate max-w-[120px] sm:max-w-none ${secondary}`}
-                  >
-                    {headerText}
-                  </motion.span>
-                </AnimatePresence>
-                <div className="flex-shrink-0"><SocialMatrixCarousel /></div>
-              </div>
-              
-              <div ref={scrollRef} className="p-5 sm:p-8 font-mono text-xs sm:text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
+          <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
+             <button 
+              onClick={handleToggleDesignMode}
+              className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg mobile-touch-target relative z-50 ${
+                designMode === "AURA" 
+                  ? 'bg-purple-500/25 text-purple-400 border-purple-500/60 hover:bg-purple-500/40' 
+                  : designMode === "CHROME"
+                  ? 'bg-indigo-500/25 text-indigo-400 border-indigo-500/60 hover:bg-indigo-500/40'
+                  : 'bg-black/30 text-white/70 border-white/20 hover:border-white hover:text-white'
+              }`}
+            >
+              {designMode === "AURA" ? 'AURA MATRIX: ON' : designMode === "CHROME" ? 'CHROME 4D: ON' : 'SILENT GLASS: ON'}
+            </button>
+             <button 
+              onClick={handleToggleOverclockClick}
+              className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg mobile-touch-target relative z-50 ${
+                isOverclocked 
+                  ? 'bg-red-500/40 text-red-400 border-red-500/80 hover:bg-red-500/60' 
+                  : 'bg-black/30 text-white/70 border-white/20 hover:border-emerald-500 hover:text-emerald-400'
+              }`}
+            >
+              {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
+            </button>
+            <Link href="/citadel"><button className="px-5 sm:px-7 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/90 bg-black/30 border border-white/15 hover:bg-white/10 transition-all backdrop-blur-md shadow-lg mobile-touch-target">Citadel</button></Link>
+            <Link href="/forge"><button className="px-5 sm:px-7 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/90 bg-black/30 border border-white/15 hover:bg-white/10 transition-all backdrop-blur-md shadow-lg mobile-touch-target">Forge</button></Link>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* LEFT COLUMN COMPONENT STACK (lg:col-span-2) */}
+          <div className="lg:col-span-2 space-y-6 flex flex-col">
+            
+            {/* MAIN CHAT TERMINAL */}
+            <FloatingGlassCard designMode={designMode} className={`bg-white/5 backdrop-blur-3xl border transition-all duration-1000 shadow-2xl ${border} flex-1`}>
+              <div className="flex flex-col h-[520px] sm:h-[680px] overflow-hidden rounded-3xl bg-gradient-to-b from-white/[0.05] to-transparent">
+                <div className="bg-black/30 px-5 sm:px-8 py-4 sm:py-5 border-b border-white/10 flex justify-between items-center gap-2">
+                  <AnimatePresence mode="wait">
+                    <motion.span 
+                      key={headerText}
+                      initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                      className={`text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest truncate max-w-[120px] sm:max-w-none ${secondary}`}
+                    >
+                      {headerText}
+                    </motion.span>
+                  </AnimatePresence>
+                  <div className="flex-shrink-0"><SocialMatrixCarousel /></div>
+                </div>
                 
-                <AnimatePresence>
-                  {activePositions.length > 0 && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6">
-                      <div className="text-[10px] font-black uppercase tracking-[0.25em] text-white/60 mb-3 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {activePositions.map(pos => (
-                          <div key={pos.id} className="bg-black/60 border border-white/15 rounded-xl p-5 backdrop-blur-md relative overflow-hidden shadow-md">
-                            <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3] shadow-[0_0_15px_rgba(0,255,163,1)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)]'}`} />
-                            <div className="flex justify-between items-start mb-2 pl-2">
-                              <div>
-                                <span className="text-white font-black text-lg sm:text-xl text-sharp-primary">{pos.asset}</span>
-                                <span className={`ml-2 text-[9px] sm:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-[#00ffa3]/20 text-[#00ffa3] border border-[#00ffa3]/40' : 'bg-red-500/20 text-red-400 border-red-500/40'}`}>{pos.type} {pos.leverage}x</span>
+                <div ref={scrollRef} className="p-5 sm:p-8 font-mono text-xs sm:text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
+                  
+                  <AnimatePresence>
+                    {activePositions.length > 0 && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6">
+                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-white/60 mb-3 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {activePositions.map(pos => (
+                            <div key={pos.id} className="bg-black/60 border border-white/15 rounded-xl p-5 backdrop-blur-md relative overflow-hidden shadow-md">
+                              <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3] shadow-[0_0_15px_rgba(0,255,163,1)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)]'}`} />
+                              <div className="flex justify-between items-start mb-2 pl-2">
+                                <div>
+                                  <span className="text-white font-black text-lg sm:text-xl text-sharp-primary">{pos.asset}</span>
+                                  <span className={`ml-2 text-[9px] sm:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-[#00ffa3]/20 text-[#00ffa3] border border-[#00ffa3]/40' : 'bg-red-500/20 text-red-400 border-red-500/40'}`}>{pos.type} {pos.leverage}x</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`font-mono text-lg sm:text-xl font-black tracking-tighter ${pos.pnl >= 0 ? 'text-[#00ffa3] drop-shadow-[0_0_8px_rgba(0,255,163,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>{pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}</div>
+                                  <div className={`text-[9px] sm:text-[11px] font-bold ${pos.pnl >= 0 ? 'text-[#00ffa3]/85' : 'text-red-500/85'}`}>{pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%</div>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <div className={`font-mono text-lg sm:text-xl font-black tracking-tighter ${pos.pnl >= 0 ? 'text-[#00ffa3] drop-shadow-[0_0_8px_rgba(0,255,163,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>{pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}</div>
-                                <div className={`text-[9px] sm:text-[11px] font-bold ${pos.pnl >= 0 ? 'text-[#00ffa3]/85' : 'text-red-500/85'}`}>{pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%</div>
-                              </div>
+                              <div className="flex justify-between text-[9px] sm:text-[11px] font-mono text-white/80 pl-2 border-t border-white/5 pt-2 mt-2"><span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span><span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
                             </div>
-                            <div className="flex justify-between text-[9px] sm:text-[11px] font-mono text-white/80 pl-2 border-t border-white/5 pt-2 mt-2"><span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span><span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                <AnimatePresence>
-                  {messages.map((msg) => {
-                    if (!msg) return null; 
-                    return (
-                      <motion.div 
-                        key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                        className={`flex flex-col gap-3 p-5 rounded-2xl backdrop-blur-2xl border shadow-2xl ${
-                          msg.role === 'user' ? 'bg-black/50 border-white/15 ml-8 sm:ml-16' : 
-                          msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/30 border-red-500/30' : 'bg-emerald-950/30 border-emerald-500/30'} mr-8 sm:mr-16` : 
-                          msg.role === 'error' ? 'bg-red-900/30 border-red-500/40 mr-8 sm:mr-16 animate-pulse' : 'bg-transparent border-transparent text-center'
-                        }`}
-                      >
-                        {msg.role !== 'system' && (
-                          <span className={`text-[9px] uppercase font-black tracking-[0.25em] ${msg.role === 'user' ? 'text-white/60' : secondary}`}>{msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}</span>
-                        )}
+                  <AnimatePresence>
+                    {messages.map((msg) => {
+                      if (!msg) return null; 
+                      return (
+                        <motion.div 
+                          key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                          className={`flex flex-col gap-3 p-5 rounded-2xl backdrop-blur-2xl border shadow-2xl ${
+                            msg.role === 'user' ? 'bg-black/50 border-white/15 ml-8 sm:ml-16' : 
+                            msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/30 border-red-500/30' : 'bg-emerald-950/30 border-emerald-500/30'} mr-8 sm:mr-16` : 
+                            msg.role === 'error' ? 'bg-red-900/30 border-red-500/40 mr-8 sm:mr-16 animate-pulse' : 'bg-transparent border-transparent text-center'
+                          }`}
+                        >
+                          {msg.role !== 'system' && (
+                            <span className={`text-[9px] uppercase font-black tracking-[0.25em] ${msg.role === 'user' ? 'text-white/60' : secondary}`}>{msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}</span>
+                          )}
 
-                        {msg.role === 'ai' && msg.thinkingSteps && msg.thinkingSteps.length > 0 && (
-                          <ReasoningLogsHUD steps={msg.thinkingSteps} latency={msg.latency} />
-                        )}
+                          {msg.role === 'ai' && msg.thinkingSteps && msg.thinkingSteps.length > 0 && (
+                            <ReasoningLogsHUD steps={msg.thinkingSteps} latency={msg.latency} />
+                          )}
 
-                        <p className={`leading-relaxed whitespace-pre-wrap font-bold text-sharp-primary`}>{msg.text}</p>
-                        
-                        {msg.actionPayload && (
-                          <div className={`mt-4 p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/15 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-black/50 border-white/15'}`}>
-                            
-                            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-                              <span className="text-xs font-black uppercase tracking-widest text-white/80 flex items-center gap-2">
-                                <div className="w-1.5 h-3 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
-                              </span>
-                              {msg.actionPayload.status === 'SUCCESS' ? (
-                                <span className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
+                          <p className={`leading-relaxed whitespace-pre-wrap font-bold text-sharp-primary`}>{msg.text}</p>
+                          
+                          {msg.actionPayload && (
+                            <div className={`mt-4 p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/15 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-black/50 border-white/15'}`}>
+                              
+                              <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                                <span className="text-xs font-black uppercase tracking-widest text-white/80 flex items-center gap-2">
+                                  <div className="w-1.5 h-3 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
+                                </span>
+                                {msg.actionPayload.status === 'SUCCESS' ? (
+                                  <span className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
+                                ) : (
+                                  <span className="text-[10px] text-amber-400 font-mono font-bold flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING SIGNATURE..." : "AWAITING SIGNATURE"}</span>
+                                )}
+                              </div>
+
+                              <div className="mb-5 bg-white/5 p-4 rounded-lg border border-white/5 flex gap-4 items-start">
+                                  <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-[#00ffa3]' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
+                                  <div>
+                                      <span className="text-[9px] uppercase tracking-widest text-white/60 block mb-1 font-bold">STRATEGY ANALYSIS</span>
+                                      <p className="text-xs text-white leading-relaxed font-bold">{msg.actionPayload.analysis}</p>
+                                  </div>
+                              </div>
+
+                              {msg.decisionHash && (
+                                <button 
+                                  onClick={() => setActiveVerificationHash(msg.decisionHash || null)}
+                                  className="w-full text-left focus:outline-none block mb-5 bg-black/60 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center hover:bg-black/80 hover:border-purple-500/25 transition-all shadow-md mobile-touch-target"
+                                >
+                                   <span className="font-bold flex-shrink-0">PROVED_DECISION HASH:</span>
+                                   <span className="break-all text-white/90 font-bold">{msg.decisionHash}</span>
+                                </button>
+                              )}
+                              
+                              <div className="grid grid-cols-4 gap-4 mb-6">
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                  <span className="text-[9px] text-white/50 block mb-1 font-bold">ASSET</span>
+                                  <span className="text-sm font-black text-white">{msg.actionPayload.asset}</span>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                  <span className="text-[9px] text-white/50 block mb-1 font-bold">ACTION</span>
+                                  <span className={`text-sm font-black ${msg.actionPayload.type === 'LONG' ? 'text-emerald-400' : msg.actionPayload.type === 'SHORT' ? 'text-red-400' : 'text-blue-400'}`}>{msg.actionPayload.type}</span>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                  <span className="text-[9px] text-white/50 block mb-1 font-bold">LEVERAGE</span>
+                                  <span className="text-sm font-black text-white">{msg.actionPayload.leverage}x</span>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
+                                  <span className="text-[9px] text-white/50 block mb-1 font-bold">COLLATERAL</span>
+                                  <span className="text-xs font-black uppercase text-purple-400">5.00 MAC</span>
+                                </div>
+                              </div>
+
+                              {msg.actionPayload.status !== 'SUCCESS' ? (
+                                <div className="flex gap-3">
+                                  <button 
+                                    onClick={() => handleSignExecution(msg.id, msg.actionPayload!)}
+                                    disabled={isTradeConfirming}
+                                    className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-600/50 text-white font-black text-xs py-3.5 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target"
+                                  >
+                                    {isTradeConfirming ? "WRITING TO LEDGER..." : "CONFIRM & LOCK COLLATERAL"}
+                                  </button>
+                                  <button className="px-6 bg-transparent border border-white/10 text-white/90 hover:bg-white/5 font-black text-xs rounded-xl uppercase tracking-widest transition-all mobile-touch-target">Cancel</button>
+                                </div>
                               ) : (
-                                <span className="text-[10px] text-amber-400 font-mono font-bold flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING SIGNATURE..." : "AWAITING SIGNATURE"}</span>
+                                <div className="w-full bg-emerald-500/20 border border-emerald-500/60 text-emerald-400 text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest flex flex-col gap-1 shadow-md">
+                                  <span>Collateral Locked & Trade Active</span>
+                                  <a 
+                                    href={`https://explorer.sepolia.mantle.xyz/tx/${txHash}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="text-[9px] text-purple-400 underline hover:text-purple-300 font-mono font-bold mobile-touch-target"
+                                  >
+                                    Verified Decision ledger Certificate &gt;
+                                  </a>
+                                </div>
                               )}
                             </div>
+                          )}
+                        </motion.div>
+                      )
+                    })}
+                  </AnimatePresence>
+                  {isExecuting && (
+                    <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className={`text-xs font-mono font-black tracking-widest uppercase ${secondary} mr-16 p-5`}>
+                      &gt; Processing neural matrix...
+                    </motion.div>
+                  )}
+                </div>
 
-                            <div className="mb-5 bg-white/5 p-4 rounded-lg border border-white/5 flex gap-4 items-start">
-                                <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-[#00ffa3]' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
-                                <div>
-                                    <span className="text-[9px] uppercase tracking-widest text-white/60 block mb-1 font-bold">STRATEGY ANALYSIS</span>
-                                    <p className="text-xs text-white leading-relaxed font-bold">{msg.actionPayload.analysis}</p>
-                                </div>
-                            </div>
-
-                            {msg.decisionHash && (
-                              <button 
-                                onClick={() => setActiveVerificationHash(msg.decisionHash || null)}
-                                className="w-full text-left focus:outline-none block mb-5 bg-black/60 p-4 rounded-lg border border-white/5 font-mono text-[9px] text-purple-400 flex gap-4 items-center hover:bg-black/80 hover:border-purple-500/25 transition-all shadow-md mobile-touch-target"
-                              >
-                                 <span className="font-bold flex-shrink-0">PROVED_DECISION HASH:</span>
-                                 <span className="break-all text-white/90 font-bold">{msg.decisionHash}</span>
-                              </button>
-                            )}
-                            
-                            <div className="grid grid-cols-4 gap-4 mb-6">
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/50 block mb-1 font-bold">ASSET</span>
-                                <span className="text-sm font-black text-white">{msg.actionPayload.asset}</span>
-                              </div>
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/50 block mb-1 font-bold">ACTION</span>
-                                <span className={`text-sm font-black ${msg.actionPayload.type === 'LONG' ? 'text-emerald-400' : msg.actionPayload.type === 'SHORT' ? 'text-red-400' : 'text-blue-400'}`}>{msg.actionPayload.type}</span>
-                              </div>
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/50 block mb-1 font-bold">LEVERAGE</span>
-                                <span className="text-sm font-black text-white">{msg.actionPayload.leverage}x</span>
-                              </div>
-                              <div className="bg-white/5 p-3 rounded-lg border border-white/5 text-center">
-                                <span className="text-[9px] text-white/50 block mb-1 font-bold">COLLATERAL</span>
-                                <span className="text-xs font-black uppercase text-purple-400">5.00 MAC</span>
-                              </div>
-                            </div>
-
-                            {msg.actionPayload.status !== 'SUCCESS' ? (
-                              <div className="flex gap-3">
-                                <button 
-                                  onClick={() => handleSignExecution(msg.id, msg.actionPayload!)}
-                                  disabled={isTradeConfirming}
-                                  className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-600/50 text-white font-black text-xs py-3.5 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target"
-                                >
-                                  {isTradeConfirming ? "WRITING TO LEDGER..." : "CONFIRM & LOCK COLLATERAL"}
-                                </button>
-                                <button className="px-6 bg-transparent border border-white/10 text-white/90 hover:bg-white/5 font-black text-xs rounded-xl uppercase tracking-widest transition-all mobile-touch-target">Cancel</button>
-                              </div>
-                            ) : (
-                              <div className="w-full bg-emerald-500/20 border border-emerald-500/60 text-emerald-400 text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest flex flex-col gap-1 shadow-md">
-                                <span>Collateral Locked & Trade Active</span>
-                                <a 
-                                  href={`https://explorer.sepolia.mantle.xyz/tx/${txHash}`}
-                                  target="_blank" rel="noopener noreferrer"
-                                  className="text-[9px] text-purple-400 underline hover:text-purple-300 font-mono font-bold mobile-touch-target"
-                                >
-                                  Verified Decision ledger Certificate &gt;
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
-                    )
-                  })}
-                </AnimatePresence>
-                {isExecuting && (
-                  <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className={`text-xs font-mono font-black tracking-widest uppercase ${secondary} mr-16 p-5`}>
-                    &gt; Processing neural matrix...
-                  </motion.div>
-                )}
-              </div>
-
-              <div className="p-6 bg-black/40 border-t border-white/10">
-                <div className="flex gap-4 bg-black/50 p-2.5 rounded-2xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)]">
-                  <input 
-                    type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
-                    onFocus={() => !isOverclocked && setSystemState('LISTENING')}
-                    onBlur={() => !isOverclocked && setSystemState('IDLE')}
-                    placeholder="Enter executive command (e.g. 'Long ETH')...." 
-                    className="flex-1 bg-transparent px-6 py-4 text-sm focus:outline-none text-white placeholder:text-white/50 font-mono font-bold pointer-events-auto"
-                    disabled={isExecuting}
-                  />
-                  <button 
-                    onClick={handleExecute} disabled={isExecuting || !command.trim()}
-                    className={`px-10 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all text-black mobile-touch-target ${
-                      isOverclocked ? 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-white hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-                    } disabled:opacity-30 disabled:cursor-not-allowed`}
-                  >
-                    SEND
-                  </button>
+                <div className="p-6 bg-black/40 border-t border-white/10">
+                  <div className="flex gap-4 bg-black/50 p-2.5 rounded-2xl border border-white/10 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)]">
+                    <input 
+                      type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
+                      onFocus={() => !isOverclocked && setSystemState('LISTENING')}
+                      onBlur={() => !isOverclocked && setSystemState('IDLE')}
+                      placeholder="Enter executive command (e.g. 'Long ETH')...." 
+                      className="flex-1 bg-transparent px-6 py-4 text-sm focus:outline-none text-white placeholder:text-white/50 font-mono font-bold pointer-events-auto"
+                      disabled={isExecuting}
+                    />
+                    <button 
+                      onClick={handleExecute} disabled={isExecuting || !command.trim()}
+                      className={`px-10 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all text-black mobile-touch-target ${
+                        isOverclocked ? 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-white hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+                      } disabled:opacity-30 disabled:cursor-not-allowed`}
+                    >
+                      SEND
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </FloatingGlassCard>
+            </FloatingGlassCard>
 
-          {/* === UPGRADE: SYMMETRICAL WIDE PERFORMANCE LEDGER CARD === */}
-          <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl">
-            <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-              <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#00ffa3] animate-pulse" /> MAC Autonomous Treasury Ledger
-              </span>
-              <span className="text-[9px] font-mono text-white/50 font-bold">Network: Mantle Sepolia (5003)</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-              {/* Cumulative TVL Counter */}
-              <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
-                 <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">TOTAL VALUE CONTROLLED (TVC)</span>
-                 <span className="text-3xl font-black text-white text-sharp-primary font-mono tracking-tighter">
-                    ${totalValueLocked.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                 </span>
-                 <span className="block text-[9px] font-mono text-emerald-400 font-bold">+14.28% APY Accruing Real-Time</span>
+            {/* MANTLE SEPOLIA LIVE LEDGER STREAM CARD */}
+            <FloatingGlassCard designMode={designMode} delay={0.1} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl flex flex-col">
+              <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4 flex-shrink-0">
+                <span className="text-[10px] font-black tracking-widest text-emerald-400 uppercase flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Mantle Sepolia Live Ledger Stream
+                </span>
+                <span className="text-[9px] font-mono text-white/50 font-bold">BLOCKHEIGHT: #{oracleData.block_number}</span>
               </div>
 
-              {/* Live Staking Allocation Indexes */}
-              <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
-                 <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">ASSETS ALLOCATION DECK</span>
-                 <div className="space-y-1 text-[10px] font-mono font-bold text-sharp-secondary">
-                    <div className="flex justify-between"><span>Mantle mETH:</span><span className="text-emerald-400">5,420 MNT</span></div>
-                    <div className="flex justify-between"><span>Ondo USDY:</span><span className="text-purple-400">1,250 USDY</span></div>
-                    <div className="flex justify-between"><span>Escrow Fee base:</span><span className="text-white">450 MAC</span></div>
+              <div className="flex-1 overflow-y-auto scrollbar-hide space-y-3 font-mono text-[10px] text-sharp-secondary font-black max-h-[140px]">
+                {oracleData.transactions && oracleData.transactions.map((tx: any, idx: number) => (
+                  <div key={idx} className="flex justify-between items-center bg-black/40 border border-white/5 p-3 rounded-xl hover:border-[#00ffa3]/20 transition-colors">
+                    <div>
+                      <div className="text-white font-black truncate max-w-[150px] sm:max-w-none">TX: {tx.hash}</div>
+                      <div className="text-[8px] text-white/50 mt-0.5 font-bold">From: {tx.from} &nbsp; To: {tx.to}</div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <span className="text-emerald-400 font-black">{tx.value}</span>
+                      <span className="block text-[8px] text-white/40">Fee: {oracleData.gas_price}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </FloatingGlassCard>
+
+            {/* TURING AGENTIC BIAS & FAIRNESS AUDITOR CARD */}
+            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row gap-6">
+              <div className="flex-1 space-y-4">
+                 <div className="inline-block px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-[9px] font-black tracking-[0.2em] uppercase">
+                   AI-Powered Fairness Auditing
                  </div>
+                 <h2 className="text-4xl font-black tracking-tighter text-white uppercase leading-none text-sharp-primary">
+                   Detect Bias. <span className="text-purple-400">Build Trust.</span>
+                 </h2>
+                 <p className="text-xs text-sharp-muted leading-relaxed font-bold">
+                   Analyzing our active AI agent&apos;s decision-making telemetry to evaluate if there is any algorithmic bias.
+                 </p>
               </div>
 
-              {/* Real-time Ledger Verifier */}
-              <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner h-full flex flex-col justify-between">
-                 <div>
-                   <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">PROVABLE LEDGER CERTIFICATE</span>
-                   <p className="text-[9px] text-sharp-muted font-mono leading-relaxed font-bold mt-1">Every treasury reallocation is backed by complete decentralized verification proofs [1.1.5].</p>
+              <div className="flex-1 bg-black/40 border border-white/5 p-5 rounded-2xl shadow-inner space-y-4 font-mono text-[10px] text-sharp-secondary font-bold">
+                 <div className="border-b border-white/10 pb-2 mb-2 flex justify-between items-center">
+                   <span className="text-white/50 text-[9px] font-black uppercase tracking-wider">Agent Audit Preview</span>
+                   <span className="text-[8px] text-white/40">Real-time fairness analysis</span>
                  </div>
-                 <a 
-                   href="https://explorer.sepolia.mantle.xyz/address/0x1E5B64264089aacC547A1506402B94f909215942" 
-                   target="_blank" rel="noopener noreferrer"
-                   className="block text-[9px] font-mono text-purple-400 hover:text-purple-300 underline font-black mt-2 mobile-touch-target"
-                 >
-                   Verify Treasury Registry on-chain &gt;
-                 </a>
-              </div>
-            </div>
+                 
+                 <div className="flex justify-between items-center">
+                   <span>EVM Gas Optimization Index:</span>
+                   <div className="flex items-center gap-3">
+                      <span>0.94</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[8px] font-black">PASS</span>
+                   </div>
+                 </div>
 
-            {/* Animated SVG Yield Acceleration Line */}
-            <div className="relative w-full h-[60px] bg-black/30 border border-white/5 rounded-2xl mt-6 overflow-hidden flex items-end">
-              <svg className="absolute inset-0 w-full h-full stroke-[#00ffa3] stroke-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 50 Q 150 45, 300 35 T 600 20 T 900 10" className="animate-[dash_10s_linear_infinite]" />
-              </svg>
-              <div className="absolute inset-x-0 bottom-1 px-4 flex justify-between text-[8px] font-mono text-white/40 font-bold">
-                 <span>Accruing block interest cycle...</span>
-                 <span>MNT / mETH Matrix active</span>
+                 <div className="flex justify-between items-center">
+                   <span>Token Selection Bias:</span>
+                   <div className="flex items-center gap-3">
+                      <span>0.81</span>
+                      <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[8px] font-black">WARNING</span>
+                   </div>
+                 </div>
+
+                 <div className="flex justify-between items-center">
+                   <span>Registry Execution Parity:</span>
+                   <div className="flex items-center gap-3">
+                      <span>0.72</span>
+                      <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-[8px] font-black">FAIL</span>
+                   </div>
+                 </div>
+
+                 <p className="text-[9px] text-red-400 italic pt-2 border-t border-white/5 font-semibold">
+                   &quot;Your agent&apos;s portfolio has a 28% higher velocity bias toward Ethereum asset allocations under volatile conditions.&quot;
+                 </p>
+              </div>
+            </FloatingGlassCard>
+
+            {/* SYMMETRICAL WIDE PERFORMANCE LEDGER CARD */}
+            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#00ffa3] animate-pulse" /> MAC Autonomous Treasury Ledger
+                </span>
+                <span className="text-[9px] font-mono text-white/50 font-bold">Network: Network Sepolia (5003)</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                {/* Cumulative TVL Counter */}
+                <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
+                   <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">TOTAL VALUE CONTROLLED (TVC)</span>
+                   <span className="text-3xl font-black text-white text-sharp-primary font-mono tracking-tighter">
+                     ${totalValueLocked.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                   </span>
+                   <span className="block text-[9px] font-mono text-emerald-400 font-bold">+14.28% APY Accruing Real-Time</span>
+                </div>
+
+                {/* Live Staking Allocation Indexes */}
+                <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
+                   <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">ASSETS ALLOCATION DECK</span>
+                   <div className="space-y-1 text-[10px] font-mono font-bold text-sharp-secondary">
+                      <div className="flex justify-between"><span>Mantle mETH:</span><span className="text-emerald-400">5,420 MNT</span></div>
+                      <div className="flex justify-between"><span>Ondo USDY:</span><span className="text-purple-400">1,250 USDY</span></div>
+                      <div className="flex justify-between"><span>Escrow Fee base:</span><span className="text-white">450 MAC</span></div>
+                   </div>
+                </div>
+
+                {/* Real-time Ledger Verifier */}
+                <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner h-full flex flex-col justify-between">
+                   <div>
+                     <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">PROVABLE LEDGER CERTIFICATE</span>
+                     <p className="text-[9px] text-sharp-muted font-mono leading-relaxed font-bold mt-1">Every treasury reallocation is backed by complete decentralized verification proofs.</p>
+                   </div>
+                   <button 
+                     onClick={() => setActiveVerificationHash("0x2a2a4d41524b4554204445434953494f4e204345525449464943415445525445")}
+                     className="block text-left text-[9px] font-mono text-purple-400 hover:text-purple-300 underline font-black mt-2 mobile-touch-target"
+                   >
+                     Verify Treasury Registry on-chain &gt;
+                   </button>
+                </div>
+              </div>
+
+              {/* HIGH-FIDELITY TICKING PERFORMANCE GRAPH */}
+              <div className="relative w-full h-[80px] bg-black/40 border border-white/5 rounded-2xl mt-6 overflow-hidden flex items-end">
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 100" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#00ffa3" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  
+                  <path 
+                    d={`${getSvgPathString()} L ${lastX} 100 L 0 100 Z`} 
+                    fill="url(#chart-glow)" 
+                    className="transition-all duration-1000"
+                  />
+
+                  <path 
+                    d={getSvgPathString()} 
+                    fill="none" 
+                    stroke="#00ffa3" 
+                    strokeWidth="2.5" 
+                    className="transition-all duration-1000" 
+                  />
+
+                  <motion.circle
+                    cx={lastX}
+                    cy={lastY}
+                    r="4.5"
+                    fill="#00ffa3"
+                    animate={{ r: [4.5, 7.5, 4.5], opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="transition-all duration-1000"
+                  />
+                </svg>
+                
+                <div className="absolute inset-x-0 bottom-1 px-4 flex justify-between text-[8px] font-mono text-white/40 font-bold">
+                   <span>Accruing block interest cycle...</span>
+                   <span>MNT / mETH Matrix active</span>
                 </div>
               </div>
             </FloatingGlassCard>
@@ -1666,7 +1791,6 @@ export default function Home() {
                     </motion.div>
                   </AnimatePresence>
                   
-                  {/* Connected interactive trigger button mapping */}
                   <div className="flex gap-3">
                      <button 
                        onClick={() => handleSentinelClick('LONG')}
@@ -1749,4 +1873,4 @@ export default function Home() {
       </motion.div>
     </main>
   );
-}
+} 
