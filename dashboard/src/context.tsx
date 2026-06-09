@@ -1,3 +1,7 @@
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
 'use client'
 
 import { wagmiAdapter, projectId, networks } from './config'
@@ -23,7 +27,7 @@ createAppKit({
   adapters: [wagmiAdapter],
   projectId,
   networks,
-  defaultNetwork: networks[2], // Forces Base Sepolia
+  defaultNetwork: networks[3], // Forces Mantle Sepolia (Index 3 in config)
   metadata: metadata,
   features: {
     analytics: true

@@ -104,7 +104,7 @@ export default function NeuralForge() {
     setOutput("// Compiling dependencies and initiating SecOps audit...\n// Querying Mantle core neural models...");
     
     try {
-      const response = await fetch("https://mantle-agentic-core.onrender.com/api/forge", {
+      const response = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/forge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: blueprint }),
@@ -123,7 +123,7 @@ export default function NeuralForge() {
         setOutput(`// FORGE SCAN ERROR:\n${data.message}`);
       }
     } catch (err) {
-      setOutput("// COMPILER ERROR: Failed to establish context stream with Neural Forge.\n// Please verify FastAPI is running at https://mantle-agentic-core.onrender.com.");
+      setOutput("// COMPILER ERROR: Failed to establish context stream with Neural Forge.\n// Please verify FastAPI is running at https://mantle-agentic-core-1f4a.onrender.com.");
     } finally {
       setIsForging(false);
       if (!isOverclocked) setSystemState('IDLE');
@@ -134,7 +134,6 @@ export default function NeuralForge() {
     if (!deployableABI || !deployableBytecode) return;
     setSystemState('MINTING');
     try {
-      // UPGRADE: Removed hardcoded gas limits, enabling dynamic on-chain estimation
       deployContract({
         abi: deployableABI,
         bytecode: deployableBytecode as `0x${string}`,
@@ -238,7 +237,7 @@ export default function NeuralForge() {
           </div>
 
           <div className="flex flex-col gap-6">
-            <FloatingGlassCard designMode={designMode} delay={0.4} className={`bg-white/5 backdrop-blur-3xl border ${border} rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.65)] flex flex-col h-[350px] transition-colors duration-500`}>
+            <FloatingGlassCard designMode={designMode} delay={0.4} className={`bg-white/5 backdrop-blur-3xl p-6 border ${border} rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] flex flex-col h-[350px]`}>
               <div className="bg-black/30 px-6 py-4 border-b border-white/10 flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2">
                   Forge Output Log
@@ -311,7 +310,7 @@ export default function NeuralForge() {
                             disabled={isDeploying || isTxConfirming}
                             className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-widest text-white transition-all duration-300 mobile-touch-target ${
                               isDeploying || isTxConfirming
-                                ? 'bg-purple-600/50 text-white/50 cursor-not-allowed'
+                                ? 'bg-purple-600/50 text-white/50 cursor-not-allowed transform-none'
                                 : 'bg-purple-600 hover:bg-purple-500 shadow-[0_0_20px_rgba(147,51,234,0.4)]'
                             }`}
                           >

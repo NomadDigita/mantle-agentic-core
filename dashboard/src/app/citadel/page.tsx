@@ -99,7 +99,7 @@ export default function CitadelVault() {
       const fetchBotDraftedProfile = async () => {
         setIsFetchingBot(true);
         try {
-          const response = await fetch(`https://mantle-agentic-core.onrender.com/api/bot/virtual-identity?wallet_address=${address.toLowerCase()}`);
+          const response = await fetch(`https://mantle-agentic-core-1f4a.onrender.com/api/bot/virtual-identity?wallet_address=${address.toLowerCase()}`);
           const data = await response.json();
           if (data.status === "pending") {
             setPendingBotIdentity({

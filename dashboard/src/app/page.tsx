@@ -1,7 +1,3 @@
-/*
-“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
-*/
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -278,7 +274,6 @@ function SocialMatrixCarousel(): React.ReactElement {
     </a>
   );
 }
-
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [showIntro, setShowIntro] = useState(false); 
@@ -417,7 +412,7 @@ export default function Home() {
     if (!mounted) return;
     const fetchOracleStream = async () => {
       try {
-        const res = await fetch("https://mantle-agentic-core.onrender.com/api/oracle/stream");
+        const res = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/oracle/stream");
         const data = await res.json();
         if (data.block_number) {
           setOracleData(data);
@@ -497,7 +492,7 @@ export default function Home() {
 
       const fetchPermanentHistory = async () => {
         try {
-          const response = await fetch(`https://mantle-agentic-core.onrender.com/api/history?wallet_address=${safeAddress}`);
+          const response = await fetch(`https://mantle-agentic-core-1f4a.onrender.com/api/history?wallet_address=${safeAddress}`);
           const parsedHistory = await response.json();
           if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
             setMessages(parsedHistory);
@@ -523,7 +518,7 @@ export default function Home() {
       const safeAddress = activeWalletAddress.toLowerCase();
       const persistHistoryToVault = async () => {
         try {
-          await fetch("https://mantle-agentic-core.onrender.com/api/history", {
+          await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/history", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ wallet_address: safeAddress, messages })
@@ -875,7 +870,7 @@ export default function Home() {
     else finalPayload += "\n\n<SYSTEM_DIRECTIVE>Maintain system formatting. Include diagnostic headers and system directive tags in your analysis.</SYSTEM_DIRECTIVE>";
 
     try {
-      const response = await fetch("https://mantle-agentic-core.onrender.com/api/execute", {
+      const response = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/execute", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: finalPayload, wallet_address: activeWalletAddress || null })
       });
@@ -1018,7 +1013,7 @@ export default function Home() {
     if (isRefuelFeeSuccess && activeWalletAddress) {
       const dispatchBackendRefuel = async () => {
         try {
-          const response = await fetch("https://mantle-agentic-core.onrender.com/api/refuel", {
+          const response = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/refuel", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ wallet_address: activeWalletAddress })
@@ -1873,4 +1868,4 @@ export default function Home() {
       </motion.div>
     </main>
   );
-} 
+}
