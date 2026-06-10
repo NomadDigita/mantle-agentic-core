@@ -25,13 +25,17 @@ import telebot
 import discord
 
 load_dotenv()
-api_key = os.getenv("GROQ_API_KEY")
-private_key = os.getenv("PRIVATE_KEY")
-gemini_key = os.getenv("GEMINI_API_KEY")
+api_key = os.getenv("GROQ_API_KEY", "")
+private_key = os.getenv("PRIVATE_KEY", "")
+gemini_key = os.getenv("GEMINI_API_KEY", "")
 
 # --- SUPABASE CENTRAL DATA STACK ---
 SUPABASE_URL = "https://gnxavrtblloukhrnurnb.supabase.co/rest/v1/"
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")  # Corrected: Removed hardcoded fallback to bypass GitHub scan block
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+
+# --- QWEN CLOUD ROUTING VARIABLES (READ FROM ENV TO BYPASS GITHUB SCAN BLOCKS) ---
+QWEN_API_KEY = os.getenv("QWEN_API_KEY", "")
+QWEN_BASE_URL = os.getenv("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
 
 # --- SPONSOR CREDITS ENV CONFIGURATIONS ---
 NANSEN_API_KEY = os.getenv("NANSEN_API_KEY", "")
@@ -375,6 +379,15 @@ def execute_mnt_refuel(to_address: str):
     except Exception as e:
         return f"Refuel failed: {str(e)}"
 
+def fetch_live_market_data():
+    try:
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,mantle&vs_currencies=usd"
+        response = requests.get(url, timeout=3)
+        data = response.json()
+        return f"BTC: ${data['bitcoin']['usd']}, ETH: ${data['ethereum']['usd']}, MNT: ${data['mantle']['usd']}"
+    except Exception as e:
+        return "MARKET_DATA_OFFLINE"
+
 # --- UN-RATE-LIMITED BYBIT POWERED MARKET DATA ORACLE (RESOLVES GEOCKO 429 BLOCKS) ---
 def fetch_live_market_data():
     """
@@ -461,34 +474,91 @@ BOT_HELP_TEXT = (
 )
 
 # ---------------------------------------------------------
-# HYBRID INFERENCE ENGINE (SECURE CLOUDFLARE 403 BYPASS)
+# UNIFIED CASCADING INFERENCE MATRIX (SPOF TIMEOUT BYPASS)
 # ---------------------------------------------------------
-def call_gemini_fallback(system_prompt: str, user_prompt: str = "") -> str:
+def call_unified_llm(system_prompt: str, user_prompt: str = "") -> str:
     """
-    Seamless Gemini REST pipeline targeting stable gemini-3.5-flash.
-    Increased connection timeout to 90 seconds to prevent read timeouts on large files.
+    Unified Cascading Fallback Router.
+    Chains Qwen Cloud, Google Gemini, and Groq together.
+    Routs around any transient timeouts (503) or bot blocks (403).
     """
-    if not gemini_key:
-        return "Mantle Pre-Cognition System Error: [GEMINI_API_KEY is not configured inside the server environment. Fallback inference aborted.] — Verified by Mantle Agentic Core"
-    
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={gemini_key}"
-    payload = {
-        "contents": [{
-            "parts": [{
-                "text": f"{system_prompt}\n\nUser Input Payload:\n{user_prompt}"
-            }]
-        }]
-    }
-    headers = {"Content-Type": "application/json"}
-    try:
-        # Timeout raised to 90 seconds to guarantee complete compilation of massive code tasks
-        response = requests.post(url, json=payload, headers=headers, timeout=90)
-        if response.status_code == 200:
-            res_json = response.json()
-            return res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
-        return f"SYSTEM INFERENCE COLLAPSE (Error Code {response.status_code}): {response.text}"
-    except Exception as e:
-        return f"SYSTEM INFERENCE TIMEOUT Exception: {str(e)}"
+    # --- TIER 1: QWEN CLOUD (State-of-the-Art OpenAI Compatible) ---
+    if QWEN_API_KEY:
+        qwen_models = ["qwen-max", "qwen-plus", "qwen-turbo"]
+        for model in qwen_models:
+            try:
+                print(f"🧬 [Brain] Invoking TIER 1 (Qwen Cloud) - Model: {model}")
+                headers = {
+                    "Authorization": f"Bearer {QWEN_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "temperature": 0.2
+                }
+                res = requests.post(f"{QWEN_BASE_URL}/chat/completions", json=payload, headers=headers, timeout=25)
+                if res.status_code == 200:
+                    data = res.json()
+                    return data["choices"][0]["message"]["content"].strip()
+                print(f"⚠️ Qwen {model} returned code {res.status_code}: {res.text}")
+            except Exception as e:
+                print(f"⚠️ Qwen {model} execution failed: {str(e)}")
+
+    # --- TIER 2: GOOGLE GEMINI (Sponsor fallback) ---
+    if gemini_key:
+        gemini_models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
+        for model in gemini_models:
+            try:
+                print(f"🧬 [Brain] Shifting to TIER 2 (Google Gemini) - Model: {model}")
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={gemini_key}"
+                payload = {
+                    "contents": [{
+                        "parts": [{
+                            "text": f"{system_prompt}\n\nUser Input Payload:\n{user_prompt}"
+                        }]
+                    }]
+                }
+                headers = {"Content-Type": "application/json"}
+                res = requests.post(url, json=payload, headers=headers, timeout=30)
+                if res.status_code == 200:
+                    res_json = response.json() if 'response' in locals() else res.json()
+                    return res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+                print(f"⚠️ Gemini {model} returned code {res.status_code}: {res.text}")
+            except Exception as e:
+                print(f"⚠️ Gemini {model} execution failed: {str(e)}")
+
+    # --- TIER 3: GROQ CLOUD (Llama Stack) ---
+    if api_key:
+        groq_models = ["llama-3.1-8b-instant", "llama3-8b-8192"]
+        for model in groq_models:
+            try:
+                print(f"🧬 [Brain] Shifting to TIER 3 (Groq Cloud) - Model: {model}")
+                url = "https://api.groq.com/openai/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "temperature": 0.2
+                }
+                res = requests.post(url, json=payload, headers=headers, timeout=15)
+                if res.status_code == 200:
+                    data = res.json()
+                    return data["choices"][0]["message"]["content"].strip()
+                print(f"⚠️ Groq {model} returned code {res.status_code}: {res.text}")
+            except Exception as e:
+                print(f"⚠️ Groq {model} execution failed: {str(e)}")
+
+    return "SYSTEM_INFERENCE_FAIL_STATE: All cascading AI completion backends (Qwen, Gemini, Groq) returned non-200 responses or timed out."
 
 # ---------------------------------------------------------
 # IN-PROCESS CORE BRAIN DECISION ENGINE (0MS OVERHEAD FIX)
@@ -576,16 +646,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
                 f"Sign off with: '— Verified by Byreal & Mantle Agentic Core'"
             )
             
-            try:
-                chat_completion = client.chat.completions.create(
-                    messages=[{"role": "system", "content": system_prompt}],
-                    model="llama-3.1-8b-instant",
-                )
-                output_text = chat_completion.choices[0].message.content.strip()
-            except groq.PermissionDeniedError:
-                # Shifting inference matrix to gemini-3.5-flash
-                thinking_steps.append("Groq TLS / IP blocked by Cloudflare Bot management. Shifting inference matrix to Google Gemini 3.5 Flash...")
-                output_text = call_gemini_fallback(system_prompt, "")
+            output_text = call_unified_llm(system_prompt, "")
 
             return {
                 "status": "success",
@@ -674,15 +735,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
             thinking_steps.append("Intent parsed: TOKEN_TRANSFER. Initiating Groq parsing engine (model: Llama-3.1-8b)...")
             extraction_prompt = f"Extract the numeric amount and the 0x Ethereum address from this text: '{command}'. Return strictly valid JSON with keys 'amount' and 'address'. Do not include markdown formatting or any other words."
             
-            try:
-                extraction_res = client.chat.completions.create(
-                    messages=[{"role": "user", "content": extraction_prompt}],
-                    model="llama-3.1-8b-instant",
-                    temperature=0
-                )
-                raw_json = extraction_res.choices[0].message.content.strip()
-            except groq.PermissionDeniedError:
-                raw_json = call_gemini_fallback(extraction_prompt, "")
+            raw_json = call_unified_llm(extraction_prompt, "")
 
             try:
                 raw_json = re.sub(r"```json|```", "", raw_json).strip()
@@ -724,15 +777,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
         )
         
         thinking_steps.append("Inference execution (model: Llama-3.1-8b-instant)...")
-        try:
-            chat_completion = client.chat.completions.create(
-                messages=[{"role": "system", "content": system_prompt}],
-                model="llama-3.1-8b-instant",
-            )
-            output_text = chat_completion.choices[0].message.content.strip()
-        except groq.PermissionDeniedError:
-            thinking_steps.append("Groq direct TLS connection blocked on Render nodes. Handing over to Gemini 3.5 Flash...")
-            output_text = call_gemini_fallback(system_prompt, "")
+        output_text = call_unified_llm(system_prompt, "")
 
         thinking_steps.append("Formatting outputs and signing verification logs...")
         latency = f"{int((time.time() - start_time) * 1000)}ms"
@@ -994,17 +1039,7 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "Start directly with the code block using standard markdown triple backticks with solidity specified: '```solidity'."
                 "End immediately after finishing the contract. Sign off with: '// Forge SecOps Verified' at the bottom of the code."
             )
-            try:
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": blueprint_prompt}
-                    ],
-                    model="llama-3.1-8b-instant",
-                )
-                output_text = chat_completion.choices[0].message.content.strip()
-            except groq.PermissionDeniedError:
-                output_text = call_gemini_fallback(system_prompt, blueprint_prompt)
+            output_text = call_unified_llm(system_prompt, blueprint_prompt)
 
             return {
                 "status": "success",
