@@ -134,6 +134,24 @@ export default function CitadelVault() {
       };
       
       localStorage.setItem(`mac_agent_${address.toLowerCase()}`, JSON.stringify(mintedProfile));
+
+      // Sync central database storage on Supabase
+      const syncIdentityToCloud = async () => {
+        try {
+          await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/citadel/identity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              wallet_address: address.toLowerCase(),
+              risk_strategy: riskLevel,
+              max_drawdown: Number(maxDrawdown)
+            })
+          });
+        } catch (err) {
+          console.error("Database identity sync failed", err);
+        }
+      };
+      syncIdentityToCloud();
       
       setMintSuccess(true);
       setTimeout(() => {
@@ -174,8 +192,8 @@ export default function CitadelVault() {
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-45">
-        <div className="absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-emerald-500 animate-ping [animation-duration:3s]" />
-        <div className="absolute top-[60%] left-[80%] w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping [animation-duration:4s]" />
+        <span className="absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-emerald-500 animate-ping [animation-duration:3s]" />
+        <span className="absolute top-[60%] left-[80%] w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping [animation-duration:4s]" />
         
         <svg className="absolute inset-0 w-full h-full stroke-white/5 stroke-[0.8]" xmlns="http://www.w3.org/2000/svg">
           <line x1="15%" y1="20%" x2="45%" y2="40%" />
@@ -223,7 +241,7 @@ export default function CitadelVault() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="bg-purple-950/20 border border-purple-500/40 p-5 rounded-3xl backdrop-blur-2xl shadow-[0_0_30px_rgba(168,85,247,0.25)] flex items-center gap-4 relative overflow-hidden">
-                    <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping flex-shrink-0" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping flex-shrink-0" />
                     <div>
                       <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase block mb-1">🧬 DNA Blueprint Detected from Bot Relay!</span>
                       <p className="text-xs text-white/90 font-mono leading-relaxed font-bold">
@@ -346,7 +364,7 @@ export default function CitadelVault() {
                         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(255,255,255,0.05)_50%)] bg-[length:100%_4px] pointer-events-none mix-blend-overlay opacity-50" />
                         
                         <div className="text-center">
-                          <div className="inline-block px-4 py-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 text-[10px] font-black tracking-[0.2em] uppercase mb-6 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                          <div className="inline-block px-4 py-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 text-[10px] font-black tracking-[0.25em] uppercase mb-6 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                             Registry Synchronized
                           </div>
                           

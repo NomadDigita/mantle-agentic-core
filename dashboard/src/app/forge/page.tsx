@@ -47,7 +47,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
         style={{ transform: "translateZ(30px)" }} 
         className={`h-full w-full rounded-[23px] transition-all duration-700 p-5 sm:p-7 flex flex-col relative z-10 ${
           designMode === "AURA"
-            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/20 border-b border-r border-white/5"
+            ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/22 border-b border-r border-white/5"
             : designMode === "CHROME"
             ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/55 to-pink-950/40 backdrop-blur-[65px] shadow-[0_55px_110px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
             : designMode === "CYBER"
@@ -70,7 +70,7 @@ export default function NeuralForge() {
   // AppKit Hook
   const { open } = useAppKit();
 
-  const { isConnected, chainId } = useAccount();
+  const { isConnected, chainId, address } = useAccount();
   const { switchChain } = useSwitchChain();
 
   const [blueprint, setBlueprint] = useState("");
@@ -146,12 +146,32 @@ export default function NeuralForge() {
   };
 
   useEffect(() => {
-    if (isDeployed && mounted) {
+    if (isDeployed && receipt && receipt.contractAddress && address && mounted) {
+      // Sync deployed contract details directly to Supabase cloud
+      const syncContractToCloud = async () => {
+        try {
+          await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/forge/contracts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              wallet_address: address.toLowerCase(),
+              contract_address: receipt.contractAddress,
+              contract_name: contractName || "Mantle Custom Contract",
+              bytecode: deployableBytecode,
+              abi: JSON.stringify(deployableABI)
+            })
+          });
+        } catch (err) {
+          console.error("Database contract sync failed", err);
+        }
+      };
+      syncContractToCloud();
+
       setTimeout(() => {
         if (!isOverclocked) setSystemState('IDLE');
       }, 4000);
     }
-  }, [isDeployed, isOverclocked, setSystemState, mounted]);
+  }, [isDeployed, receipt, address, contractName, deployableBytecode, deployableABI, isOverclocked, setSystemState, mounted]);
 
   if (!mounted) return null;
 
@@ -164,10 +184,10 @@ export default function NeuralForge() {
       
       {/* NATIVE GLOWING CYBER-NODES BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20 opacity-45">
-        <div className="absolute top-[10%] left-[20%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping [animation-duration:4s]" />
-        <div className="absolute top-[70%] left-[75%] w-2 h-2 rounded-full bg-purple-500 animate-ping [animation-duration:3s]" />
-        <div className="absolute top-[50%] left-[30%] w-1 h-1 rounded-full bg-blue-400 animate-ping [animation-duration:6s]" />
-        <div className="absolute top-[85%] left-[10%] w-2 h-2 rounded-full bg-emerald-400 animate-ping [animation-duration:3.2s]" />
+        <span className="absolute top-[10%] left-[20%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping [animation-duration:4s]" />
+        <span className="absolute top-[70%] left-[75%] w-2 h-2 rounded-full bg-purple-500 animate-ping [animation-duration:3s]" />
+        <span className="absolute top-[50%] left-[30%] w-1 h-1 rounded-full bg-blue-400 animate-ping [animation-duration:6s]" />
+        <span className="absolute top-[85%] left-[10%] w-2 h-2 rounded-full bg-emerald-400 animate-ping [animation-duration:3.2s]" />
         
         <svg className="absolute inset-0 w-full h-full stroke-white/5 stroke-[0.8]" xmlns="http://www.w3.org/2000/svg">
           <line x1="20%" y1="10%" x2="30%" y2="50%" />
@@ -242,7 +262,7 @@ export default function NeuralForge() {
                 <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2">
                   Forge Output Log
                 </span>
-                <div className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse" />
               </div>
               <div className="p-6 font-mono text-xs text-amber-400 font-black whitespace-pre-wrap overflow-y-auto flex-1 leading-relaxed scrollbar-hide">
                 {output}
