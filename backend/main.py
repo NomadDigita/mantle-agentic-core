@@ -444,13 +444,13 @@ BOT_HELP_TEXT = (
 # ---------------------------------------------------------
 def call_gemini_fallback(system_prompt: str, user_prompt: str = "") -> str:
     """
-    Seamless Gemini REST pipeline.
+    Seamless Gemini REST pipeline targeting stable gemini-3.5-flash.
     Bypasses datacenter Cloudflare blocks targeting Groq's endpoints.
     """
     if not gemini_key:
         return "Mantle Pre-Cognition System Error: [GEMINI_API_KEY is not configured inside the server environment. Fallback inference aborted.] — Verified by Mantle Agentic Core"
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={gemini_key}"
     payload = {
         "contents": [{
             "parts": [{
@@ -561,7 +561,8 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
                 )
                 output_text = chat_completion.choices[0].message.content.strip()
             except groq.PermissionDeniedError:
-                thinking_steps.append("Groq TLS / IP blocked by Cloudflare Bot management. Shifting inference matrix to Google Gemini...")
+                # Shifting inference matrix to gemini-3.5-flash
+                thinking_steps.append("Groq TLS / IP blocked by Cloudflare Bot management. Shifting inference matrix to Google Gemini 3.5 Flash...")
                 output_text = call_gemini_fallback(system_prompt, "")
 
             return {
@@ -708,7 +709,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
             )
             output_text = chat_completion.choices[0].message.content.strip()
         except groq.PermissionDeniedError:
-            thinking_steps.append("Groq direct TLS connection blocked on Render nodes. Handing over to Gemini fallback...")
+            thinking_steps.append("Groq direct TLS connection blocked on Render nodes. Handing over to Gemini 3.5 Flash...")
             output_text = call_gemini_fallback(system_prompt, "")
 
         thinking_steps.append("Formatting outputs and signing verification logs...")

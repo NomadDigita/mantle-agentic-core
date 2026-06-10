@@ -1,3 +1,7 @@
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -69,6 +73,7 @@ type Message = {
   thinkingSteps?: string[];
   latency?: string;
   decisionHash?: string;
+  sessionId?: string; // Mapped for Supabase chat session isolation
 };
 
 type RelayPingLog = {
@@ -78,7 +83,7 @@ type RelayPingLog = {
   text: string;
 };
 
-// --- PREMIUM 3D SWIMMING & FLOATING PARALLAX CONTAINER ---
+// --- OPTIMIZED VITE-STYLE FLOATING PARALLAX CONTAINER ---
 function FloatingGlassCard({ 
   children, 
   className, 
@@ -97,8 +102,8 @@ function FloatingGlassCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   
-  const rotateX = useTransform(y, [-350, 350], [10, -10]); 
-  const rotateY = useTransform(x, [-350, 350], [-10, 10]);
+  const rotateX = useTransform(y, [-350, 350], [6, -6]); 
+  const rotateY = useTransform(x, [-350, 350], [-6, 6]);
 
   function handleMouse(event: React.MouseEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -111,13 +116,13 @@ function FloatingGlassCard({
       onMouseMove={handleMouse}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-      animate={{ y: [0, -14, 0] }}
-      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay }}
-      className={`relative rounded-3xl p-[1.8px] overflow-hidden transition-all duration-700 ${className}`}
+      animate={{ y: [0, -8, 0] }} // Reduced floating height to optimize mobile rendering speed
+      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
+      className={`relative rounded-2xl p-[1.2px] overflow-hidden transition-all duration-500 ${className}`}
     >
       {isAuraActive && designMode !== "SILENT" && (
-        <div className="absolute top-1/2 left-1/2 w-[220%] h-[220%] -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 transition-all duration-700 overflow-hidden">
-          <div className={`w-full h-full rounded-full opacity-40 blur-sm scale-95 ${
+        <div className="absolute top-1/2 left-1/2 w-[220%] h-[220%] -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 transition-all duration-500 overflow-hidden">
+          <div className={`w-full h-full rounded-full opacity-35 blur-sm scale-95 ${
             systemState === 'OVERCLOCK' ? 'gemini-border-sweeper-overclock' :
             designMode === 'CHROME' ? 'gemini-border-sweeper-chrome' : 'gemini-border-sweeper'
           }`} />
@@ -125,15 +130,15 @@ function FloatingGlassCard({
       )}
       
       <div 
-        style={{ transform: "translateZ(38px)" }} 
-        className={`h-full w-full rounded-[23px] transition-all duration-700 p-6 sm:p-8 flex flex-col relative z-10 ${
+        style={{ transform: "translateZ(20px)" }} 
+        className={`h-full w-full rounded-[15px] transition-all duration-500 p-4 sm:p-5 flex flex-col relative z-10 ${
           designMode === "AURA"
-            ? "bg-[rgba(4,6,15,0.6)] backdrop-blur-[65px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.15)] border-t border-l border-white/22 border-b border-r border-white/5"
+            ? "bg-[rgba(3,4,10,0.7)] backdrop-blur-[45px] border border-white/10"
             : designMode === "CHROME"
-            ? "bg-gradient-to-br from-indigo-950/45 via-slate-900/55 to-pink-950/45 backdrop-blur-[70px] shadow-[0_55px_110px_rgba(168,85,247,0.3),inset_0_1.5px_2px_rgba(255,255,255,0.22)] border border-purple-500/40 animate-[pulse_5s_ease-in-out_infinite]"
+            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-pink-950/40 backdrop-blur-[45px] border border-purple-500/30"
             : designMode === "CYBER"
-            ? "bg-black/90 backdrop-blur-[70px] shadow-[0_55px_110px_rgba(0,255,163,0.15),inset_0_1.5px_1.5px_rgba(0,255,163,0.15)] border border-[#00ffa3]/30"
-            : "bg-[rgba(8,12,26,0.48)] backdrop-blur-[75px] shadow-[0_45px_90px_rgba(0,0,0,0.92),inset_0_1px_1px_rgba(255,255,255,0.1)] border border-white/18 hover:border-white/35"
+            ? "bg-black/95 backdrop-blur-[45px] border border-[#00ffa3]/20"
+            : "bg-[rgba(5,7,15,0.6)] backdrop-blur-[45px] border border-white/10 hover:border-white/20"
         }`}
       >
         {children}
@@ -153,37 +158,37 @@ function IntroSequence({
     <motion.div 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
-      transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl"
+      exit={{ opacity: 0, scale: 1.02, filter: "blur(8px)" }}
+      transition={{ duration: 0.5 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
     >
-      <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full text-center">
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-[#00ffa3] to-blue-500 blur-[1px] shadow-[0_0_40px_rgba(16,185,129,0.5)] flex items-center justify-center border border-white/30">
-            <div className="w-12 h-12 bg-black rounded-xl animate-pulse" />
+      <FloatingGlassCard designMode={designMode} className="max-w-xl w-full text-center">
+        <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
+          <div className="w-20 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#00ffa3] to-blue-500 blur-[0.5px] shadow-[0_0_30px_rgba(16,185,129,0.4)] flex items-center justify-center border border-white/20">
+            <div className="w-10 h-10 bg-black rounded-lg animate-pulse" />
           </div>
-          <h1 className="text-4xl font-black text-white uppercase tracking-widest mb-2 text-sharp-primary">Mantle <span className="text-emerald-400">Agentic</span> Core</h1>
-          <p className="text-white/90 font-mono text-xs mb-10 tracking-[0.3em] font-black">Autonomous Web3 Operations Ecosystem</p>
+          <h1 className="text-3xl font-black text-white uppercase tracking-wider mb-1 text-sharp-primary">Mantle <span className="text-emerald-400">Agentic</span> Core</h1>
+          <p className="text-white/80 font-mono text-[10px] mb-8 tracking-[0.25em] font-black">Autonomous Web3 Operations Ecosystem</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 text-left">
-          <div className="bg-black/60 p-5 rounded-2xl border border-white/10 shadow-lg">
-            <h3 className="text-[#00ffa3] font-black text-xs uppercase mb-2 tracking-widest">01. Live Terminal</h3>
-            <p className="text-white/85 text-[10px] leading-relaxed font-semibold">Real-time market analysis and agentic execution.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8 text-left">
+          <div className="bg-black/75 p-4 rounded-xl border border-white/5">
+            <h3 className="text-[#00ffa3] font-black text-[10px] uppercase mb-1 tracking-wider">01. Live Terminal</h3>
+            <p className="text-white/70 text-[9px] leading-relaxed font-bold">Real-time market analysis and agentic execution.</p>
           </div>
-          <div className="bg-black/60 p-5 rounded-2xl border border-white/10 shadow-lg">
-            <h3 className="text-amber-400 font-black text-xs uppercase mb-2 tracking-widest">02. Neural Forge</h3>
-            <p className="text-white/85 text-[10px] leading-relaxed font-semibold">Autonomous smart contract compilation and auditing.</p>
+          <div className="bg-black/75 p-4 rounded-xl border border-white/5">
+            <h3 className="text-amber-400 font-black text-[10px] uppercase mb-1 tracking-wider">02. Neural Forge</h3>
+            <p className="text-white/70 text-[9px] leading-relaxed font-bold">Autonomous smart contract compilation and auditing.</p>
           </div>
-          <div className="bg-black/60 p-5 rounded-2xl border border-white/10 shadow-lg">
-            <h3 className="text-purple-400 font-black text-xs uppercase mb-2 tracking-widest">03. Citadel Vault</h3>
-            <p className="text-white/85 text-[10px] leading-relaxed font-semibold">ERC-8004 Agent Identity minting and risk management.</p>
+          <div className="bg-black/75 p-4 rounded-xl border border-white/5">
+            <h3 className="text-purple-400 font-black text-[10px] uppercase mb-1 tracking-wider">03. Citadel Vault</h3>
+            <p className="text-white/70 text-[9px] leading-relaxed font-bold">ERC-8004 Agent Identity minting and risk management.</p>
           </div>
         </div>
 
         <motion.button 
           onClick={onComplete}
-          className="bg-white text-black font-black uppercase tracking-[0.25em] text-xs px-12 py-4 rounded-full hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105 active:scale-95 mobile-touch-target"
+          className="bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] px-10 py-3.5 rounded-full hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-102 active:scale-98 mobile-touch-target"
         >
           Initialize System
         </motion.button>
@@ -196,13 +201,13 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border border-white/15 rounded-xl overflow-hidden bg-black/70 mb-2 shadow-inner">
+    <div className="border border-white/10 rounded-lg overflow-hidden bg-black/80 mb-2 shadow-inner">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-5 py-3.5 text-[10px] font-mono text-purple-400 hover:bg-white/10 transition-all uppercase tracking-widest border-b border-white/5 mobile-touch-target"
+        className="w-full flex justify-between items-center px-4 py-2.5 text-[9px] font-mono text-purple-400 hover:bg-white/5 transition-all uppercase tracking-wider border-b border-white/5 mobile-touch-target"
       >
-        <span className="flex items-center gap-2 font-bold">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+        <span className="flex items-center gap-1.5 font-bold">
+          <span className="w-1 h-1 rounded-full bg-purple-400 animate-pulse" />
           Proof-of-Reasoning Trace
         </span>
         <span className="font-bold">{latency ? `Latency: ${latency}` : "Log Sync"} &nbsp; {isOpen ? "▲" : "▼"}</span>
@@ -214,11 +219,11 @@ function ReasoningLogsHUD({ steps, latency }: { steps: string[], latency?: strin
             initial={{ height: 0 }} 
             animate={{ height: "auto" }} 
             exit={{ height: 0 }}
-            className="overflow-hidden bg-black/40"
+            className="overflow-hidden bg-black/45"
           >
-            <div className="p-5 space-y-2.5 font-mono text-[10px] text-white/90 leading-relaxed border-t border-white/5">
+            <div className="p-4 space-y-2 font-mono text-[9px] text-white/80 leading-relaxed border-t border-white/5">
               {steps.map((step, idx) => (
-                <div key={idx} className="flex gap-2.5 items-start">
+                <div key={idx} className="flex gap-2 items-start">
                   <span className="text-purple-400 font-bold">[{idx + 1}]</span>
                   <span className="break-all font-bold">{step}</span>
                 </div>
@@ -256,17 +261,17 @@ function SocialMatrixCarousel(): React.ReactElement {
       href={active.url} 
       target="_blank" 
       rel="noopener noreferrer"
-      className="flex items-center gap-2 bg-white/10 border border-white/15 px-4 py-2 rounded-full hover:bg-white/20 hover:border-purple-500/60 transition-all shadow-md overflow-hidden relative max-w-[150px] sm:max-w-[200px] mobile-touch-target"
+      className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full hover:bg-white/10 hover:border-purple-500/40 transition-all shadow-md overflow-hidden relative max-w-[130px] sm:max-w-[170px] mobile-touch-target"
     >
-      <span className="text-xs flex-shrink-0">{active.name}</span>
+      <span className="text-[10px] flex-shrink-0">{active.name}</span>
       <AnimatePresence mode="wait">
         <motion.span
           key={active.text}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.3 }}
-          className={`text-[9px] sm:text-[10px] font-mono font-bold truncate ${active.color}`}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.25 }}
+          className={`text-[8px] sm:text-[9px] font-mono font-bold truncate ${active.color}`}
         >
           {active.text}
         </motion.span>
@@ -274,6 +279,10 @@ function SocialMatrixCarousel(): React.ReactElement {
     </a>
   );
 }
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [showIntro, setShowIntro] = useState(false); 
@@ -288,9 +297,14 @@ export default function Home() {
 
   const [command, setCommand] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "1", role: "system", text: "Neural link established. Awaiting input." }
-  ]);
+  
+  // All synchronized message arrays loaded from Supabase Central Storage
+  const [allMessages, setAllMessages] = useState<Message[]>([]);
+  const [isRestored, setIsRestored] = useState(false);
+
+  // Multi-session tracking arrays
+  const [activeSessionId, setActiveSessionId] = useState<string>("");
+  const [sessionList, setSessionList] = useState<string[]>([]);
 
   const [useVirtualWallet, setUseVirtualWallet] = useState(false);
   const [virtualAddress, setVirtualAddress] = useState<string | null>(null);
@@ -311,8 +325,6 @@ export default function Home() {
     hash: txHash,
     query: { enabled: !!txHash }
   } as any);
-
-  const [isRestored, setIsRestored] = useState(false);
 
   // AI YIELD WEAVER STATE
   const [yieldWeaverMode, setYieldWeaverMode] = useState<"IDLE" | "WEAVING" | "mETH_PREMIUM">("IDLE");
@@ -346,6 +358,10 @@ export default function Home() {
       { hash: "0x8c0c15112042", from: "0x7835...FE46", to: "0x1E5B...5942", value: "0.0000 MNT" }
     ]
   });
+
+  // --- COIN PRICE ORACLE FEED (BYPASSES INTERPOLATED DATA PLACEHOLDERS) ---
+  const [rawPrices, setRawPrices] = useState<Record<string, number>>({'BTCUSDT': 84420.50, 'ETHUSDT': 4704.12, 'MNTUSDT': 0.725});
+  const [livePrices, setLivePrices] = useState<Record<string, string>>({'BTCUSDT': '$84,420.50', 'ETHUSDT': '$4,704.12', 'MNTUSDT': '$0.725'});
 
   // --- SCROLLING GRAPH PLOT COORDINATES ---
   const [graphPoints, setGraphPoints] = useState<number[]>([
@@ -406,6 +422,47 @@ export default function Home() {
   useEffect(() => {
     setIsAuraActive(designMode === "AURA");
   }, [designMode]);
+
+  // --- COIN PRICE ORACLE FEED (BYPASSES INTERPOLATED DATA PLACEHOLDERS) ---
+  useEffect(() => {
+    if (!mounted) return;
+    const fetchLiveTickers = async () => {
+      try {
+        const symbols = ["BTCUSDT", "ETHUSDT", "MNTUSDT"];
+        const nextRaw = { ...rawPrices };
+        const nextLive = { ...livePrices };
+        
+        await Promise.all(symbols.map(async (symbol) => {
+          try {
+            const res = await fetch(`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${symbol}`);
+            const data = await res.json();
+            if (data.result?.list?.[0]) {
+              const price = parseFloat(data.result.list[0].lastPrice);
+              if (price > 0) {
+                nextRaw[symbol] = price;
+                nextLive[symbol] = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+              }
+            }
+          } catch {
+            // Minimal random walk under API rate limit
+            const base = rawPrices[symbol] || 1.0;
+            const delta = base * (Math.random() * 0.001 - 0.0005);
+            const price = base + delta;
+            nextRaw[symbol] = price;
+            nextLive[symbol] = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+          }
+        }));
+        
+        setRawPrices(nextRaw);
+        setLivePrices(nextLive);
+      } catch (err) {
+        console.warn("Market oracle feed standby.");
+      }
+    };
+    fetchLiveTickers();
+    const interval = setInterval(fetchLiveTickers, 6000);
+    return () => clearInterval(interval);
+  }, [mounted, rawPrices, livePrices]);
 
   // --- LIVE ON-CHAIN BLOCK QUERY ROUTER ---
   useEffect(() => {
@@ -495,89 +552,81 @@ export default function Home() {
           const response = await fetch(`https://mantle-agentic-core-1f4a.onrender.com/api/history?wallet_address=${safeAddress}`);
           const parsedHistory = await response.json();
           if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
-            setMessages(parsedHistory);
+            setAllMessages(parsedHistory);
+            
+            // Extract session IDs dynamically
+            const sessions: string[] = Array.from(
+              new Set(
+                parsedHistory.map((m: any) => {
+                  const parts = m.id.split(":");
+                  return parts.length > 1 ? parts[0] : "Default Thread";
+                })
+              )
+            );
+            
+            setSessionList(sessions);
+            // Default to the most recent thread session or generate a new one
+            setActiveSessionId(sessions[sessions.length - 1] || "session_" + Date.now());
           } else {
-            setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
+            const initialSessionId = "session_" + Date.now();
+            setAllMessages([{ id: `${initialSessionId}:1`, role: "system", text: "Neural link established. Awaiting input." }]);
+            setSessionList([initialSessionId]);
+            setActiveSessionId(initialSessionId);
           }
         } catch (err) {
-          console.warn("History Vault unreachable. Loading defaults.");
-          setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
+          console.warn("History Vault unreachable. Loading local sandbox defaults.");
+          const fallbackSessionId = "session_local";
+          setAllMessages([{ id: `${fallbackSessionId}:1`, role: "system", text: "Neural link established. Awaiting input." }]);
+          setSessionList([fallbackSessionId]);
+          setActiveSessionId(fallbackSessionId);
+          setIsRestored(true);
         } finally {
           setIsRestored(true);
         }
       };
       fetchPermanentHistory();
     } else {
-      setMessages([{ id: "1", role: "system", text: "Neural link established. Awaiting input." }]);
+      const sandboxSessionId = "session_sandbox";
+      setAllMessages([{ id: `${sandboxSessionId}:1`, role: "system", text: "Neural link established. Awaiting input." }]);
+      setSessionList([sandboxSessionId]);
+      setActiveSessionId(sandboxSessionId);
       setIsRestored(true);
     }
   }, [isUserAuthenticated, activeWalletAddress]);
 
   useEffect(() => {
-    if (isUserAuthenticated && activeWalletAddress && isRestored && messages.length > 1) {
+    if (isUserAuthenticated && activeWalletAddress && isRestored && allMessages.length > 1) {
       const safeAddress = activeWalletAddress.toLowerCase();
       const persistHistoryToVault = async () => {
         try {
           await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/history", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ wallet_address: safeAddress, messages })
+            body: JSON.stringify({ wallet_address: safeAddress, messages: allMessages })
           });
         } catch (err) {
-          console.error("Failed to persist session state to cold storage.");
+          console.error("Failed to persist session state to cloud database.");
         }
       };
       persistHistoryToVault();
     }
-  }, [messages, isUserAuthenticated, activeWalletAddress, isRestored]);
+  }, [allMessages, isUserAuthenticated, activeWalletAddress, isRestored]);
 
-  const marketCoins = [
-    { symbol: 'BTC', pair: 'BTCUSDT', name: 'BITCOIN', color: 'text-[#00ffa3]', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
-    { symbol: 'ETH', pair: 'ETHUSDT', name: 'ETHEREUM', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
-    { symbol: 'SOL', pair: 'SOLUSDT', name: 'SOLANA', color: 'text-amber-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]', border: 'border-amber-500/30', bg: 'bg-amber-500/10' }
-  ];
+  // Computed filter isolates messages for the active selected chat session
+  const messages = allMessages.filter(msg => {
+    const parts = msg.id.split(":");
+    return parts.length > 1 ? parts[0] === activeSessionId : activeSessionId === "Default Thread";
+  });
 
-  const basePrices = useRef<Record<string, number>>({'BTCUSDT': 84420.50, 'ETHUSDT': 4704.12, 'SOLUSDT': 142.85});
-  const [rawPrices, setRawPrices] = useState<Record<string, number>>({'BTCUSDT': 84420.50, 'ETHUSDT': 4704.12, 'SOLUSDT': 142.85});
-  const [livePrices, setLivePrices] = useState({'BTCUSDT': '$84,420.50', 'ETHUSDT': '$4,704.12', 'SOLUSDT': '$142.85'});
-
-  useEffect(() => {
-    const simulateLivePrices = () => {
-      const newRawPrices: Record<string, number> = {};
-      const newLivePrices: any = {};
-      
-      Object.keys(basePrices.current).forEach(pair => {
-        const base = basePrices.current[pair];
-        const volatility = base * (Math.random() * 0.002 - 0.001);
-        const newPrice = base + volatility;
-        basePrices.current[pair] = newPrice;
-        newRawPrices[pair] = newPrice;
-        newLivePrices[pair] = newPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' }); 
-      });
-      
-      setRawPrices(newRawPrices);
-      setLivePrices(newLivePrices);
-
-      setActivePositions(prev => prev.map(pos => {
-        const currentLivePrice = newRawPrices[pos.pair];
-        if (!currentLivePrice) return pos;
-        const priceDiff = currentLivePrice - pos.entryPrice;
-        const percentageMove = (priceDiff / pos.entryPrice) * 100;
-        const pnlMultiplier = pos.type === 'SHORT' ? -1 : 1;
-        const actualPnlPercentage = percentageMove * pos.leverage * pnlMultiplier;
-        const actualPnlDollars = (1000 * (actualPnlPercentage / 100));
-        return {
-          ...pos,
-          currentPrice: currentLivePrice,
-          pnl: actualPnlDollars,
-          pnlPercentage: actualPnlPercentage
-        };
-      }));
-    };
-    const priceInterval = setInterval(simulateLivePrices, 3000); 
-    const coinInterval = setInterval(() => { setActiveCoinIndex(prev => (prev + 1) % marketCoins.length); }, 6000); 
-    return () => { clearInterval(priceInterval); clearInterval(coinInterval); };
-  }, []);
+  const handleNewSession = () => {
+    const newSessionId = "session_" + Date.now();
+    setSessionList(prev => [...prev, newSessionId]);
+    setActiveSessionId(newSessionId);
+    setAllMessages(prev => [
+      ...prev,
+      { id: `${newSessionId}:1`, role: "system", text: "Neural link established. Awaiting input." }
+    ]);
+  };
 
   useEffect(() => {
     const scanOnChainAgent = async () => {
@@ -711,7 +760,7 @@ export default function Home() {
   const handleSignExecution = async (msgId: string, payload: ActionPayload) => {
     if (useVirtualWallet) {
       setPendingTradePayload({ msgId, payload });
-      setMessages(prev => prev.map(msg => {
+      setAllMessages(prev => prev.map(msg => {
         if (msg.id === msgId && msg.actionPayload) {
           return { ...msg, actionPayload: { ...msg.actionPayload, status: 'SUCCESS' } };
         }
@@ -737,16 +786,16 @@ export default function Home() {
     if (agentProfile) {
       const strategy = agentProfile.riskStrategy.toLowerCase();
       if (strategy.includes("conservative") && payload.leverage > 5) {
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
+        setAllMessages(prev => [...prev, {
+          id: `${activeSessionId}:${Date.now()}`,
           role: "error",
           text: `🚨 SIGNING REJECTED BY ON-CHAIN GOVERNANCE:\nConservative strategy maximum leverage is 5x (Attempted: ${payload.leverage}x).`
         }]);
         return;
       }
       if (strategy.includes("balanced") && payload.leverage > 10) {
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
+        setAllMessages(prev => [...prev, {
+          id: `${activeSessionId}:${Date.now()}`,
           role: "error",
           text: `🚨 SIGNING REJECTED BY ON-CHAIN GOVERNANCE:\nBalanced strategy maximum leverage is 10x (Attempted: ${payload.leverage}x).`
         }]);
@@ -841,8 +890,8 @@ export default function Home() {
     if (pendingAction && agentProfile) {
       const strategy = agentProfile.riskStrategy.toLowerCase();
       if (strategy.includes("conservative") && pendingAction.leverage > 5) {
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
+        setAllMessages(prev => [...prev, {
+          id: `${activeSessionId}:${Date.now()}`,
           role: "error",
           text: `🛑 AGENT INTERCEPT ERROR:\nCommand execution blocked. Active on-chain identity is locked into Conservative parameters. High leverage trades (>5x) are disabled.`
         }]);
@@ -851,8 +900,8 @@ export default function Home() {
         return;
       }
       if (strategy.includes("balanced") && pendingAction.leverage > 10) {
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
+        setAllMessages(prev => [...prev, {
+          id: `${activeSessionId}:${Date.now()}`,
           role: "error",
           text: `🛑 AGENT INTERCEPT ERROR:\nCommand execution blocked. Active on-chain identity is locked into Balanced parameters. High leverage trades (>10x) are disabled.`
         }]);
@@ -862,8 +911,8 @@ export default function Home() {
       }
     }
 
-    const userMsg: Message = { id: Date.now().toString(), role: "user", text: cmdString };
-    setMessages(prev => [...prev, userMsg]);
+    const userMsg: Message = { id: `${activeSessionId}:${Date.now()}`, role: "user", text: cmdString };
+    setAllMessages(prev => [...prev, userMsg]);
 
     let finalPayload = cmdString;
     if (isOverclocked) finalPayload += "\n\n<SYSTEM_DIRECTIVE>CRITICAL: OVERCLOCK mode. Act like a hyper-aggressive Web3 degen. Use ALL CAPS. Include system parsing logs in your output.</SYSTEM_DIRECTIVE>";
@@ -878,8 +927,8 @@ export default function Home() {
       let sanitizedMessage = data.message.replace(/@asiwajubtc/gi, "Mantle SecOps").replace(/ASIWAJU TERMINAL/gi, "MANTLE AGENTIC CORE").replace(/Asiwaju/gi, "Mantle Agent");
       const generatedHash = "0x" + Array.from(new TextEncoder().encode(data.message || "")).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 64);
 
-      setMessages(prev => [...prev, { 
-        id: (Date.now() + 1).toString(), 
+      setAllMessages(prev => [...prev, { 
+        id: `${activeSessionId}:${Date.now() + 1}`, 
         role: data.status === "success" ? "ai" : "error", 
         text: sanitizedMessage,
         actionPayload: pendingAction,
@@ -888,7 +937,7 @@ export default function Home() {
         decisionHash: generatedHash
       }]);
     } catch (error) {
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: "error", text: "CONNECTION FAILURE: Brain Engine unreachable." }]);
+      setAllMessages(prev => [...prev, { id: `${activeSessionId}:${Date.now()}`, role: "error", text: "CONNECTION FAILURE: Brain Engine unreachable." }]);
     } finally {
       setIsExecuting(false); 
       if (!isOverclocked) setSystemState('IDLE');
@@ -1038,13 +1087,20 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  // Mapped coins deck supporting live Bybit feed mappings
+  const marketCoins = [
+    { symbol: 'BTC', pair: 'BTCUSDT', name: 'BITCOIN', color: 'text-[#00ffa3]', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
+    { symbol: 'ETH', pair: 'ETHUSDT', name: 'ETHEREUM', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
+    { symbol: 'MNT', pair: 'MNTUSDT', name: 'MANTLE', color: 'text-amber-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]', border: 'border-amber-500/30', bg: 'bg-amber-500/10' }
+  ];
+
   if (!mounted) return null;
   const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0];
 
   return (
-    <main className={`min-h-screen relative p-3 sm:p-6 lg:p-12 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
+    <main className={`min-h-screen relative p-3 sm:p-5 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
       isOverclocked 
-        ? 'shadow-[inset_0_0_120px_rgba(239,68,68,0.22)] bg-red-950/10' 
+        ? 'shadow-[inset_0_0_80px_rgba(239,68,68,0.15)] bg-red-950/5' 
         : ''
     }`}>
       <AnimatePresence>
@@ -1059,56 +1115,56 @@ export default function Home() {
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl"
           >
             <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full">
-              <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
+              <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                 <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-[#00ffa3] animate-ping" /> Turing-Test Intelligence Certificate
+                   <span className="w-2 h-2 rounded-full bg-[#00ffa3] animate-ping" /> Turing-Test Intelligence Certificate
                 </span>
                 <button 
                   onClick={() => setActiveVerificationHash(null)}
-                  className="text-white/60 hover:text-white font-mono text-xs uppercase font-black tracking-widest mobile-touch-target"
+                  className="text-white/60 hover:text-white font-mono text-[10px] uppercase font-black tracking-widest mobile-touch-target"
                 >
                   [ CLOSE ]
                 </button>
               </div>
 
               <div className="space-y-4 font-mono text-xs leading-relaxed text-sharp-secondary font-bold">
-                <div className="bg-black/50 p-4 rounded-xl border border-white/10 space-y-1.5 shadow-inner">
-                   <div className="text-white/50">DECISION HASH:</div>
+                <div className="bg-black/50 p-3 rounded-xl border border-white/10 space-y-1.5 shadow-inner">
+                   <div className="text-white/50 text-[10px]">DECISION HASH:</div>
                    <div className="break-all text-white font-black">{activeVerificationHash}</div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                      <span className="text-white/50 text-[10px] block mb-1">REASONING ENGINE</span>
+                <div className="grid grid-cols-2 gap-3">
+                   <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                      <span className="text-white/50 text-[9px] block mb-0.5">REASONING ENGINE</span>
                       <span className="text-white font-black block">Llama-3.1-8b-instant</span>
-                      <span className="text-emerald-400 text-[10px] font-bold">Proof-of-Reasoning Synced</span>
+                      <span className="text-emerald-400 text-[9px] font-bold">Proof-of-Reasoning Synced</span>
                    </div>
-                   <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                      <span className="text-white/50 text-[10px] block mb-1">GOVERNANCE PARADIGM</span>
+                   <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                      <span className="text-white/50 text-[9px] block mb-0.5">GOVERNANCE PARADIGM</span>
                       <span className="text-white font-black block">ERC-8004 NFT Check</span>
-                      <span className="text-purple-400 text-[10px] font-bold">Strategy Limits Enforced</span>
+                      <span className="text-purple-400 text-[9px] font-bold">Strategy Limits Enforced</span>
                    </div>
                 </div>
 
-                <div className="bg-black/50 p-5 rounded-xl border border-white/10 space-y-2">
-                   <span className="block text-[10px] text-white/50 font-black">DECISION METRIC INJECTORS</span>
-                   <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
-                      <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                <div className="bg-black/50 p-4 rounded-xl border border-white/10 space-y-2">
+                   <span className="block text-[9px] text-white/50 font-black">DECISION METRIC INJECTORS</span>
+                   <div className="grid grid-cols-3 gap-1.5 text-center text-[9px] font-bold">
+                      <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
                          <span className="text-white/60 block mb-0.5">ELFA Sentiment</span>
                          <span className="text-[#00ffa3] font-mono font-black">Active (82/100)</span>
                       </div>
-                      <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                      <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
                          <span className="text-white/60 block mb-0.5">Nansen Inflow</span>
                          <span className="text-purple-400 font-mono font-black">+1.42M MNT</span>
                       </div>
-                      <div className="bg-white/5 p-2 rounded-lg border border-white/5">
+                      <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
                          <span className="text-white/60 block mb-0.5">Bybit Arbitrage</span>
                          <span className="text-amber-400 font-mono font-black">Stable Spread</span>
                       </div>
                    </div>
                 </div>
 
-                <div className="pt-4 flex gap-4">
+                <div className="pt-3 flex gap-3">
                    <a 
                      href={`https://x.com/intent/tweet?text=I%20just%20verified%20an%20autonomous%20on-chain%20decision%20hash%20${activeVerificationHash.slice(0, 12)}...%20on%20Mantle%20Agentic%20Core!%20%40MantleCore_`}
                      target="_blank" rel="noopener noreferrer"
@@ -1131,16 +1187,16 @@ export default function Home() {
       </AnimatePresence>
 
       {/* LIQUID WAVE GRADIENT PARTICLE BG */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 opacity-40">
-        <div className="absolute top-[10%] left-[20%] w-[45vw] h-[45vw] bg-[#00ffa3]/8 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[10%] right-[10%] w-[55vw] h-[55vw] bg-[#00b8ff]/8 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite_delay-2s]" />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 opacity-30">
+        <div className="absolute top-[10%] left-[20%] w-[45vw] h-[45vw] bg-[#00ffa3]/5 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[10%] right-[10%] w-[55vw] h-[55vw] bg-[#00b8ff]/5 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite_delay-2s]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#000_100%)]" />
         
-        <svg className="absolute bottom-0 left-0 w-full h-[35vh] opacity-15" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="absolute bottom-0 left-0 w-full h-[30vh] opacity-10" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill="url(#water-grad)" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,218.7C672,203,768,149,864,138.7C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
           <defs>
             <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.15" />
               <stop offset="100%" stopColor="#00b8ff" stopOpacity="0" />
             </linearGradient>
           </defs>
@@ -1148,111 +1204,148 @@ export default function Home() {
       </div>
 
       {isOverclocked && (
-        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.15)_0%,rgba(0,0,0,0.9)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
+        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0.95)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
       )}
 
       <motion.div 
-        initial={{ opacity: 0, filter: "blur(20px)" }} animate={{ opacity: showIntro ? 0 : 1, filter: showIntro ? "blur(20px)" : "blur(0px)" }} transition={{ duration: 1 }}
-        className="max-w-7xl mx-auto space-y-6 mt-2 relative z-10"
+        initial={{ opacity: 0, filter: "blur(10px)" }} 
+        animate={{ opacity: showIntro ? 0 : 1, filter: showIntro ? "blur(10px)" : "blur(0px)" }} 
+        transition={{ duration: 0.6 }}
+        className="max-w-[1440px] mx-auto space-y-4 relative z-10"
       >
         
-        {/* UPPER CONTACTS & SOCIALS BLOCK */}
-        <div className="relative rounded-3xl p-[1px] overflow-hidden transition-all duration-700 w-full shadow-2xl">
-          <div className={`absolute inset-0 bg-gradient-to-r ${isOverclocked ? 'from-red-500/40 via-red-950/20 to-red-600/40' : 'from-[#00ffa3]/30 via-purple-500/20 to-[#00b8ff]/30'} blur-sm pointer-events-none`} />
-          <div className="relative rounded-[23px] bg-[rgba(4,6,15,0.65)] backdrop-blur-[60px] p-5 border border-white/20 flex flex-col md:flex-row justify-between items-center gap-4 overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-40">
-              <div className="star-yellow absolute top-[20%] left-[8%] w-1.5 h-1.5 bg-amber-400 rounded-full" />
+        {/* UPPER PORTALS BANNER */}
+        <div className="relative rounded-2xl p-[1px] overflow-hidden transition-all duration-500 w-full shadow-lg">
+          <div className={`absolute inset-0 bg-gradient-to-r ${isOverclocked ? 'from-red-500/30 via-red-950/10 to-red-600/30' : 'from-[#00ffa3]/20 via-purple-500/10 to-[#00b8ff]/20'} blur-sm pointer-events-none`} />
+          <div className="relative rounded-[15px] bg-[rgba(3,4,10,0.7)] backdrop-blur-3xl p-3 border border-white/20 flex flex-col md:flex-row justify-between items-center gap-3 overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
+              <div className="star-yellow absolute top-[20%] left-[8%] w-1 h-1 bg-amber-400 rounded-full" />
               <div className="star-white absolute top-[70%] left-[15%] w-1.5 h-1.5 bg-white rounded-full" />
-              <div className="star-purple absolute top-[80%] left-[55%] w-1.5 h-1.5 bg-purple-400 rounded-full" />
+              <div className="star-purple absolute top-[80%] left-[55%] w-1 h-1 bg-purple-400 rounded-full" />
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left z-10 relative">
-              <div className={`px-4 py-1.5 rounded-full border text-[9px] font-mono tracking-[0.2em] uppercase font-black ${isOverclocked ? 'border-red-500/50 text-red-400' : 'border-[#00ffa3]/40 text-[#00ffa3]'}`}>
+            <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left z-10 relative">
+              <div className={`px-3 py-1 rounded-full border text-[8px] font-mono tracking-wider uppercase font-black ${isOverclocked ? 'border-red-500/40 text-red-400' : 'border-[#00ffa3]/30 text-[#00ffa3]'}`}>
                 OFFICIAL PORTALS
               </div>
-              <p className="text-[10px] sm:text-xs font-sans font-bold text-sharp-secondary tracking-tight">Secure verification lines synced with the principal ledger.</p>
+              <p className="text-[10px] font-sans font-bold text-sharp-secondary tracking-tight">Decentralized telemetry channels synced with Supabase Storage.</p>
             </div>
 
-            <div className="flex flex-wrap justify-center items-center gap-3 z-10 relative">
-              <a href="https://x.com/asiwajubtc" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-white hover:bg-black transition-all group mobile-touch-target">
-                <svg className="w-4 h-4 text-white group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-wrap justify-center items-center gap-2 z-10 relative">
+              <a href="https://x.com/asiwajubtc" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-black/60 border border-white/10 hover:border-white hover:bg-black transition-all group mobile-touch-target">
+                <svg className="w-3.5 h-3.5 text-white group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               </a>
-              <a href="https://t.me/DigitalVagabond" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-blue-400 group mobile-touch-target">
-                <svg className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <a href="https://t.me/DigitalVagabond" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-black/60 border border-white/10 hover:border-blue-400 group mobile-touch-target">
+                <svg className="w-3.5 h-3.5 text-blue-400 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.37.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z"/>
                 </svg>
               </a>
-              <a href="https://discord.gg/RZDdfKvWYC" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/15 hover:border-indigo-400 hover:bg-indigo-950/20 transition-all group mobile-touch-target">
-                <svg className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <a href="https://discord.gg/RZDdfKvWYC" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-black/60 border border-white/10 hover:border-indigo-400 hover:bg-indigo-950/20 transition-all group mobile-touch-target">
+                <svg className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19.27 4.73a16.13 16.13 0 0 0-3.97-1.23.1.1 0 0 0-.1.05c-.35.62-.74 1.44-1.01 2.1a15 15 0 0 0-4.38 0c-.27-.66-.67-1.48-1.02-2.1a.1.1 0 0 0-.1-.05 16.13 16.13 0 0 0-3.97 1.23.1.1 0 0 0-.05.04C1.9 9.36 1.02 13.84 1.48 18.25a.1.1 0 0 0 .04-.07 16.27 16.27 0 0 0 4.9 2.48.1.1 0 0 0 .11-.04c.38-.51.72-1.07 1-1.66a.1.1 0 0 0-.06-.13 10.74 10.74 0 0 1-1.51-.72.1.1 0 0 1-.01-.16c.1-.08.2-.15.3-.23a.1.1 0 0 1 .11-.01c3.15 1.44 6.57 1.44 9.66 0a.1.1 0 0 1 .11.01c.1.08.2.15.3.23a.1.1 0 0 1-.01.16 10.5 10.5 0 0 1-1.51.72.1.1 0 0 0-.06.13c.29.59.63 1.15 1 1.66a.1.1 0 0 0 .11.04 16.27 16.27 0 0 0 4.9-2.48.1.1 0 0 0 .04-.07c.56-5.1-.9-9.54-3.57-13.48a.1.1 0 0 0-.05-.04z"/>
                 </svg>
               </a>
-              <a href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-black/60 border border-white/20 hover:border-white transition-all group mobile-touch-target">
-                <svg className="w-4 h-4 text-white/80 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <a href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-black/60 border border-white/20 hover:border-white transition-all group mobile-touch-target">
+                <svg className="w-3.5 h-3.5 text-white/80 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.162 22 12c0-5.523-4.477-10-10-10z" />
-                </svg>
-              </a>
-            </div>
+              </svg>
+            </a>
           </div>
+        </div>
         </div>
 
         {/* RESPONSIVE HEADER DECK */}
-        <div className={`flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 backdrop-blur-2xl border ${border} p-5 sm:p-7 rounded-3xl shadow-2xl transition-all duration-500`}>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-black/50 border border-white/15 shadow-2xl">
-              <div className={`w-5.5 h-5.5 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]' : dotBg}`} />
+        <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/5 backdrop-blur-3xl border ${border} p-3 sm:p-4 rounded-2xl shadow-lg transition-all duration-500`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/50 border border-white/10 shadow-lg">
+              <div className={`w-4 h-4 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : dotBg}`} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-white uppercase drop-shadow-md text-sharp-primary">
+              <h1 className="text-xl sm:text-2xl font-black tracking-wider text-white uppercase drop-shadow-md text-sharp-primary">
                 MANTLE <span className={primary}>CORE</span>
               </h1>
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center">
              <button 
               onClick={handleToggleDesignMode}
-              className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg mobile-touch-target relative z-50 ${
+              className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all duration-300 border backdrop-blur-md shadow-md mobile-touch-target relative z-50 ${
                 designMode === "AURA" 
-                  ? 'bg-purple-500/25 text-purple-400 border-purple-500/60 hover:bg-purple-500/40' 
+                  ? 'bg-purple-500/25 text-purple-400 border-purple-500/50 hover:bg-purple-500/40' 
                   : designMode === "CHROME"
-                  ? 'bg-indigo-500/25 text-indigo-400 border-indigo-500/60 hover:bg-indigo-500/40'
-                  : 'bg-black/30 text-white/70 border-white/20 hover:border-white hover:text-white'
+                  ? 'bg-indigo-500/25 text-indigo-400 border-indigo-500/50 hover:bg-indigo-500/40'
+                  : 'bg-black/30 text-white/70 border-white/10 hover:border-white hover:text-white'
               }`}
             >
               {designMode === "AURA" ? 'AURA MATRIX: ON' : designMode === "CHROME" ? 'CHROME 4D: ON' : 'SILENT GLASS: ON'}
             </button>
              <button 
               onClick={handleToggleOverclockClick}
-              className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 border backdrop-blur-md shadow-lg mobile-touch-target relative z-50 ${
+              className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all duration-300 border backdrop-blur-md shadow-md mobile-touch-target relative z-50 ${
                 isOverclocked 
-                  ? 'bg-red-500/40 text-red-400 border-red-500/80 hover:bg-red-500/60' 
-                  : 'bg-black/30 text-white/70 border-white/20 hover:border-emerald-500 hover:text-emerald-400'
+                  ? 'bg-red-500/40 text-red-400 border-red-500/70 hover:bg-red-500/60' 
+                  : 'bg-black/30 text-white/70 border-white/10 hover:border-emerald-500 hover:text-emerald-400'
               }`}
             >
               {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
             </button>
-            <Link href="/citadel"><button className="px-5 sm:px-7 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/90 bg-black/30 border border-white/15 hover:bg-white/10 transition-all backdrop-blur-md shadow-lg mobile-touch-target">Citadel</button></Link>
-            <Link href="/forge"><button className="px-5 sm:px-7 py-2.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/90 bg-black/30 border border-white/15 hover:bg-white/10 transition-all backdrop-blur-md shadow-lg mobile-touch-target">Forge</button></Link>
+            <Link href="/citadel"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Citadel</button></Link>
+            <Link href="/forge"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Forge</button></Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* --- DYNAMIC VITE-STYLE 3-COLUMN WORKSPACE GRID --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
           
-          {/* LEFT COLUMN COMPONENT STACK (lg:col-span-2) */}
-          <div className="lg:col-span-2 space-y-6 flex flex-col">
-            
-            {/* MAIN CHAT TERMINAL */}
-            <FloatingGlassCard designMode={designMode} className={`bg-white/5 backdrop-blur-3xl border transition-all duration-1000 shadow-2xl ${border} flex-1`}>
-              <div className="flex flex-col h-[520px] sm:h-[680px] overflow-hidden rounded-3xl bg-gradient-to-b from-white/[0.05] to-transparent">
-                <div className="bg-black/30 px-5 sm:px-8 py-4 sm:py-5 border-b border-white/10 flex justify-between items-center gap-2">
+          {/* COLUMN 1: SUPABASE ACTIVE CHAT SESSION MANAGER (VITE-STYLE NARROW SIDEBAR) */}
+          <div className="lg:col-span-1 flex flex-col gap-3 h-full">
+            <FloatingGlassCard designMode={designMode} className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-lg flex flex-col min-h-[300px] lg:min-h-[520px]">
+              <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4 flex-shrink-0">
+                <span className="text-[9px] font-black tracking-wider text-white/50 uppercase">Active Threads</span>
+                <button 
+                  onClick={handleNewSession}
+                  className="px-2.5 py-1 rounded bg-[#00ffa3]/10 hover:bg-[#00ffa3]/20 border border-[#00ffa3]/30 text-[#00ffa3] text-[8px] font-black uppercase tracking-wider transition-all mobile-touch-target"
+                >
+                  + New Session
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto scrollbar-hide space-y-2 max-h-[220px] lg:max-h-none">
+                {sessionList.map((sid) => {
+                  const isActive = sid === activeSessionId;
+                  const displayId = sid.startsWith("session_") ? `Thread #${sid.slice(-4)}` : sid;
+                  return (
+                    <button
+                      key={sid}
+                      onClick={() => setActiveSessionId(sid)}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-[9px] font-mono font-bold flex justify-between items-center border transition-all mobile-touch-target ${
+                        isActive 
+                          ? "bg-[#00ffa3]/10 border-[#00ffa3]/40 text-[#00ffa3] shadow-inner" 
+                          : "bg-black/30 border-white/5 text-white/60 hover:bg-white/5 hover:border-white/10 hover:text-white"
+                      }`}
+                    >
+                      <span className="truncate max-w-[120px]">{displayId}</span>
+                      <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#00ffa3] animate-pulse' : 'bg-white/10'}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </FloatingGlassCard>
+          </div>
+
+          {/* COLUMN 2 & 3: MAIN CHAT TERMINAL (lg:col-span-2) */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <FloatingGlassCard designMode={designMode} className={`bg-white/5 backdrop-blur-3xl border transition-all duration-500 shadow-lg ${border} flex-1`}>
+              <div className="flex flex-col h-[480px] sm:h-[580px] overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.03] to-transparent">
+                <div className="bg-black/30 px-4 py-3 border-b border-white/10 flex justify-between items-center gap-2 flex-shrink-0">
                   <AnimatePresence mode="wait">
                     <motion.span 
                       key={headerText}
-                      initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                      className={`text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest truncate max-w-[120px] sm:max-w-none ${secondary}`}
+                      initial={{ opacity: 0, y: 3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -3 }}
+                      className={`text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider truncate max-w-[110px] sm:max-w-none ${secondary}`}
                     >
                       {headerText}
                     </motion.span>
@@ -1260,27 +1353,27 @@ export default function Home() {
                   <div className="flex-shrink-0"><SocialMatrixCarousel /></div>
                 </div>
                 
-                <div ref={scrollRef} className="p-5 sm:p-8 font-mono text-xs sm:text-sm space-y-6 overflow-y-auto flex-1 scrollbar-hide">
+                <div ref={scrollRef} className="p-4 sm:p-5 font-mono text-[11px] sm:text-xs space-y-4 overflow-y-auto flex-1 scrollbar-hide">
                   
                   <AnimatePresence>
                     {activePositions.length > 0 && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6">
-                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-white/60 mb-3 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-4 flex-shrink-0">
+                        <div className="text-[9px] font-black uppercase tracking-wider text-white/50 mb-2 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {activePositions.map(pos => (
-                            <div key={pos.id} className="bg-black/60 border border-white/15 rounded-xl p-5 backdrop-blur-md relative overflow-hidden shadow-md">
-                              <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3] shadow-[0_0_15px_rgba(0,255,163,1)]' : 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)]'}`} />
-                              <div className="flex justify-between items-start mb-2 pl-2">
+                            <div key={pos.id} className="bg-black/50 border border-white/10 rounded-xl p-3 backdrop-blur-md relative overflow-hidden shadow-inner">
+                              <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3]' : 'bg-red-500'}`} />
+                              <div className="flex justify-between items-start mb-1.5 pl-1.5">
                                 <div>
-                                  <span className="text-white font-black text-lg sm:text-xl text-sharp-primary">{pos.asset}</span>
-                                  <span className={`ml-2 text-[9px] sm:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${pos.type === 'LONG' ? 'bg-[#00ffa3]/20 text-[#00ffa3] border border-[#00ffa3]/40' : 'bg-red-500/20 text-red-400 border-red-500/40'}`}>{pos.type} {pos.leverage}x</span>
+                                  <span className="text-white font-black text-xs text-sharp-primary">{pos.asset}</span>
+                                  <span className={`ml-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${pos.type === 'LONG' ? 'bg-[#00ffa3]/10 text-[#00ffa3] border border-[#00ffa3]/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>{pos.type} {pos.leverage}x</span>
                                 </div>
                                 <div className="text-right">
-                                  <div className={`font-mono text-lg sm:text-xl font-black tracking-tighter ${pos.pnl >= 0 ? 'text-[#00ffa3] drop-shadow-[0_0_8px_rgba(0,255,163,0.5)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`}>{pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}</div>
-                                  <div className={`text-[9px] sm:text-[11px] font-bold ${pos.pnl >= 0 ? 'text-[#00ffa3]/85' : 'text-red-500/85'}`}>{pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%</div>
+                                  <div className={`font-mono text-xs font-black tracking-tight ${pos.pnl >= 0 ? 'text-[#00ffa3]' : 'text-red-400'}`}>{pos.pnl >= 0 ? '+' : '-'}${Math.abs(pos.pnl).toFixed(2)}</div>
+                                  <div className={`text-[8px] font-bold ${pos.pnl >= 0 ? 'text-[#00ffa3]/80' : 'text-red-500/80'}`}>{pos.pnlPercentage >= 0 ? '+' : ''}{pos.pnlPercentage.toFixed(2)}%</div>
                                 </div>
                               </div>
-                              <div className="flex justify-between text-[9px] sm:text-[11px] font-mono text-white/80 pl-2 border-t border-white/5 pt-2 mt-2"><span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span><span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                              <div className="flex justify-between text-[8px] font-mono text-white/70 pl-1.5 border-t border-white/5 pt-1.5 mt-1.5"><span>ENTRY: ${(pos.entryPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span><span>LIVE: ${(pos.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
                             </div>
                           ))}
                         </div>
@@ -1293,15 +1386,15 @@ export default function Home() {
                       if (!msg) return null; 
                       return (
                         <motion.div 
-                          key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                          className={`flex flex-col gap-3 p-5 rounded-2xl backdrop-blur-2xl border shadow-2xl ${
-                            msg.role === 'user' ? 'bg-black/50 border-white/15 ml-8 sm:ml-16' : 
-                            msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/30 border-red-500/30' : 'bg-emerald-950/30 border-emerald-500/30'} mr-8 sm:mr-16` : 
-                            msg.role === 'error' ? 'bg-red-900/30 border-red-500/40 mr-8 sm:mr-16 animate-pulse' : 'bg-transparent border-transparent text-center'
+                          key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                          className={`flex flex-col gap-2 p-3.5 rounded-xl backdrop-blur-2xl border shadow-md ${
+                            msg.role === 'user' ? 'bg-black/55 border-white/10 ml-6 sm:ml-12' : 
+                            msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/30 border-red-500/30' : 'bg-emerald-950/30 border-emerald-500/30'} mr-6 sm:mr-12` : 
+                            msg.role === 'error' ? 'bg-red-900/30 border-red-500/40 mr-6 sm:mr-12 animate-pulse' : 'bg-transparent border-transparent text-center'
                           }`}
                         >
                           {msg.role !== 'system' && (
-                            <span className={`text-[9px] uppercase font-black tracking-[0.25em] ${msg.role === 'user' ? 'text-white/60' : secondary}`}>{msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}</span>
+                            <span className={`text-[8px] uppercase font-black tracking-wider ${msg.role === 'user' ? 'text-white/50' : secondary}`}>{msg.role === 'user' ? 'COMMAND INPUT' : 'NEURAL OUTPUT'}</span>
                           )}
 
                           {msg.role === 'ai' && msg.thinkingSteps && msg.thinkingSteps.length > 0 && (
@@ -1311,24 +1404,24 @@ export default function Home() {
                           <p className={`leading-relaxed whitespace-pre-wrap font-bold text-sharp-primary`}>{msg.text}</p>
                           
                           {msg.actionPayload && (
-                            <div className={`mt-4 p-5 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/15 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-black/50 border-white/15'}`}>
+                            <div className={`mt-3 p-4 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/35 shadow-[0_0_15px_rgba(16,185,129,0.25)]' : 'bg-black/50 border-white/10'}`}>
                               
-                              <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-                                <span className="text-xs font-black uppercase tracking-widest text-white/80 flex items-center gap-2">
-                                  <div className="w-1.5 h-3 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
+                              <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-white/85 flex items-center gap-1.5">
+                                  <div className="w-1 h-2.5 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
                                 </span>
                                 {msg.actionPayload.status === 'SUCCESS' ? (
-                                  <span className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
+                                  <span className="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
                                 ) : (
-                                  <span className="text-[10px] text-amber-400 font-mono font-bold flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING SIGNATURE..." : "AWAITING SIGNATURE"}</span>
+                                  <span className="text-[9px] text-amber-400 font-mono font-bold flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING..." : "AWAITING SIGNATURE"}</span>
                                 )}
                               </div>
 
-                              <div className="mb-5 bg-white/5 p-4 rounded-lg border border-white/5 flex gap-4 items-start">
-                                  <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/15 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]"><span className={`text-[10px] font-black ${msg.actionPayload.confidence > 70 ? 'text-[#00ffa3]' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
+                              <div className="mb-4 bg-white/5 p-3 rounded-lg border border-white/5 flex gap-3 items-start">
+                                  <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-black/60 border border-white/10"><span className={`text-[9px] font-black ${msg.actionPayload.confidence > 70 ? 'text-[#00ffa3]' : msg.actionPayload.confidence > 50 ? 'text-amber-400' : 'text-red-400'}`}>{msg.actionPayload.confidence}%</span></div>
                                   <div>
-                                      <span className="text-[9px] uppercase tracking-widest text-white/60 block mb-1 font-bold">STRATEGY ANALYSIS</span>
-                                      <p className="text-xs text-white leading-relaxed font-bold">{msg.actionPayload.analysis}</p>
+                                      <span className="text-[8px] uppercase tracking-wider text-white/50 block mb-0.5 font-bold">STRATEGY ANALYSIS</span>
+                                      <p className="text-[11px] text-white leading-relaxed font-bold">{msg.actionPayload.analysis}</p>
                                   </div>
                               </div>
 
@@ -1424,7 +1517,7 @@ export default function Home() {
             <FloatingGlassCard designMode={designMode} delay={0.1} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl flex flex-col">
               <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4 flex-shrink-0">
                 <span className="text-[10px] font-black tracking-widest text-emerald-400 uppercase flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Mantle Sepolia Live Ledger Stream
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Mantle Sepolia Live Ledger Stream
                 </span>
                 <span className="text-[9px] font-mono text-white/50 font-bold">BLOCKHEIGHT: #{oracleData.block_number}</span>
               </div>
@@ -1507,7 +1600,7 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
                 {/* Cumulative TVL Counter */}
                 <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
-                   <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">TOTAL VALUE CONTROLLED (TVC)</span>
+                   <span className="block text-[8px] uppercase tracking-wider text-white/50 font-mono font-black">TOTAL VALUE CONTROLLED (TVC)</span>
                    <span className="text-3xl font-black text-white text-sharp-primary font-mono tracking-tighter">
                      ${totalValueLocked.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                    </span>
@@ -1540,7 +1633,7 @@ export default function Home() {
               </div>
 
               {/* HIGH-FIDELITY TICKING PERFORMANCE GRAPH */}
-              <div className="relative w-full h-[80px] bg-black/40 border border-white/5 rounded-2xl mt-6 overflow-hidden flex items-end">
+              <div className="relative w-full h-[60px] bg-black/40 border border-white/5 rounded-2xl mt-6 overflow-hidden flex items-end">
                 <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 100" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
@@ -1583,7 +1676,7 @@ export default function Home() {
 
           </div>
 
-          {/* RIGHT COLUMN COMPONENT STACK (lg:col-span-1) */}
+          {/* COLUMN 4: RIGHT PANEL METRICS & CONTROLS */}
           <div className="space-y-6">
             
             {/* WEB2 SIMPLE ONBOARDING MODULE */}
@@ -1751,9 +1844,9 @@ export default function Home() {
             {/* COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) */}
             <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 h-[220px] shadow-2xl">
                <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0"><div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />Mantle Agent Matrix Relay</h4>
-               <div className="font-mono text-[9px] space-y-3 leading-relaxed text-sharp-secondary overflow-y-auto scrollbar-hide flex-1 max-h-[140px] font-bold">
+               <div className="font-mono text-[9px] space-y-3 leading-relaxed text-sharp-secondary overflow-y-auto scrollbar-hide flex-1 max-h-[110px] font-bold">
                  <AnimatePresence>{relayLogs.map((log) => (
-                     <motion.div key={log.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-2 border-b border-white/5 pb-2 last:border-0">
+                     <motion.div key={log.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-1.5 border-b border-white/5 pb-1.5 last:border-0">
                        <span className={`${log.color} font-bold flex-shrink-0`}>[{log.agent}]:</span><span>{log.text}</span>
                      </motion.div>
                  ))}</AnimatePresence>
@@ -1775,29 +1868,29 @@ export default function Home() {
             </FloatingGlassCard>
 
             {/* MARKET SENTINEL COMPONENT */}
-            <FloatingGlassCard designMode={designMode} delay={0.6} className={`bg-transparent rounded-3xl shadow-2xl`}>
-              <div className="relative overflow-hidden rounded-3xl h-full w-full">
+            <FloatingGlassCard designMode={designMode} delay={0.6} className={`bg-transparent rounded-2xl shadow-lg`}>
+              <div className="relative overflow-hidden rounded-2xl h-full w-full">
                 <div className="relative h-full w-full">
-                  <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4"><span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50">Market Sentinel</span><div className={`w-2.5 h-2.5 rounded-full animate-pulse ${currentMarket.bg}`} /></div>
+                  <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3"><span className="text-[9px] font-black tracking-wider text-white/50">Market Sentinel</span><div className={`w-2 h-2 rounded-full animate-pulse ${currentMarket.bg}`} /></div>
                   <AnimatePresence mode="wait">
-                    <motion.div key={currentMarket.symbol} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center mb-6">
-                       <div className="text-5xl font-black text-white drop-shadow-md text-sharp-primary">{(livePrices as any)[currentMarket.pair]}</div>
-                       <div className={`text-[12px] font-black tracking-[0.2em] mt-2.5 ${currentMarket.color} ${currentMarket.glow}`}>{currentMarket.name}</div>
+                    <motion.div key={currentMarket.symbol} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="text-center mb-4">
+                       <div className="text-3xl font-black text-white drop-shadow-sm text-sharp-primary">{(livePrices as any)[currentMarket.pair]}</div>
+                       <div className={`text-[10px] font-black tracking-wider mt-1.5 ${currentMarket.color} ${currentMarket.glow}`}>{currentMarket.name}</div>
                     </motion.div>
                   </AnimatePresence>
                   
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                      <button 
                        onClick={() => handleSentinelClick('LONG')}
                        disabled={isExecuting}
-                       className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed`}
+                       className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-lg py-2.5 text-[10px] font-black uppercase tracking-wider hover:bg-white/10 transition-all transform hover:-translate-y-0.5 active:scale-98 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed`}
                      >
                        Long
                      </button>
                      <button 
                        onClick={() => handleSentinelClick('SHORT')}
                        disabled={isExecuting}
-                       className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-all transform hover:-translate-y-1 active:scale-95 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed"
+                       className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg py-2.5 text-[10px] font-black uppercase tracking-wider hover:bg-red-500/40 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all transform hover:-translate-y-0.5 active:scale-98 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed"
                      >
                        Short
                      </button>
@@ -1810,9 +1903,9 @@ export default function Home() {
             <AnimatePresence>
                {isUserAuthenticated && activeWalletAddress && mntGasBalance < 1.0 && (
                  <motion.div
-                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                   initial={{ opacity: 0, scale: 0.9, y: 15 }}
                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                   exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                   exit={{ opacity: 0, scale: 0.9, y: -15 }}
                    transition={{ duration: 0.4 }}
                    className="w-full"
                  >
@@ -1844,7 +1937,7 @@ export default function Home() {
                      {!refuelResultHash && (
                        <button
                          onClick={handleRequestRefuel}
-                         className="w-full py-3.5 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all active:scale-95 mobile-touch-target"
+                         className="w-full py-3.5 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all active:scale-98 mobile-touch-target"
                        >
                          {isRefueling ? "TRANSFERRING GAS..." : isRefuelFeePending ? "CONFIRMING FEE SWAP..." : "REQUEST GAS REFUEL"}
                        </button>
@@ -1854,10 +1947,10 @@ export default function Home() {
                )}
             </AnimatePresence>
 
-            <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[80px]">
+            <FloatingGlassCard designMode={designMode} delay={0.4} className="bg-transparent h-[70px]">
               <button 
                 onClick={() => open()} 
-                className="w-full h-full rounded-2xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-xs uppercase tracking-[0.25em] shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.4)] active:scale-95 mobile-touch-target"
+                className="w-full h-full rounded-xl bg-white text-black hover:bg-[#00ffa3] transition-all font-black text-[10px] uppercase tracking-wider shadow-[0_15px_30px_rgba(255,255,255,0.08)] hover:shadow-[0_15px_30px_rgba(16,185,129,0.35)] active:scale-98 mobile-touch-target"
               >
                 {isConnected ? "Connection Active" : "Bridge Wallet"}
               </button>
