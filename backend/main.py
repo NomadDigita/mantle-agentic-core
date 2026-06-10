@@ -31,7 +31,7 @@ gemini_key = os.getenv("GEMINI_API_KEY")
 
 # --- SUPABASE CENTRAL DATA STACK ---
 SUPABASE_URL = "https://gnxavrtblloukhrnurnb.supabase.co/rest/v1/"
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")  # Corrected: Removed hardcoded fallback to bypass GitHub scan block
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
 # --- SPONSOR CREDITS ENV CONFIGURATIONS ---
 NANSEN_API_KEY = os.getenv("NANSEN_API_KEY", "")
@@ -143,6 +143,18 @@ class BotCommandPayload(BaseModel):
     command: str
     user_id: str
     platform: str
+
+class ContractSavePayload(BaseModel):
+    wallet_address: str
+    contract_address: str
+    contract_name: str
+    bytecode: str
+    abi: str
+
+class IdentitySavePayload(BaseModel):
+    wallet_address: str
+    risk_strategy: str
+    max_drawdown: int
 
 # ---------------------------------------------------------
 # SPONSOR INTEGRATION: BYREAL AGENT SKILLS CLI SHELL
@@ -445,7 +457,7 @@ BOT_HELP_TEXT = (
 def call_gemini_fallback(system_prompt: str, user_prompt: str = "") -> str:
     """
     Seamless Gemini REST pipeline targeting stable gemini-3.5-flash.
-    Bypasses datacenter Cloudflare blocks targeting Groq's endpoints.
+    Increased connection timeout to 45 seconds to prevent read timeouts on large files.
     """
     if not gemini_key:
         return "Mantle Pre-Cognition System Error: [GEMINI_API_KEY is not configured inside the server environment. Fallback inference aborted.] — Verified by Mantle Agentic Core"
@@ -460,7 +472,8 @@ def call_gemini_fallback(system_prompt: str, user_prompt: str = "") -> str:
     }
     headers = {"Content-Type": "application/json"}
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        # Timeout raised to 45 seconds to guarantee stable execution
+        response = requests.post(url, json=payload, headers=headers, timeout=45)
         if response.status_code == 200:
             res_json = response.json()
             return res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
@@ -1113,6 +1126,48 @@ async def save_history(payload: HistorySavePayload):
     
     success = supabase_post("chat_history", db_messages, upsert=True)
     return {"status": "success" if success else "error"}
+
+# --- UPGRADED CITADEL ON-CHAIN IDENTITY SYNC ENDPOINTS ---
+@app.post("/api/citadel/identity")
+async def save_citadel_identity(payload: IdentitySavePayload):
+    """
+    Saves minted identity profile metadata directly to Supabase
+    so all bots (Telegram/Discord) immediately recognize the on-chain agent status.
+    """
+    data = {
+        "wallet_address": payload.wallet_address.lower(),
+        "risk_strategy": payload.risk_strategy,
+        "max_drawdown": payload.max_drawdown,
+        "timestamp": time.time()
+    }
+    success = supabase_post("virtual_identities", data, upsert=True)
+    return {"status": "success" if success else "error"}
+
+# --- UPGRADED NEURAL FORGE CONTRACT DEPLOYMENT STORAGE ENDPOINTS ---
+@app.post("/api/forge/contracts")
+async def save_deployed_contract(payload: ContractSavePayload):
+    """
+    Saves deployed custom contracts directly to Supabase cloud table.
+    """
+    data = {
+        "id": f"{payload.wallet_address.lower()}:{payload.contract_address.lower()}",
+        "wallet_address": payload.wallet_address.lower(),
+        "contract_address": payload.contract_address.lower(),
+        "contract_name": payload.contract_name,
+        "bytecode": payload.bytecode,
+        "abi": payload.abi,
+        "timestamp": time.time()
+    }
+    success = supabase_post("deployed_contracts", data, upsert=True)
+    return {"status": "success" if success else "error"}
+
+@app.get("/api/forge/contracts")
+async def get_deployed_contracts(wallet_address: str):
+    """
+    Retrieves complete custom deployed contract history of a user.
+    """
+    rows = supabase_get("deployed_contracts", {"wallet_address": f"eq.{wallet_address.lower()}", "order": "timestamp.desc"})
+    return rows
 
 # ---------------------------------------------------------
 # BACKEND TREASURY REFUEL
