@@ -4,11 +4,11 @@
 “Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
 */
 
-An autonomous, multi-client, pre-cognitive Web3 operations engine built for the Mantle Network. Mantle Agentic Core (MAC) bridges natural language intents with live on-chain executions, persistent cloud databases, and cryptographic risk registries.
+Mantle Agentic Core (MAC) is an autonomous, multi-client, pre-cognitive Web3 operations engine built for the Mantle Network. MAC bridges natural language intents with live on-chain executions, persistent cloud databases, and cryptographic risk registries.
 
 ---
 
-## 1. System Architecture & Infographics
+## 1. System Architecture
 
 Below is the conceptual layout of the Mantle Agentic Core's operational pipelines and database relays:
 
@@ -25,6 +25,7 @@ Below is the conceptual layout of the Mantle Agentic Core's operational pipeline
     │   +───────────────────────────────────────────────────────────────────+   │
     │   │                       PostgreSQL Tables                           │   │
     │   │  [chat_history]  [user_bindings]  [virtual_identities]            │   │
+    │   │  [deployed_contracts]                                             │   │
     │   +─────────────────────────────────┬─────────────────────────────────+   │
     +─────────────────────────────────────┼─────────────────────────────────────+
                                           │
@@ -155,7 +156,7 @@ Mantle Agentic Core is designed to project a high-contrast, professional, and un
 
 ---
 
-## 6. Core Operational Modules
+## 6. Core Operational Modules & Navigation
 
 ### 01. Central Terminal Chat Workspace
 The terminal connects directly to your FastAPI backend server. It translates natural language statements (e.g. `"Long MNT 10x"`) into valid on-chain intents. When a trade is parsed, the terminal displays an "AI Pre-Cognition Layer" card detailing reasoning trace, confidence scores, transaction parameters, and secure decision hashes.
@@ -257,7 +258,7 @@ Install Node modules and launch the Next.js development server:
     npm install
     
     # Configure your local AppKit Project ID inside .env.local
-    echo "NEXT_PUBLIC_PROJECT_ID=df57076e4f6d827dda0ae1ae16a15623" > .env.local
+    echo "NEXT_PUBLIC_PROJECT_ID="" > .env.local
     
     # Start dApp locally
     npm run dev
