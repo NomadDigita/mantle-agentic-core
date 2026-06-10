@@ -1,190 +1,265 @@
-# 🛡️ Mantle Agentic Core (MAC)
+# Mantle Agentic Core (MAC)
 
-<!-- 
+/*
 “Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
--->
+*/
 
-Mantle Agentic Core (MAC) is an autonomous, on-chain Operating System and financial co-pilot built exclusively for the Mantle ecosystem. 
-
-MAC bridges the gap between natural language processing (LLM) and raw EVM blockchain execution. By coupling an asynchronous FastAPI intent parsing backend with on-chain risk registries (ERC-8004), sovereign treasury signing wallets, and active mempool security sentinels, MAC introduces a secure, pre-cognitive operating layer for decentralized finance.
+An autonomous, multi-client, pre-cognitive Web3 operations engine built for the Mantle Network. Mantle Agentic Core (MAC) bridges natural language intents with live on-chain executions, persistent cloud databases, and cryptographic risk registries.
 
 ---
 
-## 🚀 Live Deployments & Addresses
+## 1. System Architecture & Infographics
 
-* **Production Frontend dApp (Vercel):** https://mantle-agentic-core.vercel.app/
-* **Production API Backend (Render):** https://mantle-agentic-core.onrender.com/
-* **Target Ledger Network:** Mantle Sepolia (Chain ID: 5003)
-* **Mantle Agent Token (MAC) ERC-20:** `0x69465a67c1C4860f89f2D80fab5dADF33495d171`
-* **ERC-8004 Identity Registry:** `0x1E5B64264089aacC547A1506402B94f909215942`
-* **Mantle Agent Escrow Contract:** Compiled & Verified (`contracts/MantleAgentEscrow.sol`)
+Below is the conceptual layout of the Mantle Agentic Core's operational pipelines and database relays:
 
----
-
-## 🏆 Hackathon Track Alignment & Feature Inventory
-
-### 1. Agentic Wallets & Economy Track (Track 6)
-* **Sovereign Server-Side Signer:** The Python backend holds treasury signing authority. It dynamically parses natural language transfers (e.g., "send 2 MAC to 0x..."), converts target addresses to EIP-55 checksum-compliant strings, and broadcasts transactions autonomously to Mantle Sepolia.
-* **On-Chain Collateral Escrows:** To open a leverage trade, users must execute a client-side MetaMask signature locking 5 MAC tokens into a secure escrow. The simulated trade card only mounts and tracks live PnL once the transaction is officially mined on-chain.
-* **The Autonomous Gas Tank:** If a user’s connected wallet gas balance drops below 1.0 MNT, the Gas Sentinel Alert is triggered. Users sign a 5 MAC fee payment to authorize our backend treasury, which autonomously transfers 2.00 native MNT back to their address on-chain.
-
-### 2. AI x RWA Track (Track 3)
-* **The AI Yield Weaver:** This module resolves dynamic yield optimization between mETH (Mantle LSP, yielding ~7.2% APY) and Ondo USDY (Tokenized Treasury RWA, yielding ~5.1% APY).
-* **Pre-Cognitive Yield Swaps:** The user can authorize our pre-cognitive agent to perform dynamic swaps. Signing the transaction shifts their escrowed capital allocations dynamically to capture premium yield spreads across Ondo and Mantle.
-
-### 3. AI DevTools Track (Track 5)
-* **Neural Forge AST Auditor:** The Forge parses raw Solidity code or natural language descriptions. It audits codebases for exploits (reentrancy, overflows) and returns secure compiled code blocks.
-* **EVM Paris-Compatible Launchpad:** Integrates a constructor-free compilation engine. Once a contract is generated, the UI mounts the Mantle Deployer active HUD, allowing developers to deploy gas-optimized, tested bytecode directly to Mantle Sepolia in one click with zero initialization arguments.
-
-### 4. Best UI/UX Award & Consumer DApps (Track 4)
-* **3D Liquid Glass Aesthetic:** Built with Next.js, Framer Motion, and Tailwind. All panels render high backdrop blurs, organic background vector wave meshes, and calculated mouse-perspective perspective tilting.
-* **4-Way Design System Matrix:** The entire dashboard breathes and transitions its color scheme (Emerald, Gold, Purple, and Crimson) in real-time based on the active processing and transaction states of the AI agent, fully adjustable between `SILENT` (Default), `CHROME`, `AURA`, and `CYBER` modes.
-* **The Symmetrical TVC Ledger & Live Block Stream:** Integrates an active scrolling SVG performance graph and a real-time Mantle Sepolia transaction stream that queries the latest blocks via RPC to display raw blockchain telemetry on-flight.
-* **Turing Agentic Bias Auditor:** A real-time fairness auditing dashboard evaluating EVM gas optimization indexes, token selection biases, and registry execution parities.
-
----
-
-## ⚙️ Technical Architecture & Data Directory
-
-```text
-                  [ Next.js Frontend dApp ]
-                     /       |       \
-       (API Handshake)  (Wagmi)  (Aura Engine)
-                   /         |         \
-   [ FastAPI Backend ]  [ Mantle RPC ]  [ Theme Context ]
-         /       \           |
-   [Postgres] [Web3.py]   [ERC-8004]
-    (Neon)    (Signer)   (Registry)
-```
-
-### Repository Structure
-```text
-my-ai-agent/
-├── backend/
-│   ├── main.py                     # FastAPI ASGI Server & Bot Daemons
-│   ├── MantleAgentABI.json         # Compiled Contract ABI Consumed by Web3.py
-│   ├── requirements.txt            # Python Dependencies
-│   └── mac_history.db              # SQLite Local Fallback Database
-├── dashboard/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── citadel/page.tsx    # ERC-8004 Citadel Identity Minter View
-│   │   │   ├── forge/page.tsx      # Neural Forge Compiler & Audit Workspace
-│   │   │   ├── layout.tsx          # Root Layout & Particle Background Settings
-│   │   │   ├── page.tsx            # Main Terminal Dashboard & Turing Modals
-│   │   │   └── ThemeContext.tsx    # Global Visual Theme State-Machine
-│   │   ├── config.ts               # Wagmi Adapter Network Configurations
-│   │   └── context.tsx             # Reown AppKit UI Initializers
-│   └── next.config.ts              # Webpack Polyfills & Externals Mappings
-└── mantle-agent-contracts/
-    ├── contracts/
-    │   ├── ERC8004Identity.sol     # ERC-721 Risk Strategy Identity NFT
-    │   ├── MantleAgentToken.sol    # MAC Utility Token Contract
-    │   └── MantleAgentEscrow.sol   # On-Chain Collateral Staking Escrow
-    ├── scripts/
-    │   ├── deploy.js               # MAC Token Deployment Script
-    │   ├── deployIdentity.js       # ERC-8004 Registry Deployment Script
-    │   └── deployEscrow.cjs        # Escrow Vault Deployment Script (CommonJS)
-    ├── test/
-    │   └── MantleAgentEscrow.test.js # Complete 9-Scenario ES Module Unit Tests
-    └── hardhat.config.js           # Hardhat Compiler & Toolbox Configurations
-```
+    +───────────────────────────────────────────────────────────────────────────+
+    │                             USER CLIENT DECK                              │
+    │   +───────────────────+   +───────────────────+   +───────────────────+   │
+    │   │  Web dApp Console │   │   Telegram Bot    │   │    Discord Bot    │   │
+    │   +─────────┬─────────+   +─────────┬─────────+   +─────────┬─────────+   │
+    +─────────────┼───────────────────────┼───────────────────────┼─────────────+
+                  │                       │                       │
+                  ▼                       ▼                       ▼
+    +───────────────────────────────────────────────────────────────────────────+
+    │                       CENTRAL CLOUD SYNC: SUPABASE                        │
+    │   +───────────────────────────────────────────────────────────────────+   │
+    │   │                       PostgreSQL Tables                           │   │
+    │   │  [chat_history]  [user_bindings]  [virtual_identities]            │   │
+    │   +─────────────────────────────────┬─────────────────────────────────+   │
+    +─────────────────────────────────────┼─────────────────────────────────────+
+                                          │
+                                          ▼
+    +───────────────────────────────────────────────────────────────────────────+
+    │                        AI ENGINE & ORACLE HUB (Render)                    │
+    │   +───────────────────────────────────────────────────────────────────+   │
+    │   │  FastAPI Router -> Llama-3.1-8b (Primary) / Gemini 3.5 (Fallback) │   │
+    │   │  Bybit Spot Market Oracles & Mantle RPC ledger parsers            │   │
+    │   +─────────────────────────────────┬─────────────────────────────────+   │
+    +─────────────────────────────────────┼─────────────────────────────────────+
+                                          │
+                                          ▼
+    +───────────────────────────────────────────────────────────────────────────+
+    │                     MANTLE TESTNET BLOCKCHAIN (Chain 5003)                │
+    │   +───────────────────+   +───────────────────+   +───────────────────+   │
+    │   │  ERC-8004 Registry│   │ MAC Token Contract│   │ Escrow Vault      │   │
+    │   │  (MAI Identity)   │   │  (MAC ERC-20)     │   │ (Collateral Lock) │   │
+    │   +───────────────────+   +───────────────────+   +───────────────────+   │
+    +───────────────────────────────────────────────────────────────────────────+
 
 ---
 
-## 🤖 Telegram & Discord Bot Relays
+## 2. Directory Structure & File Map
 
-Mantle Agentic Core is equipped with background-running bot relays that boot automatically inside daemon threads under the FastAPI lifecycle on your Render production container.
+The codebase is organized into three primary operational blocks, dividing backend services, Next.js frontend pages, and Hardhat development testing units:
 
-* **Telegram Bot Handle:** [`@MantleAgenticBot`](https://t.me/MantleAgenticBot)
-* **Discord Bot ID:** `Mantle Agentic Core#3046`
-
-### Unified Cross-Platform Web3 Linking
-By tying Telegram and Discord IDs directly to SQLite/PostgreSQL wallet addresses, we have established a **single, omnipresent entity**:
-* **`/link <wallet_address>`:** Links your Telegram/Discord account to your active Web3 Wallet. Your chat history on the 3D web dApp dashboard is now fully synchronized with your mobile chat logs.
-* **`/citadel mint <Strategy> <Drawdown>:`** Creates a Virtual Agent Profile in database memory. When you log into the web dApp, it detects this draft and prompts you to mint it on-chain in one click.
-* **`/citadel`:** Launches real-time Web3.py JSON-RPC queries to the Mantle Sepolia ledger to check your active on-chain risk strategy.
-* **`/forge <concept>:`** Generates, compiles, and audits complete, secure Solidity contracts instantly.
-* **`/portfolio`:** Fetches your active leveraged trading positions directly in the chat window.
-
----
-
-## 📖 The Neural Forge & Hardhat Troubleshooting Ledger
-
-Here is the structured ledger detailing every error encountered during this deployment phase, along with its permanent, verified solution:
-
-| # | Error / Warning | Root Cause | Permanent Engineering Solution |
-| :-: | :--- | :--- | :--- |
-| **01** | `ReferenceError: require is not defined in ES module scope` | The project’s `package.json` has `"type": "module"`, making standard `.js` files ES Modules where CommonJS `require()` is forbidden. | Rename CommonJS scripts to use the **`.cjs`** extension (e.g. `deployEscrow.cjs`), or convert them to use modern ES6 `import`/`export` syntax. |
-| **02** | `Error HHE1200: Cannot determine a test runner` | Hardhat’s config only imported the narrow `@nomicfoundation/hardhat-ethers` library instead of the complete `hardhat-toolbox` plugin. Mocha/Chai were not registered, so Hardhat didn't know what test runner to use to compile and execute `.js` test files. | 1. Import **`@nomicfoundation/hardhat-toolbox`** inside your `hardhat.config.js`.<br>2. Convert the test script (`MantleAgentEscrow.test.js`) to use native ES Modules **`import`** syntax. |
-| **03** | `@nomicfoundation/hardhat-toolbox` version mismatch | Installing the `@latest` tag of the toolbox plugin defaults to a version incompatible with Hardhat 2.x. | Install the explicit Hardhat 2-compatible tag: `npm install --save-dev \"@nomicfoundation/hardhat-toolbox@hh2\"`. |
-| **04** | `npm error ERESOLVE unable to resolve dependency tree` | Strict `npm` version matching locks conflicting peer dependencies (e.g., project `hardhat-ethers` v4.x vs. plugin expected v3.x). | Force the installation using the **`--legacy-peer-deps`** flag to bypass strict peer checks. |
-| **05** | `Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './common/bigInt' is not defined` | Your project’s core `hardhat` package is outdated and does not export the `bigInt` modules expected by the new testing plugins. | Upgrade the core `hardhat` dependency to **`hardhat@^2.22.0`** using the `--legacy-peer-deps` flag. |
-| **06** | `npm error network read ECONNRESET` | The system is trying to route package downloads through your phone proxy (`192.168.49.1:8282`), which is now offline. | Remove the proxy configurations from your settings: run `npm config rm proxy`. |
-| **07** | `Error: EPERM: operation not permitted, rmdir` | Windows is locking folders inside `node_modules` because an active terminal or editor process is currently referencing them. | Close all terminal sessions (or restart VS Code) to release the locks, then run your npm command. |
-| **08** | `TypeError: Cannot read properties of undefined (reading 'getSigners')` (Top-level imports) | Under strict ES Modules, loading the default `hre` object statically can execute before the ethers plugin dynamically binds its methods to the environment. | Bypass the default import entirely and **import `ethers` directly as a named export from `"hardhat"`**: `import { ethers } from \"hardhat\";`. |
-| **09** | `TypeError: Cannot read properties of undefined (reading 'getSigners')` (Inside tests) | `@nomicfoundation/hardhat-ethers` v4.x (built for Hardhat 3) is installed in your project, which the Hardhat 2 runtime ignores, leaving `hre.ethers` uninitialized. | Downgrade the dependency to **`@nomicfoundation/hardhat-ethers@^3.0.8`** using the `--legacy-peer-deps` flag. |
-| **10** | `TypeError: Cannot read properties of undefined (reading 'getSigners')` (Asynchronous race-condition) | Destructuring `ethers` statically at the top of an ES Module test file captures it as `undefined` because the file parses before the Hardhat Runtime Environment (HRE) has finished loading its plugins asynchronously. | **Erase top-level destructuring.** Always destructure and pull `ethers` dynamically inside the active `beforeEach` hook (`const { ethers } = hre;`) after the HRE has fully booted. |
-| **11** | `Error: Transaction reverted: function returned an unexpected amount of data` | The `MantleAgentEscrow` contract constructor resolved `macToken = IERC20(address(macToken))` before the state variable was initialized, mapping it to `address(0)`. Direct calls on `address(0)` returned empty data. | Directly initialize the variable with the input constructor parameter: `macToken = IERC20(_macTokenAddress);`. |
-| **12** | `BOT PROCESS FAILURE: name 'DATABASE_URL' is not defined` | The global scope resolution for the string `DATABASE_URL` would occasionally fail inside asynchronous background bot thread workers. | Completely eliminate local variable bindings; query the environment directly inside connection pools using `os.getenv(\"DATABASE_URL\")`. |
+    my-ai-agent/
+    ├── backend/
+    │   ├── main.py                     # FastAPI backend app, Discord & Telegram loops
+    │   ├── requirements.txt            # Python backend dependencies
+    │   ├── MantleAgentABI.json         # ABI descriptor for MAC token smart contract
+    │   └── .env                        # Private keys, secure API keys, and bot tokens
+    ├── dashboard/
+    │   ├── src/
+    │   │   ├── app/
+    │   │   │   ├── citadel/
+    │   │   │   │   └── page.tsx        # ERC-8004 Citadel Vault registration interface
+    │   │   │   ├── forge/
+    │   │   │   │   └── page.tsx        # Neural Forge smart contract auditor page
+    │   │   │   ├── globals.css         # Styling, laser keyframes, and custom fonts
+    │   │   │   ├── layout.tsx          # TSParticles, Web3 provider wrappers, and layout
+    │   │   │   ├── ThemeContext.tsx    # Centralized state context & safe color pallet
+    │   │   │   └── page.tsx            # Main Chat Terminal & central workspace view
+    │   │   └── context/
+    │   │       ├── config.ts           # AppKit multi-chain configurations
+    │   │       └── context.tsx         # AppKit client instance & theme provider
+    │   ├── next.config.ts              # Webpack externals and fallback rules
+    │   ├── package.json                # Frontend dependency declarations
+    │   └── tsconfig.json               # TypeScript compiler configurations
+    └── asiwaju-trading-companion/     # Base Sepolia reference registration scripts
 
 ---
 
-## 🛠️ Local Installation & Configuration Guide
+## 3. On-Chain Smart Contract Registry
 
-### 1. Backend Engine Setup
-Navigate to the backend directory, install dependencies, and launch the FastAPI server:
+The on-chain infrastructure of Mantle Agentic Core is compiled using Solidity `^0.8.20` and successfully deployed on the **Mantle Sepolia Testnet (Chain ID: 5003)**:
 
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-Create a `.env` file inside `backend/.env` with the following variables:
-
-```env
-GROQ_API_KEY="your_groq_api_key"
-PRIVATE_KEY="your_wallet_signing_private_key"
-MANTLE_RPC_URL="https://rpc.sepolia.mantle.xyz"
-MAC_TOKEN_ADDRESS="0x69465a67c1C4860f89f2D80fab5dADF33495d171"
-TELEGRAM_BOT_TOKEN="your_telegram_bot_token_here"
-DISCORD_BOT_TOKEN="your_discord_bot_token_here"
-TWITTER_CONSUMER_KEY="your_twitter_api_key"
-TWITTER_CONSUMER_SECRET="your_twitter_key_secret"
-TWITTER_ACCESS_TOKEN="your_twitter_access_token"
-TWITTER_ACCESS_TOKEN_SECRET="your_twitter_access_token_secret"
-DATABASE_URL="your_postgresql_database_connection_url_optional_for_sqlite_fallback"
-RENDER_EXTERNAL_URL="your_deployed_render_app_url"
-```
-
-Run the local development server:
-```bash
-uvicorn main:app --reload --port 8000
-```
-
-### 2. Frontend Next.js Setup
-Navigate to your dashboard directory, install dependencies, and run your development environment:
-
-```bash
-cd dashboard
-pnpm install
-```
-
-Create a `.env.local` file inside `dashboard/.env.local` containing your Reown Project ID:
-```env
-NEXT_PUBLIC_PROJECT_ID="your_reown_project_id"
-```
-
-Launch the development server:
-```bash
-pnpm run dev
-```
-
-Open `http://localhost:3000` in your browser.
+*   **Mantle Agent Core Token (MAC)**: `0x69465a67c1C4860f89f2D80fab5dADF33495d171`
+    *   Ecosystem utility and collateral asset. Implements automated deflationary mechanics (2% burn fee, 3% liquidity tax) on transfers.
+*   **ERC-8004 Identity Registry (MAI)**: `0x1E5B64264089aacC547A1506402B94f909215942`
+    *   Registers sovereign autonomous identities (MAI NFTs). Couples wallets with specialized risk parameters (Strategy settings, hard stop Drawdowns) directly on the ledger.
+*   **Mantle Agent Escrow Vault**: `0x69465a67c1C4860f89f2D80fab5dADF33495d171` (Companion Contract)
+    *   Secures MAC token collateral for active operational sessions, enabling programmatically enforced releasing or seizing of collateral during trades.
 
 ---
 
-## 📄 License
-This repository is licensed under the MIT License. Created for the Turing Test Hackathon 2026.
-```
- Quadruple backtick wrapper closes here
+## 4. Database Schema Mappings (Supabase Centralization)
+
+To prevent data loss on server restarts, MAC uses Supabase PostgreSQL as its central data engine, completely removing local storage dependencies. 
+
+The tables inside the SQL Editor are structured as follows:
+
+    -- Chat history mapping per session
+    create table if not exists chat_history (
+        id text primary key,
+        wallet_address text,
+        role text,
+        text text,
+        action_payload text,
+        thinking_steps text,
+        latency text,
+        decision_hash text,
+        timestamp double precision
+    );
+
+    -- Cross-client wallet bindings
+    create table if not exists user_bindings (
+        id text primary key,
+        platform text,
+        platform_user_id text,
+        wallet_address text
+    );
+
+    -- Virtual and drafted agent risk strategies
+    create table if not exists virtual_identities (
+        wallet_address text primary key,
+        risk_strategy text,
+        max_drawdown integer,
+        timestamp double precision
+    );
+
+    -- Deployed solidity contracts tracker
+    create table if not exists deployed_contracts (
+        id text primary key,
+        wallet_address text,
+        contract_address text,
+        contract_name text,
+        bytecode text,
+        abi text,
+        timestamp double precision
+    );
+
+---
+
+## 5. Front-End UI/UX Design System
+
+Mantle Agentic Core is designed to project a high-contrast, professional, and unified developer console experience, utilizing several layout paradigms:
+
+*   **Vite-Style Sleek Layout**: Sidebar layout structure with compact margins, narrow panels, and clear column dividers to maximize space on desktop and keep views highly organized.
+*   **Liquid Glass Backgrounds**: Main panels are styled using custom backdrop blurs, subtle border-glow outlines, and translucent overlays (`backdrop-blur-3xl`, `bg-white/5`), making background particle movements elegantly visible underneath elements.
+*   **Liquid Glass Sticky Header**: The main header panel remains statically locked at the top of the viewport (`sticky top-0 z-50`). Other body elements roll under the header when scrolling, reinforcing the translucent glass depth.
+*   **Brand-Adaptive Sentinel Themes**: The Market Sentinel card supports real-time Bybit ticker feeds. Switching between **BTC**, **ETH**, and **MNT** dynamically changes the card outline glow, text accents, and border laser sweep animations:
+    *   **BTC**: Orange/Amber theme (`#f59e0b`).
+    *   **ETH**: Indigo/Blue theme (`#6366f1`).
+    *   **MNT**: Mantle Green theme (`#00ffa3`).
+*   **Performance Optimization**: Particle density has been reduced, and SVG layout rendering has been streamlined, to prevent frame drops on mobile browsers.
+
+---
+
+## 6. Core Operational Modules
+
+### 01. Central Terminal Chat Workspace
+The terminal connects directly to your FastAPI backend server. It translates natural language statements (e.g. `"Long MNT 10x"`) into valid on-chain intents. When a trade is parsed, the terminal displays an "AI Pre-Cognition Layer" card detailing reasoning trace, confidence scores, transaction parameters, and secure decision hashes.
+
+### 02. Citadel Vault (ERC-8004 Identity Registration)
+Provides an interface to mint sovereign ERC-8004 Risk Strategy Identity NFTs. 
+*   **Navigation Manual**: Click "Citadel" in the top header. Configure your management parameter, select a Strategy (Conservative, Balanced, or Aggressive), define your drawdown limit, and click "Awaken Agent Identity". Authorize the transaction inside MetaMask/Bitget.
+*   **Dynamic Syncing**: On confirmation, your dApp automatically posts the minted risk strategy to your Supabase `virtual_identities` table. The main dashboard and bot engines will instantly detect this active identity.
+
+### 03. Neural Forge (Auditor & Compiler HUD)
+Allows users to generate, compile, and audit complete smart contracts.
+*   **Navigation Manual**: Click "Forge" in the top header. Paste any Solidity contract, or write a prompt (e.g. `"Write an ERC20 contract"`), and click "Initiate Forge".
+*   **Compiler Stack**: The backend processes the prompt and returns verified Solidity files. The dApp provides a direct on-chain deployer to push your compiled bytecode to Mantle Sepolia. The deployed contract address is then synced to your Supabase `deployed_contracts` history table.
+
+### 04. SecOps Sentinel Shield
+Monitors pending transactions inside the Mantle Sepolia mempool. If the Sentinel flags any reentrancy exploit patterns targeting your smart contracts, it prompts the dApp console with a Whitehat rescue option, allowing you to instantly secure contract balances.
+
+### 05. AI Yield Weaver & Moe Swap Router
+Compares live staking APYs between Ondo Finance USDY RWA and Mantle mETH LSP. Clicking "Execute Swap" triggers a real, on-chain swap transaction, using MetaMask to execute a swap of native MNT tokens directly for mETH, securing yield premiums.
+
+### 06. Sovereign Gas Refuel
+Monitors your wallet's gas balance. If it drops below `1.0 MNT`, the dApp allows you to lock 5.0 MAC tokens as fee collateral and request a gas refuel. The backend FastAPI treasury then instantly transfers `2.0 native MNT` to your address.
+
+---
+
+## 7. Bot Relay Commands & Operating Manual
+
+The backend main thread hosts automated background Telegram and Discord bots, synchronized directly with your central Supabase database.
+
+### Command Catalog
+*   `/help` or `!mac help` (catalog menu guide)
+*   `/link <0x_address>` or `!mac link <0x_address>` (binds Discord/Telegram IDs to Web dApp wallet addresses)
+*   `/citadel` or `!mac citadel` (checks on-chain ERC-8004 NFT status and risk variables)
+*   `/citadel mint <Strategy> <Drawdown>` (registers virtual identity parameters inside database)
+*   `/forge <concept>` (compiles and audits custom contract solidity code)
+*   `/portfolio` or `!mac portfolio` (lists active leveraged contract deployments from Supabase)
+
+---
+
+## 8. Pricing Mechanics for the MAC Token
+
+To establish a live, public trading price for the ecosystem utility token (`MAC`) on the Mantle Sepolia network, you must configure a Decentralized Exchange (DEX) liquidity pool:
+
+1. Navigate to the testnet interface of a Mantle DEX (such as **Merchant Moe** or **Agni Finance**).
+2. Create a new pool pairing your deployed `MantleAgentToken` contract address (`0x69465a67c1C4860f89f2D80fab5dADF33495d171`) with native `MNT`.
+3. Deposit initial liquidity (e.g., `10,000 MAC` paired with `1,000 MNT`).
+4. The Automated Market Maker (AMM) math will set the initial live price of `1 MAC = 0.1 MNT`. Arbitrage and trading swaps on the pool will then dictate the ticking price, which is parsed by the dashboard's Market Sentinel.
+
+---
+
+## 9. Forking, Setup & Deployment Guide
+
+Follow these steps to fork the repository, compile smart contracts, and configure deployments:
+
+### 1. Fork and Clone Repository
+Fork the official repository on GitHub to your account, then clone the workspace:
+
+    git clone https://github.com/<your_username>/mantle-agentic-core.git
+    cd mantle-agentic-core
+
+### 2. Deployed Contracts & Compiling (Hardhat)
+Compile contract files and deploy them manually to Mantle Sepolia if needed:
+
+    # Install Hardhat dependencies inside root or contract directory
+    npm install
+    
+    # Compile contract files
+    npx hardhat compile
+    
+    # Deploy Registry to Mantle Sepolia
+    npx hardhat run scripts/deployCitadel.js --network mantleSepolia
+
+### 3. Backend Setup (FastAPI Hub)
+Configure environment variables, write your Supabase keys, and start the local API server:
+
+    cd backend
+    pip install -r requirements.txt
+    
+    # Configure variables inside .env
+    cat <<EOT >> .env
+    GROQ_API_KEY="gsk_..."
+    GEMINI_API_KEY="AIzaSy..."
+    PRIVATE_KEY="your_private_key"
+    SUPABASE_KEY="your_supabase_secret_key"
+    MANTLE_RPC_URL="https://rpc.sepolia.mantle.xyz"
+    MAC_TOKEN_ADDRESS="0x69465a67c1C4860f89f2D80fab5dADF33495d171"
+    TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
+    DISCORD_BOT_TOKEN="your_discord_bot_token"
+    RENDER_EXTERNAL_URL="http://localhost:8000"
+    EOT
+
+    # Run backend locally
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+### 4. Frontend dApp Setup (Next.js)
+Install Node modules and launch the Next.js development server:
+
+    cd ../dashboard
+    npm install
+    
+    # Configure your local AppKit Project ID inside .env.local
+    echo "NEXT_PUBLIC_PROJECT_ID=df57076e4f6d827dda0ae1ae16a15623" > .env.local
+    
+    # Start dApp locally
+    npm run dev
+
+Open `http://localhost:3000` to test the terminal interface locally.

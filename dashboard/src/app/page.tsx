@@ -35,7 +35,7 @@ const ERC8004_IDENTITY_ABI = [
   }
 ] as const;
 
-// Standard ERC721 Balance ABI (Corrected parameter syntax)
+// Standard ERC721 Balance ABI (XHTML Compliant parameter inputs)
 const ERC721_BALANCE_ABI = [
   {
     inputs: [{ name: "owner", type: "address" }],
@@ -424,6 +424,13 @@ export default function Home() {
   const [liveMntBalance, setLiveMntBalance] = useState<number>(0);
   const [liveEscrowBalance, setLiveEscrowBalance] = useState<number>(0);
 
+  // Automatically deactivate virtual demo wallet once physical MetaMask/Web3 provider connects
+  useEffect(() => {
+    if (isConnected) {
+      setUseVirtualWallet(false);
+    }
+  }, [isConnected]);
+
   useEffect(() => {
     if (!mounted) return;
     const fetchLiveOnChainLedger = async () => {
@@ -489,7 +496,7 @@ export default function Home() {
     if (graphPoints.length === 0) return "";
     return graphPoints.reduce((acc, val, idx) => {
       const x = idx * (600 / (graphPoints.length - 1));
-      const y = 80 - (val * 0.7); 
+      const y = 80 - (val * 0.7); // Safe scale coordinate mapping
       if (idx === 0) return `M ${x} ${y}`;
       return `${acc} L ${x} ${y}`;
     }, "");
@@ -941,7 +948,7 @@ export default function Home() {
     const parsedLeverage = leverageMatch ? parseInt(leverageMatch[1]) : 10;
 
     let pendingAction: ActionPayload | undefined = undefined;
-    const resolvedAsset = targetAsset || (lowerCmd.includes("btc") ? "BTC" : lowerCmd.includes("eth") ? "ETH" : "SOL");
+    const resolvedAsset = targetAsset || (lowerCmd.includes("btc") ? "BTC" : lowerCmd.includes("eth") ? "ETH" : lowerCmd.includes("sol") ? "MNT" : "MNT");
     const resolvedPair = `${resolvedAsset}USDT`;
     const resolvedType = lowerCmd.includes("long") ? "LONG" : "SHORT";
 
@@ -971,10 +978,10 @@ export default function Home() {
           ? "Golden cross confirmed. Ecosystem liquidity flowing heavily into LSTs." 
           : "Counter-trend execution. Smart money is currently accumulating spot ETH."
       };
-    } else if (resolvedAsset === "SOL") {
+    } else if (resolvedAsset === "MNT" || resolvedAsset === "sol") {
       pendingAction = {
-        asset: "SOL",
-        pair: "SOLUSDT",
+        asset: "MNT",
+        pair: "MNTUSDT",
         type: resolvedType as any,
         leverage: parsedLeverage,
         status: "PENDING",
@@ -982,7 +989,7 @@ export default function Home() {
         risk: "MEDIUM",
         analysis: resolvedType === "LONG" 
           ? "High velocity momentum indicators turning bullish. Prepare for local breakouts." 
-          : "Solana is showing signs of localized distribution. Wait for confirmatory breakdowns."
+          : "Mantle is showing signs of localized consolidation. Wait for structural breakouts."
       };
     }
 
@@ -1056,6 +1063,7 @@ export default function Home() {
     executeDirectCommand(generatedCmd, activeCoin.symbol);
   };
 
+  // Dynamic on-chain trading swap function targeting standard swap router paths on Mantle Sepolia
   const handleWeaveYield = async () => {
     if (useVirtualWallet) {
       setYieldWeaverMode("mETH_PREMIUM");
@@ -1063,7 +1071,8 @@ export default function Home() {
     }
     setSystemState('MINTING');
     try {
-      weaveWrite({
+      // Execute native MNT swap transaction to the escrow or official router address
+      writeContract({
         address: '0x69465a67c1C4860f89f2D80fab5dADF33495d171', 
         abi: [{
           inputs: [
@@ -1302,27 +1311,22 @@ export default function Home() {
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0.95)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
       )}
 
-      <motion.div 
-        initial={{ opacity: 0, filter: "blur(10px)" }} 
-        animate={{ opacity: showIntro ? 0 : 1, filter: showIntro ? "blur(10px)" : "blur(0px)" }} 
-        transition={{ duration: 0.6 }}
-        className="max-w-[1440px] mx-auto space-y-4 relative z-10"
-      >
-        
+      {/* --- STICKY PORTAL & HEADER DECK --- */}
+      <div className="sticky top-0 z-50 pb-4 space-y-3 pointer-events-none">
         {/* UPPER PORTALS BANNER */}
-        <div className="relative rounded-2xl p-[1px] overflow-hidden transition-all duration-500 w-full shadow-lg">
+        <div className="relative rounded-2xl p-[1px] overflow-hidden transition-all duration-500 w-full shadow-lg pointer-events-auto">
           <div className={`absolute inset-0 bg-gradient-to-r ${isOverclocked ? 'from-red-500/30 via-red-950/10 to-red-600/30' : 'from-[#00ffa3]/20 via-purple-500/10 to-[#00b8ff]/20'} blur-sm pointer-events-none`} />
           <div className="relative rounded-[15px] bg-[rgba(3,4,10,0.7)] backdrop-blur-3xl p-3 border border-white/20 flex flex-col md:flex-row justify-between items-center gap-3 overflow-hidden">
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
-              <div className="star-yellow absolute top-[20%] left-[8%] w-1 h-1 bg-amber-400 rounded-full" />
-              <div className="star-white absolute top-[70%] left-[15%] w-1.5 h-1.5 bg-white rounded-full" />
-              <div className="star-purple absolute top-[80%] left-[55%] w-1 h-1 bg-purple-400 rounded-full" />
+              <span className="star-yellow absolute top-[20%] left-[8%] w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
+              <span className="star-white absolute top-[70%] left-[15%] w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              <span className="star-purple absolute top-[80%] left-[55%] w-1 h-1 bg-purple-400 rounded-full animate-pulse" />
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left z-10 relative">
-              <div className={`px-3 py-1 rounded-full border text-[8px] font-mono tracking-wider uppercase font-black ${isOverclocked ? 'border-red-500/40 text-red-400' : 'border-[#00ffa3]/30 text-[#00ffa3]'}`}>
+              <span className={`px-3 py-1 rounded-full border text-[8px] font-mono tracking-wider uppercase font-black ${isOverclocked ? 'border-red-500/40 text-red-400' : 'border-[#00ffa3]/30 text-[#00ffa3]'}`}>
                 OFFICIAL PORTALS
-              </div>
+              </span>
               <p className="text-[10px] font-sans font-bold text-sharp-secondary tracking-tight">Decentralized telemetry channels synced with Supabase Storage.</p>
             </div>
 
@@ -1345,17 +1349,17 @@ export default function Home() {
               <a href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-black/60 border border-white/20 hover:border-white transition-all group mobile-touch-target">
                 <svg className="w-3.5 h-3.5 text-white/80 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.162 22 12c0-5.523-4.477-10-10-10z" />
-              </svg>
-            </a>
+                </svg>
+              </a>
+            </div>
           </div>
-        </div>
         </div>
 
         {/* RESPONSIVE HEADER DECK */}
-        <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/5 backdrop-blur-3xl border ${border} p-3 sm:p-4 rounded-2xl shadow-lg transition-all duration-500`}>
+        <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/5 backdrop-blur-3xl border ${border} p-3 sm:p-4 rounded-2xl shadow-lg transition-all duration-500 pointer-events-auto`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/50 border border-white/10 shadow-lg">
-              <div className={`w-4 h-4 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : dotBg}`} />
+              <span className={`w-4 h-4 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : dotBg}`} />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-black tracking-wider text-white uppercase drop-shadow-md text-sharp-primary">
@@ -1391,7 +1395,14 @@ export default function Home() {
             <Link href="/forge"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Forge</button></Link>
           </div>
         </div>
+      </div>
 
+      <motion.div 
+        initial={{ opacity: 0, filter: "blur(10px)" }} 
+        animate={{ opacity: showIntro ? 0 : 1, filter: showIntro ? "blur(10px)" : "blur(0px)" }} 
+        transition={{ duration: 0.6 }}
+        className="max-w-[1440px] mx-auto space-y-4 relative z-10"
+      >
         {/* --- DYNAMIC VITE-STYLE 3-COLUMN WORKSPACE GRID --- */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
           
@@ -1502,7 +1513,7 @@ export default function Home() {
                             <div className={`mt-3 p-4 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/35 shadow-[0_0_15px_rgba(16,185,129,0.25)]' : 'bg-black/50 border-white/10'}`}>
                               
                               <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
-                                <span className="text-[9px] font-black uppercase tracking-wider text-white/80 flex items-center gap-1.5">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-white/80 flex items-center gap-1.5">
                                   <span className="w-1 h-2.5 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
                                 </span>
                                 {msg.actionPayload.status === 'SUCCESS' ? (
@@ -1597,7 +1608,7 @@ export default function Home() {
                     />
                     <button 
                       onClick={handleExecute} disabled={isExecuting || !command.trim()}
-                      className={`px-10 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all text-black mobile-touch-target ${
+                      className={`px-10 rounded-xl font-black text-xs uppercase tracking-[0.25em] transition-all text-black mobile-touch-target ${
                         isOverclocked ? 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-white hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]'
                       } disabled:opacity-30 disabled:cursor-not-allowed`}
                     >
@@ -1636,7 +1647,7 @@ export default function Home() {
             {/* TURING AGENTIC BIAS & FAIRNESS AUDITOR CARD */}
             <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-4">
-                 <div className="inline-block px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-[9px] font-black tracking-[0.2em] uppercase">
+                 <div className="inline-block px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-[9px] font-black tracking-[0.25em] uppercase">
                    AI-Powered Fairness Auditing
                  </div>
                  <h2 className="text-4xl font-black tracking-tighter text-white uppercase leading-none text-sharp-primary">
@@ -1937,14 +1948,21 @@ export default function Home() {
             </FloatingGlassCard>
 
             {/* COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) */}
-            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 h-[220px] shadow-2xl">
+            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-[#00ffa3]/20 rounded-3xl p-6 h-[220px] shadow-2xl">
                <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0"><div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />Mantle Agent Matrix Relay</h4>
                <div className="font-mono text-[9px] space-y-3 leading-relaxed text-sharp-secondary overflow-y-auto scrollbar-hide flex-1 max-h-[110px] font-bold">
-                 <AnimatePresence>{relayLogs.map((log) => (
-                     <motion.div key={log.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-2 border-b border-white/5 pb-2 last:border-0">
-                       <span className={`${log.color} font-bold flex-shrink-0`}>[{log.agent}]:</span><span>{log.text}</span>
-                     </motion.div>
-                 ))}</AnimatePresence>
+                 {messages.length === 0 ? (
+                    <div className="text-white/40 text-center py-4 font-mono font-bold">Awaiting Supabase conversation events...</div>
+                 ) : (
+                    <AnimatePresence>
+                      {messages.map((m) => (
+                        <motion.div key={m.id} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-2 border-b border-white/5 pb-2 last:border-0">
+                          <span className={`font-bold flex-shrink-0 ${m.role === 'user' ? 'text-blue-400' : m.role === 'ai' ? 'text-[#00ffa3]' : 'text-purple-400'}`}>[{m.role.toUpperCase()}]:</span>
+                          <span className="truncate max-w-[200px]">{m.text}</span>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                 )}
                </div>
             </FloatingGlassCard>
 
