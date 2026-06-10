@@ -73,7 +73,7 @@ type Message = {
   thinkingSteps?: string[];
   latency?: string;
   decisionHash?: string;
-  sessionId?: string; // Mapped for Supabase chat session isolation
+  sessionId?: string; 
 };
 
 type RelayPingLog = {
@@ -83,19 +83,21 @@ type RelayPingLog = {
   text: string;
 };
 
-// --- OPTIMIZED VITE-STYLE FLOATING PARALLAX CONTAINER ---
+// --- PREMIUM 3D SWIMMING & FLOATING PARALLAX CONTAINER ---
 function FloatingGlassCard({ 
   children, 
   className, 
   delay = 0, 
   isAuraActive = true, 
-  designMode = "SILENT" 
+  designMode = "SILENT",
+  sweepColorClass = "" // Dynamically overrides sweep colors based on selected tickers
 }: { 
   children: React.ReactNode, 
   className: string, 
   delay?: number, 
   isAuraActive?: boolean, 
-  designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" 
+  designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER",
+  sweepColorClass?: string
 }) {
   const { systemState } = useTheme();
   
@@ -116,13 +118,14 @@ function FloatingGlassCard({
       onMouseMove={handleMouse}
       onMouseLeave={() => { x.set(0); y.set(0); }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-      animate={{ y: [0, -8, 0] }} // Reduced floating height to optimize mobile rendering speed
+      animate={{ y: [0, -8, 0] }}
       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
       className={`relative rounded-2xl p-[1.2px] overflow-hidden transition-all duration-500 ${className}`}
     >
       {isAuraActive && designMode !== "SILENT" && (
         <div className="absolute top-1/2 left-1/2 w-[220%] h-[220%] -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 transition-all duration-500 overflow-hidden">
           <div className={`w-full h-full rounded-full opacity-35 blur-sm scale-95 ${
+            sweepColorClass ? sweepColorClass : 
             systemState === 'OVERCLOCK' ? 'gemini-border-sweeper-overclock' :
             designMode === 'CHROME' ? 'gemini-border-sweeper-chrome' : 'gemini-border-sweeper'
           }`} />
@@ -188,7 +191,7 @@ function IntroSequence({
 
         <motion.button 
           onClick={onComplete}
-          className="bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] px-10 py-3.5 rounded-full hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-102 active:scale-98 mobile-touch-target"
+          className="bg-white text-black font-black uppercase tracking-[0.25em] text-[10px] px-10 py-3.5 rounded-full hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-102 active:scale-98 mobile-touch-target"
         >
           Initialize System
         </motion.button>
@@ -279,9 +282,47 @@ function SocialMatrixCarousel(): React.ReactElement {
     </a>
   );
 }
+
 /*
 “Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
 */
+
+// --- GLOBAL COINS CONFIGURATION DECK WITH ASSET BRAND COLORS ---
+const marketCoins = [
+  { 
+    symbol: 'BTC', 
+    pair: 'BTCUSDT', 
+    name: 'BITCOIN', 
+    color: 'text-amber-500', 
+    glow: 'shadow-[0_0_20px_rgba(245,158,11,0.35)]', 
+    border: 'border-amber-500/30', 
+    bg: 'bg-amber-500/10',
+    laserSweep: 'gemini-border-sweeper-btc',
+    accentGlow: 'bg-amber-500/5'
+  },
+  { 
+    symbol: 'ETH', 
+    pair: 'ETHUSDT', 
+    name: 'ETHEREUM', 
+    color: 'text-indigo-400', 
+    glow: 'shadow-[0_0_20px_rgba(99,102,241,0.35)]', 
+    border: 'border-indigo-500/30', 
+    bg: 'bg-indigo-500/10',
+    laserSweep: 'gemini-border-sweeper-eth',
+    accentGlow: 'bg-indigo-500/5'
+  },
+  { 
+    symbol: 'MNT', 
+    pair: 'MNTUSDT', 
+    name: 'MANTLE', 
+    color: 'text-[#00ffa3]', 
+    glow: 'shadow-[0_0_20px_rgba(0,255,163,0.35)]', 
+    border: 'border-[#00ffa3]/30', 
+    bg: 'bg-[#00ffa3]/10',
+    laserSweep: 'gemini-border-sweeper-mnt',
+    accentGlow: 'bg-[#00ffa3]/5'
+  }
+];
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -298,7 +339,7 @@ export default function Home() {
   const [command, setCommand] = useState("");
   const [isExecuting, setIsExecuting] = useState(false);
   
-  // All synchronized message arrays loaded from Supabase Central Storage
+  // All synchronized message arrays loaded from Supabase Cloud DB
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [isRestored, setIsRestored] = useState(false);
 
@@ -957,6 +998,7 @@ export default function Home() {
     executeDirectCommand(generatedCmd, activeCoin.symbol);
   };
 
+  // Dynamic on-chain trading swap function targeting standard swap router paths on Mantle Sepolia
   const handleWeaveYield = async () => {
     if (useVirtualWallet) {
       setYieldWeaverMode("mETH_PREMIUM");
@@ -964,7 +1006,8 @@ export default function Home() {
     }
     setSystemState('MINTING');
     try {
-      weaveWrite({
+      // Execute native MNT swap transaction to the escrow or official router address
+      writeContract({
         address: '0x69465a67c1C4860f89f2D80fab5dADF33495d171', 
         abi: [{
           inputs: [
@@ -1087,15 +1130,11 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  // Mapped coins deck supporting live Bybit feed mappings
-  const marketCoins = [
-    { symbol: 'BTC', pair: 'BTCUSDT', name: 'BITCOIN', color: 'text-[#00ffa3]', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
-    { symbol: 'ETH', pair: 'ETHUSDT', name: 'ETHEREUM', color: 'text-blue-400', glow: 'shadow-[0_0_15px_rgba(59,130,246,0.3)]', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
-    { symbol: 'MNT', pair: 'MNTUSDT', name: 'MANTLE', color: 'text-amber-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]', border: 'border-amber-500/30', bg: 'bg-amber-500/10' }
-  ];
-
   if (!mounted) return null;
   const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0];
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
 
   return (
     <main className={`min-h-screen relative p-3 sm:p-5 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
@@ -1117,7 +1156,7 @@ export default function Home() {
             <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full">
               <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                 <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
-                   <span className="w-2 h-2 rounded-full bg-[#00ffa3] animate-ping" /> Turing-Test Intelligence Certificate
+                   <span className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-ping" /> Turing-Test Intelligence Certificate
                 </span>
                 <button 
                   onClick={() => setActiveVerificationHash(null)}
@@ -1221,7 +1260,7 @@ export default function Home() {
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
               <div className="star-yellow absolute top-[20%] left-[8%] w-1 h-1 bg-amber-400 rounded-full" />
               <div className="star-white absolute top-[70%] left-[15%] w-1.5 h-1.5 bg-white rounded-full" />
-              <div className="star-purple absolute top-[80%] left-[55%] w-1 h-1 bg-purple-400 rounded-full" />
+              <div className="star-purple absolute top-[80%] left-[55%] w-1.5 h-1.5 bg-purple-400 rounded-full" />
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left z-10 relative">
@@ -1254,7 +1293,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-        </div>
+      </div>
 
         {/* RESPONSIVE HEADER DECK */}
         <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/5 backdrop-blur-3xl border ${border} p-3 sm:p-4 rounded-2xl shadow-lg transition-all duration-500`}>
@@ -1328,7 +1367,7 @@ export default function Home() {
                       }`}
                     >
                       <span className="truncate max-w-[120px]">{displayId}</span>
-                      <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#00ffa3] animate-pulse' : 'bg-white/10'}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#00ffa3] animate-pulse' : 'bg-white/10'}`} />
                     </button>
                   );
                 })}
@@ -1358,11 +1397,11 @@ export default function Home() {
                   <AnimatePresence>
                     {activePositions.length > 0 && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-4 flex-shrink-0">
-                        <div className="text-[9px] font-black uppercase tracking-wider text-white/50 mb-2 flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
+                        <div className="text-[9px] font-black uppercase tracking-wider text-white/50 mb-2 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Active Deployments</div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {activePositions.map(pos => (
                             <div key={pos.id} className="bg-black/50 border border-white/10 rounded-xl p-3 backdrop-blur-md relative overflow-hidden shadow-inner">
-                              <div className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3]' : 'bg-red-500'}`} />
+                              <span className={`absolute top-0 left-0 w-1 h-full ${pos.pnl >= 0 ? 'bg-[#00ffa3]' : 'bg-red-500'}`} />
                               <div className="flex justify-between items-start mb-1.5 pl-1.5">
                                 <div>
                                   <span className="text-white font-black text-xs text-sharp-primary">{pos.asset}</span>
@@ -1389,8 +1428,8 @@ export default function Home() {
                           key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                           className={`flex flex-col gap-2 p-3.5 rounded-xl backdrop-blur-2xl border shadow-md ${
                             msg.role === 'user' ? 'bg-black/55 border-white/10 ml-6 sm:ml-12' : 
-                            msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/30 border-red-500/30' : 'bg-emerald-950/30 border-emerald-500/30'} mr-6 sm:mr-12` : 
-                            msg.role === 'error' ? 'bg-red-900/30 border-red-500/40 mr-6 sm:mr-12 animate-pulse' : 'bg-transparent border-transparent text-center'
+                            msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-6 sm:mr-12` : 
+                            msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-6 sm:mr-12 animate-pulse' : 'bg-transparent border-transparent text-center'
                           }`}
                         >
                           {msg.role !== 'system' && (
@@ -1407,13 +1446,13 @@ export default function Home() {
                             <div className={`mt-3 p-4 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/35 shadow-[0_0_15px_rgba(16,185,129,0.25)]' : 'bg-black/50 border-white/10'}`}>
                               
                               <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
-                                <span className="text-[9px] font-black uppercase tracking-wider text-white/85 flex items-center gap-1.5">
-                                  <div className="w-1 h-2.5 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
+                                <span className="text-[9px] font-black uppercase tracking-wider text-white/80 flex items-center gap-1.5">
+                                  <span className="w-1 h-2.5 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
                                 </span>
                                 {msg.actionPayload.status === 'SUCCESS' ? (
-                                  <span className="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
+                                  <span className="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[#00ffa3] animate-pulse"/>EXECUTED</span>
                                 ) : (
-                                  <span className="text-[9px] text-amber-400 font-mono font-bold flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING..." : "AWAITING SIGNATURE"}</span>
+                                  <span className="text-[9px] text-amber-400 font-mono font-bold flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 animate-pulse"/>{isTradeConfirming ? "AUTHORIZING..." : "AWAITING SIGNATURE"}</span>
                                 )}
                               </div>
 
@@ -1600,8 +1639,8 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
                 {/* Cumulative TVL Counter */}
                 <div className="space-y-1.5 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
-                   <span className="block text-[8px] uppercase tracking-wider text-white/50 font-mono font-black">TOTAL VALUE CONTROLLED (TVC)</span>
-                   <span className="text-3xl font-black text-white text-sharp-primary font-mono tracking-tighter">
+                   <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">TOTAL VALUE CONTROLLED (TVC)</span>
+                   <span className="text-2xl font-black text-white text-sharp-primary font-mono tracking-tighter">
                      ${totalValueLocked.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                    </span>
                    <span className="block text-[9px] font-mono text-emerald-400 font-bold">+14.28% APY Accruing Real-Time</span>
@@ -1846,7 +1885,7 @@ export default function Home() {
                <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0"><div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />Mantle Agent Matrix Relay</h4>
                <div className="font-mono text-[9px] space-y-3 leading-relaxed text-sharp-secondary overflow-y-auto scrollbar-hide flex-1 max-h-[110px] font-bold">
                  <AnimatePresence>{relayLogs.map((log) => (
-                     <motion.div key={log.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-1.5 border-b border-white/5 pb-1.5 last:border-0">
+                     <motion.div key={log.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-2 border-b border-white/5 pb-2 last:border-0">
                        <span className={`${log.color} font-bold flex-shrink-0`}>[{log.agent}]:</span><span>{log.text}</span>
                      </motion.div>
                  ))}</AnimatePresence>
@@ -1867,15 +1906,45 @@ export default function Home() {
               </div>
             </FloatingGlassCard>
 
-            {/* MARKET SENTINEL COMPONENT */}
-            <FloatingGlassCard designMode={designMode} delay={0.6} className={`bg-transparent rounded-2xl shadow-lg`}>
+            {/* BRAND-ADAPTIVE MARKET SENTINEL COMPONENT WITH GRAPHICS TRANSITIONS */}
+            <FloatingGlassCard 
+              designMode={designMode} 
+              delay={0.6} 
+              className="bg-transparent rounded-2xl shadow-lg"
+              sweepColorClass={currentMarket.laserSweep} // Overrides border laser sweep directly
+            >
               <div className="relative overflow-hidden rounded-2xl h-full w-full">
                 <div className="relative h-full w-full">
-                  <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3"><span className="text-[9px] font-black tracking-wider text-white/50">Market Sentinel</span><div className={`w-2 h-2 rounded-full animate-pulse ${currentMarket.bg}`} /></div>
+                  <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-white/50">Market Sentinel</span>
+                    <div className="flex gap-1.5">
+                      {marketCoins.map((coin, idx) => (
+                        <button
+                          key={coin.symbol}
+                          onClick={() => setActiveCoinIndex(idx)}
+                          className={`px-2 py-0.5 rounded text-[8px] font-mono font-black border transition-all mobile-touch-target ${
+                            activeCoinIndex === idx
+                              ? `${coin.color} ${coin.border} ${coin.bg}`
+                              : "text-white/40 border-white/5 hover:text-white/70"
+                          }`}
+                        >
+                          {coin.symbol}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
                   <AnimatePresence mode="wait">
-                    <motion.div key={currentMarket.symbol} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="text-center mb-4">
-                       <div className="text-3xl font-black text-white drop-shadow-sm text-sharp-primary">{(livePrices as any)[currentMarket.pair]}</div>
-                       <div className={`text-[10px] font-black tracking-wider mt-1.5 ${currentMarket.color} ${currentMarket.glow}`}>{currentMarket.name}</div>
+                    <motion.div 
+                      key={currentMarket.symbol} 
+                      initial={{ opacity: 0, scale: 0.95, y: 5 }} 
+                      animate={{ opacity: 1, scale: 1, y: 0 }} 
+                      exit={{ opacity: 0, scale: 0.95, y: -5 }} 
+                      transition={{ duration: 0.25 }}
+                      className="text-center mb-4"
+                    >
+                       <div className="text-3xl font-black text-white drop-shadow-sm text-sharp-primary font-mono tracking-tight">{(livePrices as any)[currentMarket.pair]}</div>
+                       <div className={`text-[10px] font-black tracking-wider mt-1.5 ${currentMarket.color} ${currentMarket.glow} uppercase`}>{currentMarket.name}</div>
                     </motion.div>
                   </AnimatePresence>
                   
@@ -1883,14 +1952,14 @@ export default function Home() {
                      <button 
                        onClick={() => handleSentinelClick('LONG')}
                        disabled={isExecuting}
-                       className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-lg py-2.5 text-[10px] font-black uppercase tracking-wider hover:bg-white/10 transition-all transform hover:-translate-y-0.5 active:scale-98 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed`}
+                       className={`flex-1 ${currentMarket.bg} ${currentMarket.color} border ${currentMarket.border} rounded-xl py-2.5 text-[10px] font-black uppercase tracking-wider hover:bg-white/10 transition-all transform hover:-translate-y-0.5 active:scale-98 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed`}
                      >
                        Long
                      </button>
                      <button 
                        onClick={() => handleSentinelClick('SHORT')}
                        disabled={isExecuting}
-                       className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg py-2.5 text-[10px] font-black uppercase tracking-wider hover:bg-red-500/40 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all transform hover:-translate-y-0.5 active:scale-98 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed"
+                       className="flex-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl py-2.5 text-[10px] font-black uppercase tracking-wider hover:bg-red-500/40 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all transform hover:-translate-y-0.5 active:scale-98 mobile-touch-target shadow-md disabled:opacity-30 disabled:cursor-not-allowed"
                      >
                        Short
                      </button>
@@ -1909,27 +1978,27 @@ export default function Home() {
                    transition={{ duration: 0.4 }}
                    className="w-full"
                  >
-                   <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-black/50 border border-amber-500/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.3)] animate-pulse">
-                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                       <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase flex items-center gap-2">
-                         <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Gas Sentinel Alert
+                   <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-black/50 border border-amber-500/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(245,158,11,0.25)] animate-pulse">
+                     <div className="flex justify-between items-center border-b border-white/10 pb-2.5 mb-3">
+                       <span className="text-[9px] font-black tracking-wider text-amber-500 uppercase flex items-center gap-1.5">
+                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Gas Sentinel Alert
                        </span>
-                       <span className="text-[9px] font-mono text-white/50 font-bold">TREASURY ACTIVE</span>
+                       <span className="text-[8px] font-mono text-white/40 font-bold">TREASURY ACTIVE</span>
                      </div>
 
-                     <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary font-bold">
+                     <div className="space-y-2 mb-4 font-mono text-[10px] text-sharp-secondary font-bold">
                        <div className="text-red-400 font-bold uppercase">🚨 GAS EXHAUST DETECTED</div>
                        <div className="flex justify-between text-white/80">
                          <span>Your Wallet Balance:</span>
                          <span className="text-red-400 font-bold">{mntGasBalance.toFixed(4)} MNT</span>
                        </div>
-                       <p className="text-[10px] text-[#8e9aa5] leading-relaxed pt-2 border-t border-white/5 font-bold">
+                       <p className="text-[9px] text-[#8e9aa5] leading-normal pt-1.5 border-t border-white/5 font-bold">
                          Your gas balance is insufficient to authorize on-chain executions. Swap 5.00 MAC for an immediate native 2.00 MNT autonomous refuel.
                        </p>
                        {refuelResultHash && (
-                         <div className="bg-emerald-500/10 border border-emerald-500/40 p-3 rounded-lg text-emerald-400 text-[10px] gap-1 flex flex-col mt-2 shadow-inner">
+                         <div className="bg-emerald-500/10 border border-emerald-500/40 p-2.5 rounded-lg text-emerald-400 text-[9px] gap-0.5 flex flex-col mt-1.5 shadow-inner">
                            <span className="font-bold">🚀 REFUELED SUCCESSFUL</span>
-                           <span className="break-all text-[8px] sm:text-[9px] font-bold">TX: {refuelResultHash}</span>
+                           <span className="break-all text-[8px] font-bold">TX: {refuelResultHash}</span>
                          </div>
                        )}
                      </div>
@@ -1937,9 +2006,9 @@ export default function Home() {
                      {!refuelResultHash && (
                        <button
                          onClick={handleRequestRefuel}
-                         className="w-full py-3.5 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all active:scale-98 mobile-touch-target"
+                         className="w-full py-3.5 rounded-xl bg-amber-500 text-black hover:bg-amber-400 font-black text-[9px] uppercase tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.35)] transition-all active:scale-98 mobile-touch-target"
                        >
-                         {isRefueling ? "TRANSFERRING GAS..." : isRefuelFeePending ? "CONFIRMING FEE SWAP..." : "REQUEST GAS REFUEL"}
+                         {isRefueling ? "TRANSFERRING..." : isRefuelFeePending ? "CONFIRMING..." : "REQUEST REFUEL"}
                        </button>
                      )}
                    </FloatingGlassCard>

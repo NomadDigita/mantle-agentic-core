@@ -136,3 +136,23 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 255, 163, 0.4);
 }
+
+/*
+“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
+*/
+
+/* APPEND TO BOTTOM OF GLOBAL.CSS */
+.gemini-border-sweeper-btc {
+  animation: laser-sweep 5s linear infinite;
+  background: conic-gradient(from 0deg, transparent 30%, rgba(245, 158, 11, 0.8) 50%, transparent 70%);
+}
+
+.gemini-border-sweeper-eth {
+  animation: laser-sweep 5s linear infinite;
+  background: conic-gradient(from 0deg, transparent 30%, rgba(99, 102, 241, 0.8) 50%, transparent 70%);
+}
+
+.gemini-border-sweeper-mnt {
+  animation: laser-sweep 5s linear infinite;
+  background: conic-gradient(from 0deg, transparent 30%, rgba(0, 255, 163, 0.8) 50%, transparent 70%);
+}
