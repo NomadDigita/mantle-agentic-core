@@ -77,7 +77,7 @@ body {
 .star-purple { animation: twinkle-purple 4.5s infinite ease-in-out; }
 .star-mint { animation: twinkle-mint 6s infinite ease-in-out; }
 
-/* GEMINI STYLE GLOWING GRADIENT BORDER SWEEP */
+/* BRAND-ADAPTIVE GRADIENT BORDER SWEEP ANIMATIONS */
 @keyframes laser-sweep {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -122,26 +122,6 @@ body {
   );
 }
 
-/* CUSTOM SCROLLBAR */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 163, 0.4);
-}
-
-/*
-“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
-*/
-
-/* APPEND TO BOTTOM OF GLOBAL.CSS */
 .gemini-border-sweeper-btc {
   animation: laser-sweep 5s linear infinite;
   background: conic-gradient(from 0deg, transparent 30%, rgba(245, 158, 11, 0.8) 50%, transparent 70%);
@@ -155,4 +135,19 @@ body {
 .gemini-border-sweeper-mnt {
   animation: laser-sweep 5s linear infinite;
   background: conic-gradient(from 0deg, transparent 30%, rgba(0, 255, 163, 0.8) 50%, transparent 70%);
+}
+
+/* CUSTOM SCROLLBAR */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 163, 0.4);
 }

@@ -12,7 +12,7 @@ import { useTheme } from "./ThemeContext";
 import { createPublicClient, http, parseAbiItem } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt, useBalance } from "wagmi";
 
-// --- CORRECTED ERC-721 COMPILATION COMPLIANT ABI DECK ---
+// --- STRONGLY-TYPED ABI CONSTANT FOR VIEM COMPILER RESOLUTION ---
 const ERC8004_IDENTITY_ABI = [
   {
     inputs: [{ internalType: "uint256", name: "agentId", type: "uint256" }],
@@ -39,6 +39,17 @@ const ERC8004_IDENTITY_ABI = [
 const ERC721_BALANCE_ABI = [
   {
     inputs: [{ name: "owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+    type: "function"
+  }
+] as const;
+
+// Standard ERC20 Balance ABI to query real-time MAC token contract allocations
+const ERC20_BALANCE_ABI = [
+  {
+    inputs: [{ name: "account", type: "address" }],
     name: "balanceOf",
     outputs: [{ type: "uint256" }],
     stateMutability: "view",
@@ -149,7 +160,7 @@ function FloatingGlassCard({
           designMode === "AURA"
             ? "bg-[rgba(3,4,10,0.7)] backdrop-blur-[45px] border border-white/10"
             : designMode === "CHROME"
-            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-pink-950/40 backdrop-blur-[45px] border border-purple-500/30"
+            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-pink-950/40 backdrop-blur-[45px] border border-purple-500/35"
             : designMode === "CYBER"
             ? "bg-black/95 backdrop-blur-[45px] border border-[#00ffa3]/20"
             : "bg-[rgba(5,7,15,0.6)] backdrop-blur-[45px] border border-white/10 hover:border-white/20"
@@ -424,12 +435,35 @@ export default function Home() {
   const [liveMntBalance, setLiveMntBalance] = useState<number>(0);
   const [liveEscrowBalance, setLiveEscrowBalance] = useState<number>(0);
 
+  // --- DYNAMIC YIELD WEAVER APY STATE ---
+  const [methApy, setMethApy] = useState<number>(7.2);
+
   // Automatically deactivate virtual demo wallet once physical MetaMask/Web3 provider connects
   useEffect(() => {
     if (isConnected) {
       setUseVirtualWallet(false);
     }
   }, [isConnected]);
+
+  // Dynamic APY Fetcher querying DeFiLlama public pool stats
+  useEffect(() => {
+    if (!mounted) return;
+    const fetchMethApy = async () => {
+      try {
+        const res = await fetch("https://yields.llama.fi/pools");
+        const data = await res.json();
+        if (data.data) {
+          const mEthPool = data.data.find((p: any) => p.symbol === "METH" && p.project === "mantle-lsp");
+          if (mEthPool && mEthPool.apy) {
+            setMethApy(parseFloat(mEthPool.apy.toFixed(2)));
+          }
+        }
+      } catch (err) {
+        console.warn("DeFiLlama Yield feed standby.");
+      }
+    };
+    fetchMethApy();
+  }, [mounted]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -444,11 +478,18 @@ export default function Home() {
           },
           transport: http()
         });
+        
+        // Fetch real-time on-chain MNT and locked MAC collateral balances
         const regBal = await client.getBalance({ address: "0x1E5B64264089aacC547A1506402B94f909215942" });
-        const escBal = await client.getBalance({ address: "0x69465a67c1C4860f89f2D80fab5dADF33495d171" });
+        const escMacBal = await client.readContract({
+          address: "0x69465a67c1C4860f89f2D80fab5dADF33495d171", // MAC Token Address
+          abi: ERC20_BALANCE_ABI,
+          functionName: "balanceOf",
+          args: ["0x69465a67c1C4860f89f2D80fab5dADF33495d171"] // Escrow Address holds tokens
+        }) as bigint;
         
         const regFloat = Number(regBal) / 1e18;
-        const escFloat = Number(escBal) / 1e18;
+        const escFloat = Number(escMacBal) / 1e18;
         
         setLiveMntBalance(regFloat);
         setLiveEscrowBalance(escFloat);
@@ -1197,126 +1238,25 @@ export default function Home() {
 
   if (!mounted) return null;
   const currentMarket = marketCoins[activeCoinIndex] ?? marketCoins[0];
-/*
-“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
-*/
+
+  if (showIntro) {
+    return (
+      <AnimatePresence>
+        <IntroSequence designMode={designMode} onComplete={handleIntroComplete} />
+      </AnimatePresence>
+    );
+  }
 
   return (
-    <main className={`min-h-screen relative p-3 sm:p-5 z-10 overflow-x-hidden bg-transparent font-sans transition-all duration-1000 ${
-      isOverclocked 
-        ? 'shadow-[inset_0_0_80px_rgba(239,68,68,0.15)] bg-red-950/5' 
-        : ''
-    }`}>
-      <AnimatePresence>
-        {showIntro && <IntroSequence designMode={designMode} onComplete={handleIntroComplete} />}
-      </AnimatePresence>
-
-      {/* --- HOLOGRAPHIC TURING VERIFIER MODAL --- */}
-      <AnimatePresence>
-        {activeVerificationHash && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl"
-          >
-            <FloatingGlassCard designMode={designMode} className="max-w-2xl w-full">
-              <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                <span className="text-[10px] font-black tracking-widest text-[#00ffa3] uppercase flex items-center gap-2">
-                   <span className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-ping" /> Turing-Test Intelligence Certificate
-                </span>
-                <button 
-                  onClick={() => setActiveVerificationHash(null)}
-                  className="text-white/60 hover:text-white font-mono text-[10px] uppercase font-black tracking-widest mobile-touch-target"
-                >
-                  [ CLOSE ]
-                </button>
-              </div>
-
-              <div className="space-y-4 font-mono text-xs leading-relaxed text-sharp-secondary font-bold">
-                <div className="bg-black/50 p-3 rounded-xl border border-white/10 space-y-1.5 shadow-inner">
-                   <div className="text-white/50 text-[10px]">DECISION HASH:</div>
-                   <div className="break-all text-white font-black">{activeVerificationHash}</div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                   <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-                      <span className="text-white/50 text-[9px] block mb-0.5">REASONING ENGINE</span>
-                      <span className="text-white font-black block">Llama-3.1-8b-instant</span>
-                      <span className="text-emerald-400 text-[9px] font-bold">Proof-of-Reasoning Synced</span>
-                   </div>
-                   <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-                      <span className="text-white/50 text-[9px] block mb-0.5">GOVERNANCE PARADIGM</span>
-                      <span className="text-white font-black block">ERC-8004 NFT Check</span>
-                      <span className="text-purple-400 text-[9px] font-bold">Strategy Limits Enforced</span>
-                   </div>
-                </div>
-
-                <div className="bg-black/50 p-4 rounded-xl border border-white/10 space-y-2">
-                   <span className="block text-[9px] text-white/50 font-black">DECISION METRIC INJECTORS</span>
-                   <div className="grid grid-cols-3 gap-1.5 text-center text-[9px] font-bold">
-                      <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
-                         <span className="text-white/60 block mb-0.5">ELFA Sentiment</span>
-                         <span className="text-[#00ffa3] font-mono font-black">Active (82/100)</span>
-                      </div>
-                      <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
-                         <span className="text-white/60 block mb-0.5">Nansen Inflow</span>
-                         <span className="text-purple-400 font-mono font-black">+1.42M MNT</span>
-                      </div>
-                      <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
-                         <span className="text-white/60 block mb-0.5">Bybit Arbitrage</span>
-                         <span className="text-amber-400 font-mono font-black">Stable Spread</span>
-                      </div>
-                   </div>
-                </div>
-
-                <div className="pt-3 flex gap-3">
-                   <a 
-                     href={`https://x.com/intent/tweet?text=I%20just%20verified%20an%20autonomous%20on-chain%20decision%20hash%20${activeVerificationHash.slice(0, 12)}...%20on%20Mantle%20Agentic%20Core!%20%40MantleCore_`}
-                     target="_blank" rel="noopener noreferrer"
-                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest hover:scale-[1.02] transition-all mobile-touch-target"
-                   >
-                     Publish Certificate to 𝕏
-                   </a>
-                   <a 
-                     href="https://explorer.sepolia.mantle.xyz/address/0x1E5B64264089aacC547A1506402B94f909215942"
-                     target="_blank" rel="noopener noreferrer"
-                     className="px-6 bg-transparent border border-white/20 text-white hover:bg-white/5 text-center font-black text-xs py-3.5 rounded-xl uppercase tracking-widest transition-all mobile-touch-target"
-                   >
-                     View Explorer Registry
-                   </a>
-                </div>
-              </div>
-            </FloatingGlassCard>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* LIQUID WAVE GRADIENT PARTICLE BG */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 opacity-30">
-        <div className="absolute top-[10%] left-[20%] w-[45vw] h-[45vw] bg-[#00ffa3]/5 rounded-full blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[10%] right-[10%] w-[55vw] h-[55vw] bg-[#00b8ff]/5 rounded-full blur-[160px] animate-[pulse_12s_ease-in-out_infinite_delay-2s]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#000_100%)]" />
+    <main className="min-h-screen relative p-3 sm:p-5 z-10 overflow-x-hidden bg-transparent font-sans">
+      
+      {/* --- STICKY PORTAL & HEADER DECK (LIQUID GLASS) --- */}
+      <div className="sticky top-0 z-50 bg-[#020204]/75 backdrop-blur-xl border-b border-white/10 -mx-3 px-3 sm:-mx-5 sm:px-5 pb-3 pt-2 pointer-events-auto">
         
-        <svg className="absolute bottom-0 left-0 w-full h-[30vh] opacity-10" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill="url(#water-grad)" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,218.7C672,203,768,149,864,138.7C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
-          <defs>
-            <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#00b8ff" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
-      {isOverclocked && (
-        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.12)_0%,rgba(0,0,0,0.95)_100%)] pointer-events-none -z-15 transition-all duration-1000 animate-pulse" />
-      )}
-
-      {/* --- STICKY PORTAL & HEADER DECK --- */}
-      <div className="sticky top-0 z-50 pb-4 space-y-3 pointer-events-none">
         {/* UPPER PORTALS BANNER */}
-        <div className="relative rounded-2xl p-[1px] overflow-hidden transition-all duration-500 w-full shadow-lg pointer-events-auto">
+        <div className="relative rounded-2xl p-[1px] overflow-hidden transition-all duration-500 w-full shadow-lg mb-3">
           <div className={`absolute inset-0 bg-gradient-to-r ${isOverclocked ? 'from-red-500/30 via-red-950/10 to-red-600/30' : 'from-[#00ffa3]/20 via-purple-500/10 to-[#00b8ff]/20'} blur-sm pointer-events-none`} />
-          <div className="relative rounded-[15px] bg-[rgba(3,4,10,0.7)] backdrop-blur-3xl p-3 border border-white/20 flex flex-col md:flex-row justify-between items-center gap-3 overflow-hidden">
+          <div className="relative rounded-[15px] bg-[rgba(3,4,10,0.7)] p-3 border border-white/20 flex flex-col md:flex-row justify-between items-center gap-3 overflow-hidden">
             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-20">
               <span className="star-yellow absolute top-[20%] left-[8%] w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
               <span className="star-white absolute top-[70%] left-[15%] w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
@@ -1349,54 +1289,56 @@ export default function Home() {
               <a href="https://github.com/NomadDigita/mantle-agentic-core" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-black/60 border border-white/20 hover:border-white transition-all group mobile-touch-target">
                 <svg className="w-3.5 h-3.5 text-white/80 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.162 22 12c0-5.523-4.477-10-10-10z" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* RESPONSIVE HEADER DECK */}
-        <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/5 backdrop-blur-3xl border ${border} p-3 sm:p-4 rounded-2xl shadow-lg transition-all duration-500 pointer-events-auto`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/50 border border-white/10 shadow-lg">
-              <span className={`w-4 h-4 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : dotBg}`} />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-wider text-white uppercase drop-shadow-md text-sharp-primary">
-                MANTLE <span className={primary}>CORE</span>
-              </h1>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 justify-center">
-             <button 
-              onClick={handleToggleDesignMode}
-              className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all duration-300 border backdrop-blur-md shadow-md mobile-touch-target relative z-50 ${
-                designMode === "AURA" 
-                  ? 'bg-purple-500/25 text-purple-400 border-purple-500/50 hover:bg-purple-500/40' 
-                  : designMode === "CHROME"
-                  ? 'bg-indigo-500/25 text-indigo-400 border-indigo-500/50 hover:bg-indigo-500/40'
-                  : 'bg-black/30 text-white/70 border-white/10 hover:border-white hover:text-white'
-              }`}
-            >
-              {designMode === "AURA" ? 'AURA MATRIX: ON' : designMode === "CHROME" ? 'CHROME 4D: ON' : 'SILENT GLASS: ON'}
-            </button>
-             <button 
-              onClick={handleToggleOverclockClick}
-              className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all duration-300 border backdrop-blur-md shadow-md mobile-touch-target relative z-50 ${
-                isOverclocked 
-                  ? 'bg-red-500/40 text-red-400 border-red-500/70 hover:bg-red-500/60' 
-                  : 'bg-black/30 text-white/70 border-white/10 hover:border-emerald-500 hover:text-emerald-400'
-              }`}
-            >
-              {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
-            </button>
-            <Link href="/citadel"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Citadel</button></Link>
-            <Link href="/forge"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Forge</button></Link>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
 
+      {/* --- RESPONSIVE HEADER DECK --- */}
+      <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 bg-white/5 backdrop-blur-3xl border ${border} p-3 sm:p-4 rounded-2xl shadow-lg transition-all duration-500 pointer-events-auto`}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-black/50 border border-white/10 shadow-lg">
+            <span className={`w-4 h-4 rounded-full ${isOverclocked ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : dotBg}`} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black tracking-wider text-white uppercase drop-shadow-md text-sharp-primary">
+              MANTLE <span className={primary}>CORE</span>
+            </h1>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-2 justify-center">
+           <button 
+            onClick={handleToggleDesignMode}
+            className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all duration-300 border backdrop-blur-md shadow-md mobile-touch-target relative z-50 ${
+              designMode === "AURA" 
+                ? 'bg-purple-500/25 text-purple-400 border-purple-500/50 hover:bg-purple-500/40' 
+                : designMode === "CHROME"
+                ? 'bg-indigo-500/25 text-indigo-400 border-indigo-500/50 hover:bg-indigo-500/40'
+                : 'bg-black/30 text-white/70 border-white/10 hover:border-white hover:text-white'
+            }`}
+          >
+            {designMode === "AURA" ? 'AURA MATRIX: ON' : designMode === "CHROME" ? 'CHROME 4D: ON' : 'SILENT GLASS: ON'}
+          </button>
+           <button 
+            onClick={handleToggleOverclockClick}
+            className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all duration-300 border backdrop-blur-md shadow-md mobile-touch-target relative z-50 ${
+              isOverclocked 
+                ? 'bg-red-500/40 text-red-400 border-red-500/70 hover:bg-red-500/60' 
+                : 'bg-black/30 text-white/70 border-white/10 hover:border-emerald-500 hover:text-emerald-400'
+            }`}
+          >
+            {isOverclocked ? 'BEAST ONLINE' : 'OVERCLOCK'}
+          </button>
+          <Link href="/citadel"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Citadel</button></Link>
+          <Link href="/forge"><button className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider text-white/90 bg-black/30 border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md shadow-md mobile-touch-target">Forge</button></Link>
+        </div>
+      </div>
+    </div>
+
+    {/* --- WORKSPACE CONTENT SCROLLABLE DECK --- */}
+    <div className="pt-4 space-y-4">
       <motion.div 
         initial={{ opacity: 0, filter: "blur(10px)" }} 
         animate={{ opacity: showIntro ? 0 : 1, filter: showIntro ? "blur(10px)" : "blur(0px)" }} 
@@ -1496,7 +1438,7 @@ export default function Home() {
                           className={`flex flex-col gap-2 p-3.5 rounded-xl backdrop-blur-2xl border shadow-md ${
                             msg.role === 'user' ? 'bg-black/55 border-white/10 ml-6 sm:ml-12' : 
                             msg.role === 'ai' ? `${isOverclocked ? 'bg-red-950/20 border-red-500/20' : 'bg-emerald-950/20 border-emerald-500/20'} mr-6 sm:mr-12` : 
-                            msg.role === 'error' ? 'bg-red-900/20 border-red-500/30 mr-6 sm:mr-12 animate-pulse' : 'bg-transparent border-transparent text-center'
+                            msg.role === 'error' ? 'bg-red-900/20 border-red-500/40 mr-6 sm:mr-12 animate-pulse' : 'bg-transparent border-transparent text-center'
                           }`}
                         >
                           {msg.role !== 'system' && (
@@ -1513,7 +1455,7 @@ export default function Home() {
                             <div className={`mt-3 p-4 rounded-xl border backdrop-blur-md ${msg.actionPayload.status === 'SUCCESS' ? 'bg-emerald-500/10 border-emerald-500/35 shadow-[0_0_15px_rgba(16,185,129,0.25)]' : 'bg-black/50 border-white/10'}`}>
                               
                               <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-white/80 flex items-center gap-1.5">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-white/80 flex items-center gap-1.5">
                                   <span className="w-1 h-2.5 bg-amber-400 rounded-full" /> AI Pre-Cognition Layer
                                 </span>
                                 {msg.actionPayload.status === 'SUCCESS' ? (
@@ -1718,7 +1660,7 @@ export default function Home() {
                    <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-black">ASSETS ALLOCATION DECK</span>
                    <div className="space-y-1 text-[10px] font-mono font-bold text-sharp-secondary">
                       <div className="flex justify-between"><span>Registry MNT:</span><span className="text-emerald-400">{liveMntBalance.toFixed(2)} MNT</span></div>
-                      <div className="flex justify-between"><span>Escrow MNT:</span><span className="text-purple-400">{liveEscrowBalance.toFixed(2)} MNT</span></div>
+                      <div className="flex justify-between"><span>Escrow MAC:</span><span className="text-purple-400">{liveEscrowBalance.toFixed(2)} MAC</span></div>
                       <div className="flex justify-between"><span>Escrow Fee base:</span><span className="text-white">450 MAC</span></div>
                    </div>
                 </div>
@@ -1934,21 +1876,21 @@ export default function Home() {
                 <div className="relative z-10 text-center">
                   <span className="block text-[8px] uppercase tracking-widest text-white/50 font-mono font-bold">APY TARGET</span>
                   <span className="text-xl font-black text-white text-sharp-primary">
-                    {yieldWeaverMode === "mETH_PREMIUM" ? "7.2%" : "5.1%"}
+                    {yieldWeaverMode === "mETH_PREMIUM" ? `${methApy}%` : "5.1%"}
                   </span>
                 </div>
               </div>
 
               <div className="space-y-3 mb-6 font-mono text-xs text-sharp-secondary font-bold">
                 <div className="flex justify-between"><span className="text-white/60 font-bold">Ondo USDY APY:</span><span className="text-white font-bold">5.1% APY</span></div>
-                <div className="flex justify-between"><span className="text-white/60 font-bold">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">7.2% APY</span></div>
+                <div className="flex justify-between"><span className="text-white/60 font-bold">Mantle mETH APY:</span><span className="text-emerald-400 font-bold">{methApy}% APY</span></div>
                 <div className="flex justify-between border-t border-white/5 pt-2"><span className="text-white/60 font-bold">WEAVER ALLOCATION:</span><span className="text-purple-400 font-bold">{yieldWeaverMode === "mETH_PREMIUM" ? "100% Mantle mETH" : "100% Ondo USDY"}</span></div>
                 {yieldWeaverMode !== "mETH_PREMIUM" && (<button onClick={handleWeaveYield} className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-black text-[10px] text-white uppercase tracking-widest shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-95 mobile-touch-target">EXECUTE PRE-COGNITIVE SWAP</button>)}
               </div>
             </FloatingGlassCard>
 
             {/* COMPACTED MULTI-AGENT MATRIX RELAY CARD (SCROLL LOCKED) */}
-            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-[#00ffa3]/20 rounded-3xl p-6 h-[220px] shadow-2xl">
+            <FloatingGlassCard designMode={designMode} delay={0.2} className="bg-white/5 border border-white/15 rounded-3xl p-6 h-[220px] shadow-2xl">
                <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50 mb-3 border-b border-white/10 pb-2 flex items-center gap-2 flex-shrink-0"><div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />Mantle Agent Matrix Relay</h4>
                <div className="font-mono text-[9px] space-y-3 leading-relaxed text-sharp-secondary overflow-y-auto scrollbar-hide flex-1 max-h-[110px] font-bold">
                  {messages.length === 0 ? (
@@ -2017,7 +1959,7 @@ export default function Home() {
                       transition={{ duration: 0.25 }}
                       className="text-center mb-4"
                     >
-                       <div className="text-3xl font-black text-white drop-shadow-sm text-sharp-primary font-mono tracking-tight">{(livePrices as any)[currentMarket.pair]}</div>
+                       <div className="text-3xl font-black text-white drop-shadow-sm text-sharp-primary font-mono tracking-tight font-bold">{(livePrices as any)[currentMarket.pair]}</div>
                        <div className={`text-[10px] font-black tracking-wider mt-1.5 ${currentMarket.color} ${currentMarket.glow} uppercase`}>{currentMarket.name}</div>
                     </motion.div>
                   </AnimatePresence>
@@ -2066,7 +2008,7 @@ export default function Home() {
                          <span>Your Wallet Balance:</span>
                          <span className="text-red-400 font-bold">{mntGasBalance.toFixed(4)} MNT</span>
                        </div>
-                       <p className="text-[9px] text-[#8e9aa5] leading-normal pt-1.5 border-t border-white/5 font-bold">
+                       <p className="text-[10px] text-[#8e9aa5] leading-normal pt-1.5 border-t border-white/5 font-bold">
                          Your gas balance is insufficient to authorize on-chain executions. Swap 5.00 MAC for an immediate native 2.00 MNT autonomous refuel.
                        </p>
                        {refuelResultHash && (
@@ -2102,6 +2044,7 @@ export default function Home() {
 
         </div>
       </motion.div>
+    </div>
     </main>
   );
 }

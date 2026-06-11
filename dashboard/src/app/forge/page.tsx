@@ -11,7 +11,7 @@ import { useTheme } from "../ThemeContext";
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useSwitchChain, useDeployContract, useWaitForTransactionReceipt } from 'wagmi';
 
-function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER" }) {
+function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true, designMode = "SILENT", sweepColorClass = "" }: { children: React.ReactNode, className: string, delay?: number, isAuraActive?: boolean, designMode?: "AURA" | "SILENT" | "CHROME" | "CYBER", sweepColorClass?: string }) {
   const { systemState } = useTheme();
   
   const x = useMotionValue(0);
@@ -37,6 +37,7 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       {isAuraActive && designMode !== "SILENT" && (
         <div className="absolute top-1/2 left-1/2 w-[220%] h-[220%] -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 transition-all duration-700 overflow-hidden">
           <div className={`w-full h-full rounded-full opacity-35 blur-sm scale-95 ${
+            sweepColorClass ? sweepColorClass : 
             systemState === 'OVERCLOCK' ? 'gemini-border-sweeper-overclock' :
             designMode === 'CHROME' ? 'gemini-border-sweeper-chrome' : 'gemini-border-sweeper'
           }`} />
@@ -45,11 +46,11 @@ function FloatingGlassCard({ children, className, delay = 0, isAuraActive = true
       
       <div 
         style={{ transform: "translateZ(30px)" }} 
-        className={`h-full w-full rounded-[23px] transition-all duration-700 p-5 sm:p-7 flex flex-col relative z-10 ${
+        className={`h-full w-full rounded-[23px] transition-all duration-500 p-5 sm:p-7 flex flex-col relative z-10 ${
           designMode === "AURA"
             ? "bg-[rgba(5,7,18,0.55)] backdrop-blur-[60px] shadow-[0_55px_110px_rgba(0,0,0,0.95),inset_0_1.5px_1.5px_rgba(255,255,255,0.12)] border-t border-l border-white/22 border-b border-r border-white/5"
             : designMode === "CHROME"
-            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/55 to-pink-950/40 backdrop-blur-[65px] shadow-[0_55px_110px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
+            ? "bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-pink-950/40 backdrop-blur-[65px] shadow-[0_55px_110px_rgba(168,85,247,0.25),inset_0_1.5px_2px_rgba(255,255,255,0.2)] border border-purple-500/35 animate-[pulse_6s_ease-in-out_infinite]"
             : designMode === "CYBER"
             ? "bg-black/90 backdrop-blur-[70px] shadow-[0_55px_110px_rgba(0,255,163,0.15),inset_0_1.5px_1.5px_rgba(0,255,163,0.15)] border border-[#00ffa3]/30"
             : "bg-[rgba(10,15,30,0.4)] backdrop-blur-[70px] shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_1px_rgba(255,255,255,0.08)] border border-white/15 hover:border-white/30"
@@ -176,7 +177,7 @@ export default function NeuralForge() {
   if (!mounted) return null;
 
   return (
-    <main className={`min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col items-center bg-transparent font-sans transition-all duration-1000 ${
+    <main className={`min-h-screen relative p-4 md:p-8 lg:p-12 z-10 overflow-x-hidden flex flex-col bg-transparent transition-all duration-1000 ${
       isOverclocked 
         ? 'shadow-[inset_0_0_120px_rgba(239,68,68,0.22)] bg-red-950/10' 
         : ''
@@ -205,8 +206,10 @@ export default function NeuralForge() {
         <div className={`absolute top-[-20%] left-[-10%] w-[60%] h-[60%] ${glow} blur-[150px] rounded-full transition-all duration-1000 opacity-60`} />
       </div>
 
-      <div className="max-w-6xl w-full mt-10">
-        <div className="flex justify-between items-end mb-8 border-b border-white/15 pb-6">
+      <div className="max-w-6xl w-full mx-auto">
+        
+        {/* --- STICKY PORTAL & HEADER DECK (LIQUID GLASS) --- */}
+        <div className="sticky top-0 z-50 bg-[#020204]/75 backdrop-blur-xl border-b border-white/10 -mx-4 px-4 pb-4 pt-4 mb-8 flex justify-between items-end pointer-events-auto">
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-white uppercase mb-1 drop-shadow-md text-sharp-primary">
               NEURAL <span className="text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]">FORGE</span>
@@ -282,7 +285,7 @@ export default function NeuralForge() {
                   <FloatingGlassCard designMode={designMode} delay={0.5} className="bg-black/50 border border-purple-500/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                       <span className="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> Mantle Deployer Active
+                        <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" /> Mantle Deployer Active
                       </span>
                       <span className="text-[9px] font-mono text-white/50 font-bold">Target: Mantle Sepolia (5003)</span>
                     </div>
