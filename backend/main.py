@@ -379,20 +379,11 @@ def execute_mnt_refuel(to_address: str):
     except Exception as e:
         return f"Refuel failed: {str(e)}"
 
-def fetch_live_market_data():
-    try:
-        url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,mantle&vs_currencies=usd"
-        response = requests.get(url, timeout=3)
-        data = response.json()
-        return f"BTC: ${data['bitcoin']['usd']}, ETH: ${data['ethereum']['usd']}, MNT: ${data['mantle']['usd']}"
-    except Exception as e:
-        return "MARKET_DATA_OFFLINE"
-
 # --- UN-RATE-LIMITED BYBIT POWERED MARKET DATA ORACLE (RESOLVES GEOCKO 429 BLOCKS) ---
 def fetch_live_market_data():
     """
     Sovereign Bybit Ticker Market Oracle Feed.
-    Eliminates "MARKET_DATA_OFFLINE" desyncs permanently.
+    Eliminates \"MARKET_DATA_OFFLINE\" desyncs permanently.
     """
     try:
         btc = fetch_bybit_ticker_data("BTCUSDT")
@@ -401,7 +392,7 @@ def fetch_live_market_data():
         btc_p = btc.get("lastPrice", "84400.00") if "error" not in btc else "84400.00"
         eth_p = eth.get("lastPrice", "4700.00") if "error" not in eth else "4700.00"
         mnt_p = mnt.get("lastPrice", "0.725") if "error" not in mnt else "0.725"
-        return f"BTC: ${btc_p}, ETH: ${eth_p}, MNT: ${mnt_p}"
+        return f"BTC: \${btc_p}, ETH: \${eth_p}, MNT: \${mnt_p}"
     except Exception:
         return "BTC: $84,400.00, ETH: $4,700.00, MNT: $0.725"
 
@@ -525,7 +516,7 @@ def call_unified_llm(system_prompt: str, user_prompt: str = "") -> str:
                 headers = {"Content-Type": "application/json"}
                 res = requests.post(url, json=payload, headers=headers, timeout=30)
                 if res.status_code == 200:
-                    res_json = response.json() if 'response' in locals() else res.json()
+                    res_json = res.json()
                     return res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
                 print(f"⚠️ Gemini {model} returned code {res.status_code}: {res.text}")
             except Exception as e:
@@ -686,7 +677,7 @@ async def process_intent_core(command: str, wallet_address: str | None = None) -
                 msg = (
                     "**BYBIT EXCHANGE FEED (CEX)**\n"
                     f"Trading Symbol: **{bybit_data['symbol']}**\n"
-                    f"Last Price: **${bybit_data['lastPrice']}**\n"
+                    f"Last Price: **\${bybit_data['lastPrice']}**\n"
                     f"24H Volume: **{bybit_data['volume24h']} MNT**\n\n"
                     "**AI DECISION MATRIX:** Spread matches target thresholds. Direct on-chain rebalancing authorized."
                 )
@@ -1039,7 +1030,17 @@ async def handle_bot_webhook(payload: BotCommandPayload):
                 "Start directly with the code block using standard markdown triple backticks with solidity specified: '```solidity'."
                 "End immediately after finishing the contract. Sign off with: '// Forge SecOps Verified' at the bottom of the code."
             )
-            output_text = call_unified_llm(system_prompt, blueprint_prompt)
+            try:
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": blueprint_prompt}
+                    ],
+                    model="llama-3.1-8b-instant",
+                )
+                output_text = chat_completion.choices[0].message.content.strip()
+            except groq.PermissionDeniedError:
+                output_text = call_unified_llm(system_prompt, blueprint_prompt)
 
             return {
                 "status": "success",
@@ -1248,7 +1249,7 @@ async def execute_forge(payload: CommandPayload):
             )
             audit_output = chat_completion.choices[0].message.content.strip()
         except groq.PermissionDeniedError:
-            audit_output = call_gemini_fallback(system_prompt, payload.command)
+            audit_output = call_unified_llm(system_prompt, payload.command)
 
         is_contract_request = any(keyword in payload.command.lower() for keyword in ["contract", "erc", "token", "solidity", "mint", "deploy", "lock"])
         
