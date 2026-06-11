@@ -77,7 +77,7 @@ body {
 .star-purple { animation: twinkle-purple 4.5s infinite ease-in-out; }
 .star-mint { animation: twinkle-mint 6s infinite ease-in-out; }
 
-/* BRAND-ADAPTIVE GRADIENT BORDER SWEEP ANIMATIONS */
+/* GEMINI STYLE GLOWING GRADIENT BORDER SWEEP */
 @keyframes laser-sweep {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -122,19 +122,35 @@ body {
   );
 }
 
+/* BRAND-ADAPTIVE GLOWING LASER KEYFRAMES */
 .gemini-border-sweeper-btc {
   animation: laser-sweep 5s linear infinite;
-  background: conic-gradient(from 0deg, transparent 30%, rgba(245, 158, 11, 0.8) 50%, transparent 70%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 30%,
+    rgba(245, 158, 11, 0.8) 50%,
+    transparent 70%
+  );
 }
 
 .gemini-border-sweeper-eth {
   animation: laser-sweep 5s linear infinite;
-  background: conic-gradient(from 0deg, transparent 30%, rgba(99, 102, 241, 0.8) 50%, transparent 70%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 30%,
+    rgba(99, 102, 241, 0.8) 50%,
+    transparent 70%
+  );
 }
 
 .gemini-border-sweeper-mnt {
   animation: laser-sweep 5s linear infinite;
-  background: conic-gradient(from 0deg, transparent 30%, rgba(0, 255, 163, 0.8) 50%, transparent 70%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 30%,
+    rgba(0, 255, 163, 0.8) 50%,
+    transparent 70%
+  );
 }
 
 /* CUSTOM SCROLLBAR */
