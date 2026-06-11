@@ -1,8 +1,6 @@
 # Mantle Agentic Core (MAC)
 
-/*
-“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
-*/
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/eb60be8f-efdd-4358-a5cc-d29ee93aea68" />
 
 Mantle Agentic Core (MAC) is an autonomous, multi-client, pre-cognitive Web3 operations engine built for the Mantle Network. MAC bridges natural language intents with live on-chain executions, persistent cloud databases, and cryptographic risk registries.
 
@@ -47,6 +45,13 @@ Below is the conceptual layout of the Mantle Agentic Core's operational pipeline
     │   +───────────────────+   +───────────────────+   +───────────────────+   │
     +───────────────────────────────────────────────────────────────────────────+
 
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/67508d85-56a7-4a27-a6a8-72668d5701d3" /> 
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/b4338a96-c2e9-412a-8c2d-f48d1dff5f07" /> <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/9cc2db27-7508-4c3d-9da8-5c838a4609e2" /> <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/b532d74f-2a67-4c9c-ab4e-5361cc51bead" /> <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/23497556-b0b2-47d2-8bf1-3183fe625fab" />
+
+
+
+
+
 ---
 
 ## 2. Directory Structure & File Map
@@ -86,6 +91,8 @@ The on-chain infrastructure of Mantle Agentic Core is compiled using Solidity `^
 
 *   **Mantle Agent Core Token (MAC)**: `0x69465a67c1C4860f89f2D80fab5dADF33495d171`
     *   Ecosystem utility and collateral asset. Implements automated deflationary mechanics (2% burn fee, 3% liquidity tax) on transfers.
+
+
 *   **ERC-8004 Identity Registry (MAI)**: `0x1E5B64264089aacC547A1506402B94f909215942`
     *   Registers sovereign autonomous identities (MAI NFTs). Couples wallets with specialized risk parameters (Strategy settings, hard stop Drawdowns) directly on the ledger.
 *   **Mantle Agent Escrow Vault**: `0x69465a67c1C4860f89f2D80fab5dADF33495d171` (Companion Contract)
@@ -138,6 +145,8 @@ The tables inside the SQL Editor are structured as follows:
         abi text,
         timestamp double precision
     );
+    <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/bbc72c72-f87b-4366-b1d6-116f37d99782" />
+
 
 ---
 
@@ -165,26 +174,32 @@ The terminal connects directly to your FastAPI backend server. It translates nat
 Provides an interface to mint sovereign ERC-8004 Risk Strategy Identity NFTs. 
 *   **Navigation Manual**: Click "Citadel" in the top header. Configure your management parameter, select a Strategy (Conservative, Balanced, or Aggressive), define your drawdown limit, and click "Awaken Agent Identity". Authorize the transaction inside MetaMask/Bitget.
 *   **Dynamic Syncing**: On confirmation, your dApp automatically posts the minted risk strategy to your Supabase `virtual_identities` table. The main dashboard and bot engines will instantly detect this active identity.
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/48fc02c7-cc2b-41df-aea0-bf34d5ebab6f" /> 
 
 ### 03. Neural Forge (Auditor & Compiler HUD)
 Allows users to generate, compile, and audit complete smart contracts.
 *   **Navigation Manual**: Click "Forge" in the top header. Paste any Solidity contract, or write a prompt (e.g. `"Write an ERC20 contract"`), and click "Initiate Forge".
 *   **Compiler Stack**: The backend processes the prompt and returns verified Solidity files. The dApp provides a direct on-chain deployer to push your compiled bytecode to Mantle Sepolia. The deployed contract address is then synced to your Supabase `deployed_contracts` history table.
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/e134978a-cd0c-42a0-8de8-3463662598fe" />
 
 ### 04. SecOps Sentinel Shield
 Monitors pending transactions inside the Mantle Sepolia mempool. If the Sentinel flags any reentrancy exploit patterns targeting your smart contracts, it prompts the dApp console with a Whitehat rescue option, allowing you to instantly secure contract balances.
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/29757eca-d0ed-4593-b062-aa5f81ba20a2" />
 
 ### 05. AI Yield Weaver & Moe Swap Router
 Compares live staking APYs between Ondo Finance USDY RWA and Mantle mETH LSP. Clicking "Execute Swap" triggers a real, on-chain swap transaction, using MetaMask to execute a swap of native MNT tokens directly for mETH, securing yield premiums.
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/a781229c-eb95-4278-a6bf-c1fceabc16d3" />
 
 ### 06. Sovereign Gas Refuel
 Monitors your wallet's gas balance. If it drops below `1.0 MNT`, the dApp allows you to lock 5.0 MAC tokens as fee collateral and request a gas refuel. The backend FastAPI treasury then instantly transfers `2.0 native MNT` to your address.
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/80435ce4-54e7-43dd-9bdb-287bd4303c7c" />
 
 ---
 
 ## 7. Bot Relay Commands & Operating Manual
 
 The backend main thread hosts automated background Telegram and Discord bots, synchronized directly with your central Supabase database.
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/25467e3a-e559-4cd6-9c08-a9b7e1937e62" />
 
 ### Command Catalog
 *   `/help` or `!mac help` (catalog menu guide)
@@ -264,3 +279,7 @@ Install Node modules and launch the Next.js development server:
     npm run dev
 
 Open `http://localhost:3000` to test the terminal interface locally.
+
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/f58069b8-9fec-4521-9e6a-9ff65cfd9a41" /> <img width="3369" height="12528" alt="NotebookLM Mind Map" src="https://github.com/user-attachments/assets/030d0d71-cf64-4410-9042-60e0fc91368e" />
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/e7dca4b0-3bc2-420a-b3de-2c7940247c50" />
+
