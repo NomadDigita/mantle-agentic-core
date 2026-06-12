@@ -1,6 +1,3 @@
-/*
-“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
-*/
 
 "use client";
 
