@@ -1,6 +1,4 @@
-/*
-“Must always include our chat rule from the beginning of this section to the end the rules and ways in all code outputs and design assets.”
-*/
+
 
 import "@nomicfoundation/hardhat-toolbox"; // Registers Mocha, Chai, and test runners globally
 import * as dotenv from "dotenv";
