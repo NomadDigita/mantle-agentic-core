@@ -2,7 +2,10 @@
 
 <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/eb60be8f-efdd-4358-a5cc-d29ee93aea68" />
 
-Mantle Agentic Core (MAC) is an autonomous, multi-client, pre-cognitive Web3 operations engine built for the Mantle Network. MAC bridges natural language intents with live on-chain executions, persistent cloud databases, and cryptographic risk registries.
+
+## Mantle Agentic Core (MAC) is an autonomous, multi-client, pre-cognitive Web3 operations engine built for the Mantle Network. MAC bridges natural language intents with live on-chain executions, persistent cloud databases, and cryptographic risk registries.
+
+
 <img width="1672" height="565" alt="photo_2026-06-14_20-17-49" src="https://github.com/user-attachments/assets/7f4de4f9-94f5-44f3-add4-e45255b59fcd" />
 
 ---
