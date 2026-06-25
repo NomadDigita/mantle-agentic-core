@@ -103,7 +103,7 @@ export default function NeuralForge() {
     setOutput("// Compiling dependencies and initiating SecOps audit...\n// Querying Mantle core neural models...");
     
     try {
-      const response = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/forge", {
+      const response = await fetch("https://mantle-agentic-core-q674.onrender.com/api/forge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: blueprint }),
@@ -149,7 +149,7 @@ export default function NeuralForge() {
       // Sync deployed contract details directly to Supabase cloud
       const syncContractToCloud = async () => {
         try {
-          await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/forge/contracts", {
+          await fetch("https://mantle-agentic-core-q674.onrender.com/api/forge/contracts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
