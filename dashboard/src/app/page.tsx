@@ -603,7 +603,7 @@ export default function Home() {
     if (!mounted) return;
     const fetchOracleStream = async () => {
       try {
-        const res = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/oracle/stream");
+        const res = await fetch("https://mantle-agentic-core-q674.onrender.com/api/oracle/stream");
         const data = await res.json();
         if (data.block_number) {
           setOracleData(data);
@@ -683,7 +683,7 @@ export default function Home() {
 
       const fetchPermanentHistory = async () => {
         try {
-          const response = await fetch(`https://mantle-agentic-core-1f4a.onrender.com/api/history?wallet_address=${safeAddress}`);
+          const response = await fetch(`https://mantle-agentic-core-q674.onrender.com/api/history?wallet_address=${safeAddress}`);
           const parsedHistory = await response.json();
           if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
             setAllMessages(parsedHistory);
@@ -875,7 +875,7 @@ export default function Home() {
         } else {
           // If no active token balance, trigger parallel Supabase sync check
           try {
-            const fallbackRes = await fetch(`https://mantle-agentic-core-1f4a.onrender.com/api/bot/virtual-identity?wallet_address=${safeAddress}`);
+            const fallbackRes = await fetch(`https://mantle-agentic-core-q674.onrender.com/api/bot/virtual-identity?wallet_address=${safeAddress}`);
             const fallbackData = await fallbackRes.json();
             if (fallbackData.status === "pending" || fallbackData.status === "active") {
               setAgentProfile({
@@ -1208,7 +1208,7 @@ export default function Home() {
     if (isRefuelFeeSuccess && activeWalletAddress) {
       const dispatchBackendRefuel = async () => {
         try {
-          const response = await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/refuel", {
+          const response = await fetch("https://mantle-agentic-core-q674.onrender.com/api/refuel", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ wallet_address: activeWalletAddress })
