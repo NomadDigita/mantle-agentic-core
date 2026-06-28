@@ -135,7 +135,7 @@ export default function CitadelVault() {
       // Sync central database storage on Supabase
       const syncIdentityToCloud = async () => {
         try {
-          await fetch("https://mantle-agentic-core-1f4a.onrender.com/api/citadel/identity", {
+          await fetch("https://mantle-agentic-core-q674.onrender.com/api/citadel/identity", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
