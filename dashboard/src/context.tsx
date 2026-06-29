@@ -23,7 +23,7 @@ createAppKit({
   adapters: [wagmiAdapter],
   projectId,
   networks,
-  defaultNetwork: networks[2], // Forces Base Sepolia
+  defaultNetwork: networks[3], // Forces Mantle Sepolia (Index 3 in config)
   metadata: metadata,
   features: {
     analytics: true
