@@ -8,6 +8,7 @@ import { ThemeProvider, useTheme } from "./ThemeContext";
 import ContextProvider from "../context";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import React, { useEffect, useState, useMemo } from "react";
 // @ts-ignore
 import { Analytics } from "@vercel/analytics/react";
@@ -128,7 +129,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </ContextProvider>
         </ThemeProvider>
+ vercel/install-vercel-speed-insights-4b5tqr
+        <SpeedInsights />
         <Analytics />
+        main
       </body>
     </html>
   );
