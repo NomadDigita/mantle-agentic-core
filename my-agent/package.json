@@ -15,7 +15,7 @@
     "@google/generative-ai": "^0.24.1",
     "agent0-sdk": "latest",
     "dotenv": "^16.6.1",
-    "express": "^4.18.2",
+    "express": "^5.2.1",
     "openai": "^4.68.0",
     "uuid": "^9.0.0"
   },
